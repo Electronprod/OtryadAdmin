@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Редактировать человека</title>
+	<link rel="stylesheet" href="/admin/humanmgr_add.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+</head>
+
+<body>
+	<form th:object="${human}" th:action="@{/admin/humanmgr/edit}" method="post">
+		<h1>Изменение информации о человеке:</h1>
+		<input type="hidden" th:field="*{id}" />
+		<label for="name">Имя</label>
+		<input placeholder="Name" name="name" type="text" th:field="*{name}" />
+		<label for="lastname">Фамилия</label>
+		<input placeholder="Lastname" name="lastname" type="text" th:field="*{lastname}" />
+		<label for="surname">Отчество</label>
+		<input placeholder="Surname" name="surname" type="text" th:field="*{surname}" />
+		<label for="birthday">День рождения</label>
+		<input placeholder="birthday" name="birthday" type="date" th:field="*{birthday}" />
+		<label for="school">Школа</label>
+		<input placeholder="school" name="school" type="text" th:field="*{school}" />
+		<label for="classnum">Класс</label>
+		<input placeholder="class number" name="classnum" type="number" th:field="*{classnum}" />
+		<label for="classchar">Буква класса</label>
+		<input placeholder="class char" name="classchar" type="text" th:field="*{classchar}" />
+		<label for="address">Адрес</label>
+		<input placeholder="Address" name="address" type="text" th:field="*{address}" />
+		<label for="phone">Телефон</label>
+		<input placeholder="Phone" name="phone" type="text" th:field="*{phone}" />
+		<label for="year">Год поступления</label>
+		<input placeholder="year of admission" name="year" type="text" th:field="*{year_of_admission}" />
+		<label for="dedicated">Посвящен</label>
+		<input type="checkbox" name="dedicated" th:field="*{dedicated}" />
+		<label for="mother">Мама</label>
+		<input placeholder="mother" name="mother" type="text" th:field="*{mother}" />
+		<label for="father">Папа</label>
+		<input placeholder="father" name="father" type="text" th:field="*{father}" />
+		<label for="squadid">ID звена</label>
+		<input placeholder="squadid" name="squadid" type="number" th:field="*{squadid}" />
+		<button type="submit">Обновить</button>
+	</form>
+	<button type="button" onclick="window.location.href = '/admin/humanmgr'">Отмена</button>
+</body>
+<script src="/assets/formcheck.js"></script>
+
+</html>

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Список пользователей</title>
+	<link rel="stylesheet" href="/assets/tablemgr.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+</head>
+
+<body>
+	<table>
+		<thead>
+			<tr>
+				<th>ID</th>
+				<th>Логин</th>
+				<th>Роль</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="user : ${users}">
+				<td th:text="${user.id}"></td>
+				<td th:text="${user.login}"></td>
+				<td th:text="${user.role}"></td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="bottomPanel">
+		<button class="btn" onclick="window.location.href = '/admin/usermgr/add'">Добавить</button>
+		<button class="btn" onclick="deleteF();">Удалить</button>
+		<button class="btn" onclick="editF();">Редактировать</button>
+	</div>
+</body>
+<script>
+	if (window.location.href.includes("saved")) {
+		Swal.fire({
+			title: "Готово!",
+			text: "Пользователь создан",
+			icon: "success"
+		});
+	}
+	if (window.location.href.includes("edited")) {
+		Swal.fire({
+			title: "Готово!",
+			text: "Изменения сохранены в базу данных",
+			icon: "success"
+		});
+	}
+	if (window.location.href.includes("deleted")) {
+		Swal.fire({
+			title: "Готово!",
+			text: "Пользователь был удален",
+			icon: "info"
+		});
+	}
+	if (window.location.href.includes("error")) {
+		Swal.fire({
+			title: "Произошла ошибка!",
+			text: "Попробуйте еще раз.",
+			icon: "error"
+		});
+	}
+	if (window.location.href.includes("error_protected")) {
+		Swal.fire({
+			title: "Действие запрещено",
+			text: "Данный пользователь не может быть удален.",
+			icon: "error"
+		});
+	}
+	function editF() {
+		Swal.fire({
+			title: 'Введите ID',
+			input: 'number',
+			inputAttributes: {
+				step: '1',
+				min: '1'
+			},
+			showCancelButton: true,
+			confirmButtonText: 'Редактировать',
+			showLoaderOnConfirm: true,
+			preConfirm: (number) => {
+				if (!number || number % 1 !== 0) {
+					Swal.showValidationMessage('ID - целое число!');
+				}
+			}
+		}).then((result) => {
+			if (result.value) {
+				window.location.href = '/admin/usermgr/edit?id=' + encodeURIComponent(result.value);
+			}
+		});
+	}
+	function deleteF() {
+		Swal.fire({
+			title: 'Введите ID',
+			input: 'number',
+			inputAttributes: {
+				step: '1',
+				min: '1'
+			},
+			showCancelButton: true,
+			confirmButtonText: 'Удалить',
+			showLoaderOnConfirm: true,
+			preConfirm: (number) => {
+				if (!number || number % 1 !== 0) {
+					Swal.showValidationMessage('ID - целое число!');
+				}
+			}
+		}).then((result) => {
+			if (result.value) {
+				window.location.href = '/admin/usermgr/delete?id=' + encodeURIComponent(result.value);
+			}
+		});
+	}
+</script>
+
+</html>

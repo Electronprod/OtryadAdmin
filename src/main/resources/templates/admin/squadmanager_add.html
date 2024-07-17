@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Добавить звено</title>
+	<link rel="stylesheet" href="/admin/humanmgr_add.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+</head>
+
+<body>
+	<form action="#" th:action="@{/admin/squadmgr/add}" th:object="${squad}" method="post">
+		<h1>Создать звено</h1>
+		<label>Название:</label>
+		<input type="text" th:field="*{squadname}">
+		<input type="hidden" th:field="*{commander}"><br>
+		<button type="submit">Создать</button>
+	</form>
+	<button type="button" onclick="window.location.href = '/admin/squadmgr'">Отмена</button>
+</body>
+<script src="/assets/formcheck.js"></script>
+
+</html>
