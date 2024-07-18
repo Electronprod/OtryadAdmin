@@ -6,9 +6,12 @@
 	<title>Список отряда</title>
 	<link rel="stylesheet" href="/assets/tablemgr.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+	<link rel="icon" href="/icon.png">
 </head>
 
 <body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="navbar"></div>
 	<table id="userTable">
 		<thead>

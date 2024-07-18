@@ -25,7 +25,7 @@ public class SecurityConfig {
 						.requestMatchers("/**").authenticated())
 				.formLogin(login -> login.loginPage("/auth/login").loginProcessingUrl("/process_login")
 						.defaultSuccessUrl("/lk"))
-				.logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessUrl("/")).build();
+				.logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessUrl("/auth/login")).build();
 	}
 
 	@Bean

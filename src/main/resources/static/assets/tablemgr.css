@@ -1,57 +1,88 @@
-		body {
-			font-family: Arial, sans-serif;
-			margin: 0;
-			padding: 0;
-			background-color: #f0f0f0;
-		}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+}
 
-		table {
-			width: 100%;
-			border-collapse: collapse;
-			margin-top: 20px;
-			border: 1px solid #ccc;
-			background-color: #fff;
-		}
+#userTable {
+    width: 100%;
+    overflow-x: auto; /* Добавляем горизонтальную прокрутку */
+    padding: 20px;
+    box-sizing: border-box;
+}
 
-		th,
-		td {
-			padding: 10px;
-			text-align: center;
-			border-bottom: 1px solid #ccc;
-		}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    table-layout: auto; /* Стандартное поведение таблицы */
+}
 
-		thead {
-			background-color: #f2f2f2;
-		}
+th,
+td {
+    padding: 10px;
+    text-align: center;
+    border-bottom: 1px solid #ccc;
+    white-space: nowrap; /* Сохраняет текст внутри ячеек в одну строку */
+}
 
-		tr:nth-child(even) {
-			background-color: #f9f9f9;
-		}
+th {
+    position: sticky;
+    top: 0; /* Закрепляет заголовки таблицы */
+    z-index: 2; /* Чтобы заголовки были поверх остальных ячеек */
+}
 
-		tr:hover {
-			background-color: #f1f1f1;
-		}
+thead {
+    background-color: #f2f2f2;
+}
 
-		.bottomPanel {
-			position: fixed;
-			bottom: 0;
-			left: 0;
-			width: 100%;
-			background-color: #f1f1f1;
-			padding: 10px;
-			text-align: center;
-		}
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
 
-		.btn {
-			margin: 0 10px;
-			padding: 5px 10px;
-			border: 1px solid #333;
-			background-color: #fff;
-			color: #333;
-			cursor: pointer;
-		}
+tr:hover {
+    background-color: #f1f1f1;
+}
 
-		.btn:hover {
-			background-color: #333;
-			color: #fff;
-		}
+.bottomPanel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f1f1f1;
+    padding: 10px;
+    text-align: center;
+}
+
+.btn {
+    margin: 0 10px;
+    padding: 5px 10px;
+    border: 1px solid #333;
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background-color: #333;
+    color: #fff;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 600px) {
+    th,
+    td {
+        padding: 8px;
+    }
+
+    .btn {
+        padding: 4px 8px;
+    }
+
+    .table-container {
+        padding: 10px;
+    }
+}
