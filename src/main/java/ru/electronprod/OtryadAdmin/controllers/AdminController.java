@@ -36,7 +36,13 @@ public class AdminController {
 	private DBService dbservice;
 	@Autowired
 	private AdminService adminservice;
-
+	/*
+	 * Main page
+	 */
+	@GetMapping("")
+	public String dash() {
+		return "admin/dashboard";
+	}
 	/*
 	 * User manager
 	 */
