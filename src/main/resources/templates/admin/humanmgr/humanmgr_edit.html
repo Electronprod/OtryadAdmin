@@ -4,12 +4,13 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Редактировать человека</title>
-	<link rel="stylesheet" href="/admin/humanmgr_add.css">
+	<link rel="stylesheet" href="/assets/formpage.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 </head>
 
 <body>
-	<form th:object="${human}" th:action="@{/admin/humanmgr/edit}" method="post">
+	<div id="navbar"></div>
+	<form th:object="${humanHelper}" th:action="@{/admin/humanmgr/edit}" method="post">
 		<h1>Изменение информации о человеке:</h1>
 		<input type="hidden" th:field="*{id}" />
 		<label for="name">Имя</label>
@@ -38,12 +39,12 @@
 		<input placeholder="mother" name="mother" type="text" th:field="*{mother}" />
 		<label for="father">Папа</label>
 		<input placeholder="father" name="father" type="text" th:field="*{father}" />
-		<label for="squadid">ID звена</label>
-		<input placeholder="squadid" name="squadid" type="number" th:field="*{squadid}" />
+		<label for="squad">Звено(ОПАСНО)</label>
+		<input placeholder="squad" name="squad" type="text" th:field="*{squad_id}" />
 		<button type="submit">Обновить</button>
 	</form>
 	<button type="button" onclick="window.location.href = '/admin/humanmgr'">Отмена</button>
 </body>
 <script src="/assets/formcheck.js"></script>
-
+<script src="/admin/navbar.js"></script>
 </html>

@@ -1,22 +1,37 @@
 package ru.electronprod.OtryadAdmin.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
+import java.io.Serializable;
+import java.util.List;
+
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "squads")
-@Data
-public class Squad {
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private int squad_id;
-  @Column
-  private String squadname;
-  @Column(unique = true)
-  private int commander; // Связь с таблицей User
+@Getter
+@Setter
+@NoArgsConstructor
+public class Squad implements Serializable {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private int id;
+	@OneToOne
+	@JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+	private User commander;
+	@Column(name = "name", nullable = false)
+	private String squadName;
+	@Column(name = "commander_name")
+	private String commanderName;
+	@OneToMany(mappedBy = "squad", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private List<Human> humans;
+
+	public void addHuman(Human human) {
+		humans.add(human);
+		human.setSquad(this);
+	}
+
+	public void removeHuman(Human human) {
+		humans.remove(human);
+		human.setSquad(null);
+	}
 }

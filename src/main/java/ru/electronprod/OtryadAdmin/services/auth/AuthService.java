@@ -1,5 +1,8 @@
 package ru.electronprod.OtryadAdmin.services.auth;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,29 +14,54 @@ import ru.electronprod.OtryadAdmin.models.User;
 @Service
 public class AuthService {
 	@Autowired
-	private UserRepository usp;
+	private UserRepository userRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	/**
-	 * Saves user to database
+	 * It hashes password and saves user to database
 	 * 
-	 * @see ru.electronprod.OtryadAdmin.models.User
 	 * @param person
 	 */
 	@Transactional
 	public void register(User person) {
 		person.setPassword(passwordEncoder.encode(person.getPassword()));
-		usp.save(person);
+		userRepository.save(person);
 	}
 
 	/**
-	 * Checks for violation of the "UNIQUE" parameter
+	 * Checks login for availability
 	 * 
 	 * @param login
 	 * @return true - found user/ false - not found
 	 */
+	@Transactional(readOnly = true)
 	public boolean exists(String login) {
-		return usp.findByLogin(login).isPresent();
+		return userRepository.findByLogin(login).isPresent();
+	}
+
+	@Transactional(readOnly = true)
+	public List<User> findAll() {
+		return userRepository.findAll();
+	}
+
+	@Transactional(readOnly = true)
+	public Optional<User> findById(int id) {
+		return userRepository.findById(id);
+	}
+
+	@Transactional(readOnly = true)
+	public User findByLogin(String login) {
+		return userRepository.findByLogin(login).orElse(null);
+	}
+
+	@Transactional
+	public User save(User user) {
+		return userRepository.save(user);
+	}
+
+	@Transactional
+	public void deleteById(int id) {
+		userRepository.deleteById(id);
 	}
 }

@@ -4,20 +4,24 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Добавить звено</title>
-	<link rel="stylesheet" href="/admin/humanmgr_add.css">
+	<link rel="stylesheet" href="/assets/formpage.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 </head>
 
 <body>
-	<form action="#" th:action="@{/admin/squadmgr/add}" th:object="${squad}" method="post">
+	<div id="navbar"></div>
+	<form action="#" th:action="@{/admin/squadmgr/add}" th:object="${squadHelper}" method="post">
 		<h1>Создать звено</h1>
 		<label>Название:</label>
-		<input type="text" th:field="*{squadname}">
-		<input type="hidden" th:field="*{commander}"><br>
+		<input type="text" th:field="*{squadName}">
+		<input type="text" th:field="*{commanderName}">
+		<input type="hidden" th:field="*{commander_id}">
+		<input type="hidden" th:field="*{id}">
 		<button type="submit">Создать</button>
 	</form>
 	<button type="button" onclick="window.location.href = '/admin/squadmgr'">Отмена</button>
 </body>
 <script src="/assets/formcheck.js"></script>
+<script src="/admin/navbar.js"></script>
 
 </html>
