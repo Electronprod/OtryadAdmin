@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Список звеньев</title>
+	<link rel="stylesheet" href="/assets/tablemgr.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+</head>
+
+<body>
+	<div id="navbar"></div>
+	<table id="userTable">
+		<thead>
+			<tr>
+				<th onclick="sortTable(0)">ID</th>
+				<th onclick="sortTable(1)">Название</th>
+				<th onclick="sortTable(2)">Имя командира</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="squad : ${squads}">
+				<td th:text="${squad.id}"></td>
+				<td th:text="${squad.squadName}"></td>
+				<td th:text="${squad.commanderName}"></td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="bottomPanel">
+		<button class="btn" onclick="addSquad('/admin/squadmgr')">Добавить</button>
+		<button class="btn" onclick="deleteF('/admin/squadmgr');">Удалить</button>
+		<button class="btn" onclick="editF('/admin/squadmgr');">Редактировать</button>
+	</div>
+</body>
+<script src="/assets/mgr.js"></script>
+<script src="/admin/navbar.js"></script>
+
+</html>

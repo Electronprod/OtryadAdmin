@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Список пользователей</title>
+	<link rel="stylesheet" href="/assets/tablemgr.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+</head>
+
+<body>
+	<div id="navbar"></div>
+	<table id="userTable">
+		<thead>
+			<tr>
+				<th onclick="sortTable(0)">ID</th>
+				<th onclick="sortTable(1)">Логин</th>
+				<th onclick="sortTable(2)">Роль</th>
+				<th onclick="sortTable(3)">Telegram</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="user : ${users}">
+				<td th:text="${user.id}"></td>
+				<td th:text="${user.login}"></td>
+				<td th:text="${user.role}"></td>
+				<td th:text="${user.telegram}"></td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="bottomPanel">
+		<button class="btn" onclick="window.location.href = '/admin/usermgr/add'">Добавить</button>
+		<button class="btn" onclick="deleteF('/admin/usermgr');">Удалить</button>
+		<button class="btn" onclick="editF('/admin/usermgr');">Редактировать</button>
+	</div>
+</body>
+<script src="/assets/mgr.js"></script>
+<script src="/admin/navbar.js"></script>
+</html>

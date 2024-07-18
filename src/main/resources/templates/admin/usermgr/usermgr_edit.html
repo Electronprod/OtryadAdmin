@@ -3,14 +3,16 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>Добавить пользователя</title>
-	<link rel="stylesheet" href="/admin/humanmgr_add.css">
+	<title>Редактировать пользователя</title>
+	<link rel="stylesheet" href="/assets/formpage.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 </head>
 
 <body>
-	<form action="#" th:action="@{/admin/usermgr/add}" th:object="${user}" method="post">
+	<div id="navbar"></div>
+	<form action="#" th:action="@{/admin/usermgr/edit}" th:object="${user}" method="post">
 		<h1>Создать пользователя</h1>
+		<input type="hidden" th:field="*{id}"><br>
 		<label>Логин:</label>
 		<input type="text" th:field="*{login}"><br>
 
@@ -20,10 +22,13 @@
 		<label>Роль:</label>
 		<input type="text" th:field="*{role}"><br>
 
-		<button type="submit">Создать</button>
+		<label>Telegram:</label>
+		<input type="text" th:field="*{telegram}"><br>
+
+		<button type="submit">Обновить</button>
 	</form>
 	<button type="button" onclick="window.location.href = '/admin/usermgr'">Отмена</button>
 </body>
 <script src="/assets/formcheck.js"></script>
-
+<script src="/admin/navbar.js"></script>
 </html>

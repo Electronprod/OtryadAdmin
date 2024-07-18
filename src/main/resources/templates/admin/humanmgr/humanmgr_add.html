@@ -4,15 +4,17 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Добавить человека</title>
-	<link rel="stylesheet" href="/admin/humanmgr_add.css">
+	<link rel="stylesheet" href="/assets/formpage.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 </head>
 
 <body>
-	<form th:object="${human}" th:action="@{/admin/humanmgr/add}" method="post">
+	<div id="navbar"></div>
+	<form th:object="${humanHelper}" th:action="@{/admin/humanmgr/add}" method="post">
 		<h1>Введите информацию о человеке:</h1>
+		<input type="hidden" th:field="*{squad_id}" />
 		<label for="name">Имя</label>
-	    <input placeholder="Name" name="name" type="text" th:field="*{name}" />
+		<input placeholder="Name" name="name" type="text" th:field="*{name}" />
 		<label for="lastname">Фамилия</label>
 		<input placeholder="Lastname" name="lastname" type="text" th:field="*{lastname}" />
 		<label for="surname">Отчество</label>
@@ -37,11 +39,10 @@
 		<input placeholder="mother" name="mother" type="text" th:field="*{mother}" />
 		<label for="father">Папа</label>
 		<input placeholder="father" name="father" type="text" th:field="*{father}" />
-		<label for="squadid">ID звена</label>
-		<input placeholder="squadid" name="squadid" type="number" th:field="*{squadid}" />
-	    <button type="submit">Добавить</button>
+		<button type="submit">Добавить</button>
 	</form>
 	<button type="button" onclick="window.location.href = '/admin/humanmgr'">Отмена</button>
 </body>
 <script src="/assets/formcheck.js"></script>
+<script src="/admin/navbar.js"></script>
 </html>
