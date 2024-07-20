@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ru.electronprod.OtryadAdmin.data.UsrDetails;
 import ru.electronprod.OtryadAdmin.data.repositories.UserRepository;
 import ru.electronprod.OtryadAdmin.models.User;
 
@@ -27,6 +30,12 @@ public class AuthService {
 	public void register(User person) {
 		person.setPassword(passwordEncoder.encode(person.getPassword()));
 		userRepository.save(person);
+	}
+
+	public User getCurrentUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UsrDetails details = (UsrDetails) authentication.getPrincipal();
+		return details.getUser();
 	}
 
 	/**

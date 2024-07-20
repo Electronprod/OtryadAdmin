@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 #logoutForm button:hover {
                     background-color: white;
                     color: black;
-                                        border: 2px solid #f44336;
+                    border: 2px solid #f44336;
                 }
             `;
 	document.head.appendChild(style);

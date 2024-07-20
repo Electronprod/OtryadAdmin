@@ -21,10 +21,10 @@ public class SecurityConfig {
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
-				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login", "/").permitAll()
+				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login").permitAll()
 						.requestMatchers("/**").authenticated())
 				.formLogin(login -> login.loginPage("/auth/login").loginProcessingUrl("/process_login")
-						.defaultSuccessUrl("/lk"))
+						.defaultSuccessUrl("/lk", false))
 				.logout(logout -> logout.logoutUrl("/auth/logout").logoutSuccessUrl("/auth/login")).build();
 	}
 

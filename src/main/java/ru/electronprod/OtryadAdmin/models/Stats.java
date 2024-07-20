@@ -15,13 +15,21 @@ public class Stats implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
 
-	@OneToOne(mappedBy = "stats")
-	@JoinColumn(name = "stats_id", referencedColumnName = "id")
+	@ManyToOne()
+	@JoinColumn(name = "human_id", referencedColumnName = "id")
 	private Human human;
+	// Дата
 	@Column
-	private int general_fee_count;
+	private String date;
+	// Тип
 	@Column
-	private String general_fee_dates;
+	private String type;
+	// Автор
+	@Column
+	private String author;
+	// Роль пользователя
+	@Column
+	private String user_role;
 
 	public Stats(Human human) {
 		this.human = human;

@@ -19,11 +19,11 @@ import ru.electronprod.OtryadAdmin.data.repositories.HumanRepository;
 import ru.electronprod.OtryadAdmin.data.repositories.SquadRepository;
 import ru.electronprod.OtryadAdmin.data.repositories.UserRepository;
 import ru.electronprod.OtryadAdmin.models.Human;
-import ru.electronprod.OtryadAdmin.models.HumanHelper;
 import ru.electronprod.OtryadAdmin.models.Squad;
-import ru.electronprod.OtryadAdmin.models.SquadHelper;
 import ru.electronprod.OtryadAdmin.models.Stats;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.models.helpers.HumanHelper;
+import ru.electronprod.OtryadAdmin.models.helpers.SquadHelper;
 import ru.electronprod.OtryadAdmin.services.AdminService;
 import ru.electronprod.OtryadAdmin.services.auth.AuthService;
 import ru.electronprod.OtryadAdmin.services.data.DBService;
@@ -213,7 +213,6 @@ public class AdminController {
 		Human human = HumanHelper.fillDefaultValues(helper);
 		helper = null; // helping cleaner
 		human.setSquad(squad.get());
-		human.setStats(new Stats(human));
 		// Saving to DB
 		dbservice.getHumanService().save(human);
 		return "redirect:/admin/humanmgr?saved";

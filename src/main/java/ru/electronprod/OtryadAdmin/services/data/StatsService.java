@@ -45,4 +45,8 @@ public class StatsService {
 	public void deleteById(int id) {
 		statsRepository.deleteById(id);
 	}
+	@Transactional(readOnly = true)
+	public List<Stats> findByAuthor(String author) {
+		return statsRepository.findByAuthor(author);
+	}
 }

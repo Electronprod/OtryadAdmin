@@ -1,12 +1,17 @@
 package ru.electronprod.OtryadAdmin.services;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.services.auth.AuthService;
+import ru.electronprod.OtryadAdmin.services.data.NewsService;
 
 @Service
 public class AdminService implements InitializingBean {
@@ -16,6 +21,8 @@ public class AdminService implements InitializingBean {
 	private String admin_password;
 	@Autowired
 	private AuthService regService;
+	@Autowired
+	private NewsService newsService;
 
 	/**
 	 * Checks the existence of admin account
@@ -32,6 +39,15 @@ public class AdminService implements InitializingBean {
 		}
 		System.out
 				.println("[AdminService]: admin registered. Use authorization data from application.properties file.");
+		if (newsService.findAll().isEmpty()) {
+			System.out.println("[AdminService]: couldn't find news. Creating a new one...");
+			Calendar calendar = Calendar.getInstance();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+			newsService.save(new News(1, "First launch!", "generated automatically",
+					"In this day this application was launched for the first time.",
+					dateFormat.format(calendar.getTime())));
+			System.out.println("[AdminService]: created.");
+		}
 	}
 
 	public boolean isNativeAdmin(User person) {

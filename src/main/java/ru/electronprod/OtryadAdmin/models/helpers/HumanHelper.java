@@ -1,7 +1,8 @@
-package ru.electronprod.OtryadAdmin.models;
+package ru.electronprod.OtryadAdmin.models.helpers;
 
 import lombok.Data;
 import lombok.NonNull;
+import ru.electronprod.OtryadAdmin.models.Human;
 
 @Data
 public class HumanHelper {

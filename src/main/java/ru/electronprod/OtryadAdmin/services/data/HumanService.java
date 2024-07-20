@@ -50,4 +50,8 @@ public class HumanService {
 	public List<Human> findAll(Sort by) {
 		return humanRepository.findAll(by);
 	}
+	@Transactional(readOnly = true)
+	public List<Human> findByIds(List<Integer> ids) {
+        return humanRepository.findAllById(ids);
+    }
 }
