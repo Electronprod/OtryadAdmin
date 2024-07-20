@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Статистика пользователей</title>
+	<link rel="stylesheet" href="/assets/tablemgr.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+	<link rel="icon" href="/icon.png">
+</head>
+
+<body>
+	<table id="userTable">
+		<thead>
+			<tr>
+				<th>ID<br><button onclick="sortTable(0)" class="sortbtn">Сортировать</button></th>
+				<th>Тип<br><button onclick="sortTable(1)" class="sortbtn">Сортировать</button></th>
+				<th>Дата<br><button onclick="sortTable(2)" class="sortbtn">Сортировать</button></th>
+				<th>Пользователь<br><button onclick="sortTable(3)" class="sortbtn">Сортировать</button></th>
+				<th>Фамилия<br><button onclick="sortTable(4)" class="sortbtn">Сортировать</button></th>
+				<th>Имя<br><button onclick="sortTable(5)" class="sortbtn">Сортировать</button></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="stats : ${statss}">
+				<td th:text="${stats.id}"></td>
+				<td th:text="${stats.type}"></td>
+				<td th:text="${stats.date}"></td>
+				<td th:text="${stats.author}"></td>
+				<td th:text="${stats.human.lastname}"></td>
+				<td th:text="${stats.human.name}"></td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="bottomPanel">
+		<button class="btn" onclick="window.location.href = '/squadcommander/mark'">Вернуться</button>
+		<button class="btn" onclick="deleteF('/squadcommander/mark');">Удалить</button>
+	</div>
+</body>
+<script src="/assets/mgr.js"></script>
+</html>

@@ -1,6 +1,7 @@
 package ru.electronprod.OtryadAdmin.models;
 
 import java.io.Serializable;
+import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -18,8 +19,8 @@ public class Human implements Serializable {
 	@JoinColumn(name = "squad_id")
 	private Squad squad;
 
-	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-	private Stats stats;
+	@OneToMany(mappedBy = "human" ,cascade = CascadeType.REMOVE, orphanRemoval = true)
+	private List<Stats> stats;
 
 	@Column
 	private String name;

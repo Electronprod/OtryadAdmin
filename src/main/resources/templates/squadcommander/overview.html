@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Главная</title>
+	<link rel="stylesheet" href="/squadcommander/default.css">
+	<link rel="icon" href="/icon.png">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="navbar"></div>
+	<div id="dashboard">
+		<div id="sidebar">
+			<h2>Меню</h2>
+			<ul>
+			</ul>
+		</div>
+		<div id="content">
+			<div class="card">
+				<h3>Добро пожаловать!</h3>
+				<p>Это ваша административная панель. Слева находятся доступные вам функции. Снизу расположены последние
+					новости.</p>
+			</div>
+			<div class="card">
+				<h3>Новости</h3>
+				<div class="card_2" th:each="news : ${newsList}">
+					<h4 th:text="${news.title}"></h4>
+					<p><strong>Автор:</strong> <span th:text="${news.author}"></span></p>
+					<p><strong>Дата:</strong> <span th:text="${news.date}"></span></p>
+					<p th:text="${news.content}"></p>
+				</div>
+			</div>
+			<!-- Добавьте больше карточек или контента по необходимости -->
+		</div>
+	</div>
+</body>
+<script src="/squadcommander/navbar.js"></script>
+<script src="/squadcommander/sidebar.js"></script>
+
+</html>

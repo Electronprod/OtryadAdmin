@@ -13,18 +13,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class lkController {
 	@GetMapping("/lk")
-	public String showLKPage(Model model) {
+	public String redirectToHome(Model model) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		@SuppressWarnings("unchecked")
 		List<GrantedAuthority> authorities = (List<GrantedAuthority>) authentication.getAuthorities();
-		List<String> roles = new ArrayList();
+		List<String> roles = new ArrayList<String>();
 		for (GrantedAuthority authority : authorities) {
 			roles.add(authority.getAuthority());
 		}
+		// Redirecting to home page
 		if (roles.contains("ROLE_ADMIN")) {
-//			String user = " John Doe";
-//			model.addAttribute("user", user);
-			return "admin/dashboard";
+			return "redirect:/admin";
+		} else if (roles.contains("ROLE_SQUADCOMMANDER")) {
+			return "redirect:/squadcommander";
 		} else {
+			// If user is guest
 			return "index";
 		}
 	}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Отметить ребят</title>
+	<link rel="stylesheet" href="/squadcommander/default.css">
+	<link rel="stylesheet" href="/squadcommander/data.css">
+	<link rel="icon" href="/icon.png">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="navbar"></div>
+	<div id="dashboard">
+		<div id="sidebar">
+			<h2>Меню</h2>
+			<ul>
+			</ul>
+		</div>
+		<div id="content">
+			<div class="card">
+				<h3>Инструкция по использованию</h3>
+				<p>В форме ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии. Выберите тип
+					статистики в селекторе
+					под таблицей и нажмите "Отправить". <br><br><strong>Если кто-то опоздал, а форма
+						уже отправлена:</strong> вы можете зайти повторно на эту страницу и отметить только
+					опаздавщего(их), НО ОБЯЗАТЕЛЬНО
+					сделайте это В ТОТ ЖЕ ДЕНЬ, когда отметили остальных.</p>
+			</div>
+			<div class="card">
+				<h3>Отметьте ребят:</h3>
+				<form th:action="@{/squadcommander/mark}" method="post">
+					<table>
+						<thead>
+							<tr>
+								<th>Выбрать</th>
+								<th>Имя</th>
+								<th>Фамилия</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="humanHelper, iterStat : ${humanList}">
+								<td><input class="custom-checkbox" type="checkbox" th:name="selectedIds"
+										th:value="${humanHelper.id}" /></td>
+								<td th:text="${humanHelper.name}">Имя</td>
+								<td th:text="${humanHelper.lastname}">Фамилия</td>
+							</tr>
+						</tbody>
+					</table>
+					<label>Выберите тип статистики:</label>
+					<select name="statsType">
+						<option value="fee">Посещение общего сбора</option>
+						<option value="duty">Дежурство (вызвался(ась) дежурить в кабинете)</option>
+						<option value="walk">Прогулка (гулял(а) со звеном)</option>
+						<option value="other1">Другое #1 (используйте эту категорию по своему усмотрению)</option>
+						<option value="other2">Другое #2 (используйте эту категорию по своему усмотрению)</option>
+					</select>
+					<button type="submit">Отправить</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Ошиблись при выборе?</h3>
+				<p>Вы можете удалить запись в базе данных. Для этого нажмите кнопку ниже, найдите запись, которую нужно
+					удалить, запомните ее ID и нажмите "удалить".<br><br><strong>Обратите внимание:</strong> В строке
+					"type"
+					указан
+					тип записи на английском. (fee-общий сбор, duty-дежурство и т. д.)</p>
+				<button type="button" onclick="window.location.href = '/squadcommander/mark/del'">Открыть
+					таблицу</button>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="/squadcommander/navbar.js"></script>
+<script src="/squadcommander/sidebar.js"></script>
+
+</html>
