@@ -25,15 +25,12 @@
 		<div id="content">
 			<div class="card">
 				<h3>Инструкция по использованию</h3>
-				<p>В форме ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии. Выберите тип
+				<p>В форме ниже отметьте ребят, которые <strong>ОТСУТСТВОВАЛИ</strong> на событии. Выберите тип
 					статистики в селекторе
-					под таблицей и нажмите "Отправить". <br><br><strong>Если кто-то опоздал, а форма
-						уже отправлена:</strong> вы можете зайти повторно на эту страницу и отметить только
-					опаздавщего(их), НО ОБЯЗАТЕЛЬНО
-					сделайте это В ТОТ ЖЕ ДЕНЬ, когда отметили остальных.</p>
+					под таблицей и нажмите "Отправить".<br><strong>Отправленные данные изменить нельзя!</strong></p>
 			</div>
 			<div class="card">
-				<h3>Отметьте ребят:</h3>
+				<h3>Отметьте отсутствующих ребят:</h3>
 				<form th:action="@{/squadcommander/mark}" method="post">
 					<table>
 						<thead>
@@ -41,20 +38,33 @@
 								<th>Выбрать</th>
 								<th>Имя</th>
 								<th>Фамилия</th>
+								<th>Причина</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr th:each="humanHelper, iterStat : ${humanList}">
-								<td><input class="custom-checkbox" type="checkbox" th:name="selectedIds"
-										th:value="${humanHelper.id}" /></td>
-								<td th:text="${humanHelper.name}">Имя</td>
-								<td th:text="${humanHelper.lastname}">Фамилия</td>
+							<tr th:each="human, iterStat : ${humanList}">
+								<td>
+									<input class="custom-checkbox" type="checkbox" name="selectedIds"
+										th:value="${human.id}" th:id="'checkbox-' + ${iterStat.index}" />
+								</td>
+								<td th:text="${human.name}">Имя</td>
+								<td th:text="${human.lastname}">Фамилия</td>
+								<td>
+									<select class="details-input" th:name="'details[' + ${human.id} + ']'"
+										th:disabled="disabled" th:id="'details-' + ${iterStat.index}">
+										<option value="ill">Заболел(а)</option>
+										<option value="away">Уехал(а)</option>
+										<option value="study">Учеба</option>
+										<option value="respect">Уважительная причина</option>
+										<option value="disrespect">Неуважительная причина</option>
+									</select>
+								</td>
 							</tr>
 						</tbody>
 					</table>
 					<label>Выберите тип статистики:</label>
-					<select name="statsType">
-						<option value="fee">Посещение общего сбора</option>
+					<select name="statsType" id="statsType">
+						<option value="general">Посещение общего сбора</option>
 						<option value="duty">Дежурство (вызвался(ась) дежурить в кабинете)</option>
 						<option value="walk">Прогулка (гулял(а) со звеном)</option>
 						<option value="other1">Другое #1 (используйте эту категорию по своему усмотрению)</option>
@@ -63,20 +73,42 @@
 					<button type="submit">Отправить</button>
 				</form>
 			</div>
-			<div class="card">
-				<h3>Ошиблись при выборе?</h3>
-				<p>Вы можете удалить запись в базе данных. Для этого нажмите кнопку ниже, найдите запись, которую нужно
-					удалить, запомните ее ID и нажмите "удалить".<br><br><strong>Обратите внимание:</strong> В строке
-					"type"
-					указан
-					тип записи на английском. (fee-общий сбор, duty-дежурство и т. д.)</p>
-				<button type="button" onclick="window.location.href = '/squadcommander/mark/del'">Открыть
-					таблицу</button>
-			</div>
-		</div>
-	</div>
-</body>
-<script src="/squadcommander/navbar.js"></script>
-<script src="/squadcommander/sidebar.js"></script>
+			<script>
+				document.addEventListener('DOMContentLoaded', function () {
+					const checkboxes = document.querySelectorAll('.custom-checkbox');
+
+					checkboxes.forEach(checkbox => {
+						checkbox.addEventListener('change', function () {
+							const index = this.id.split('-')[1];
+							const selectInput = document.getElementById('details-' + index);
+
+							if (selectInput) {
+								selectInput.disabled = !this.checked;
+							}
+						});
+					});
+				});
+				document.querySelector('form').addEventListener('submit', function(event) {
+				            if (!isAnyCheckboxChecked()) {
+				                event.preventDefault();
+								var selectElement = document.getElementById('statsType');
+								        var selectedValue = selectElement.value;
+								window.location.href = '/squadcommander/mark_allhere?statsType='+selectedValue;
+				            }
+				        });
+						
+				function isAnyCheckboxChecked() {
+				            const checkboxes = document.querySelectorAll('.custom-checkbox');
+				            for (let checkbox of checkboxes) {
+				                if (checkbox.checked) {
+				                    return true;
+				                }
+				            }
+				            return false;
+				        }
+			</script>
+			<script src="/assets/messagesUtil.js"></script>
+			<script src="/squadcommander/navbar.js"></script>
+			<script src="/squadcommander/sidebar.js"></script>
 
 </html>

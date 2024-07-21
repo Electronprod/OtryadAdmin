@@ -45,8 +45,22 @@ public class StatsService {
 	public void deleteById(int id) {
 		statsRepository.deleteById(id);
 	}
+
+	@Transactional(readOnly = true)
+	public int findMaxEventIDValue() {
+		Integer val = statsRepository.findMaxEventIDValue();
+		if(val==null)
+			return -1;
+		return val.intValue();
+	}
+
 	@Transactional(readOnly = true)
 	public List<Stats> findByAuthor(String author) {
 		return statsRepository.findByAuthor(author);
+	}
+
+	@Transactional
+	public StatsRepository getRepository() {
+		return statsRepository;
 	}
 }

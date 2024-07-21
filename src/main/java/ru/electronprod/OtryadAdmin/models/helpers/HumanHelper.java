@@ -24,6 +24,7 @@ public class HumanHelper {
 	private boolean dedicated;
 	private String mother;
 	private String father;
+	private String details;
 
 	public static HumanHelper fillDefaultValues(@NonNull Human human) {
 		HumanHelper result = new HumanHelper();

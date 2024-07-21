@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		{ name: 'Список звена', url: '/squadcommander/humans' },
 		{ name: 'Отметить', url: '/squadcommander/mark' },
 		{ name: 'Статистика', url: '/squadcommander/stats' },
+		{ name: 'Аналитика', url: '/squadcommander/analytics' },
 		{ name: 'Предупреждения', url: '/squadcommander/warnings' },
 		{ name: 'Настройки', url: '/squadcommander/settings' }
 	];
