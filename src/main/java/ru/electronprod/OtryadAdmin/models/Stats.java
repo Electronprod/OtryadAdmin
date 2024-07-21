@@ -30,6 +30,15 @@ public class Stats implements Serializable {
 	// Роль пользователя
 	@Column
 	private String user_role;
+	// Причина отсутствия
+	@Column
+	private String reason;
+	// ID ивента
+	@Column
+	private int event_id;
+	// Положительное - человек пришел, иначе - нет
+	@Column
+	private boolean isPresent;
 
 	public Stats(Human human) {
 		this.human = human;
