@@ -1,5 +1,7 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -171,7 +173,60 @@ public class SquadCommanderController {
 	}
 
 	@GetMapping("/personal_stats")
-	public String personal_stats(Model model) {
+	public String personal_stats(@RequestParam int id, Model model) {
+		User user = dbservice.getAuthService().getCurrentUser();
+		if (user == null)
+			return "redirect:/squadcommander?error_usernotfound";
+		// Getting stats for user's humans
+		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
+		statsList.removeIf(stats -> (stats.getHuman().getId() != id));
+		// Model data
+		String[] types = { "general", "duty", "walk", "other1", "other2" };
+		List<Integer> attendanceValues = new ArrayList<Integer>();
+		List<Integer> omissionsValues = new ArrayList<Integer>();
+		Map<String, Boolean> dateMap = new HashMap<String, Boolean>();
+		// For each type...
+		for (String type : types) {
+			// Generating typedStats list
+			List<Stats> typedStats = new ArrayList<Stats>();
+			typedStats.addAll(statsList);
+			typedStats.removeIf(stats -> !stats.getType().equals(type));
+			// --------------------------
+			int attendanceVal = 0;
+			int omissionsVal = 0;
+			for (Stats stats : typedStats) {
+				dateMap.putIfAbsent(stats.getDate(), stats.isPresent());
+				if (stats.isPresent()) {
+					// Пришел
+					attendanceVal++;
+				} else {
+					// Не пришел
+					omissionsVal++;
+				}
+			}
+			attendanceValues.add(attendanceVal);
+			omissionsValues.add(omissionsVal);
+			typedStats = null;
+		}
+		// Sorting dates to send
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy");
+		Map<String, Boolean> sortedDateMap = new TreeMap<>(new Comparator<String>() {
+			@Override
+			public int compare(String date1, String date2) {
+				try {
+					return dateFormat.parse(date1).compareTo(dateFormat.parse(date2));
+				} catch (ParseException e) {
+					throw new IllegalArgumentException(e);
+				}
+			}
+		});
+		sortedDateMap.putAll(dateMap);
+		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
+		model.addAttribute("name", human.getName() + " " + human.getLastname());
+		model.addAttribute("labels", types);
+		model.addAttribute("attendanceData", attendanceValues);
+		model.addAttribute("omissionsValues", omissionsValues);
+		model.addAttribute("datesData", sortedDateMap);
 		return "/squadcommander/personal_stats.html";
 	}
 
