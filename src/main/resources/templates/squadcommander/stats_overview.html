@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Статистика</title>
+	<link rel="stylesheet" href="/squadcommander/default.css">
+	<link rel="stylesheet" href="/squadcommander/data.css">
+	<link rel="icon" href="/icon.png">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="navbar"></div>
+	<div id="dashboard">
+		<div id="sidebar">
+			<h2>Меню</h2>
+			<ul>
+			</ul>
+		</div>
+		<div id="content">
+			<div class="card">
+				<h3>Статистика посещений</h3>
+				<p>Посмотрите количество посещений каждого члена вашего звена для каждого события в общем виде.</p>
+				<button onclick="window.location.href='/squadcommander/stats/report';">Перейти</button>
+			</div>
+			<div class="card">
+				<h3>Персональная статистика</h3>
+				<p>Посмотрите подробную статистику для любого члена вашего звена.</p>
+				<form action="#" th:action="@{/squadcommander/stats/personal}" method="get">
+					<select name="id">
+						<option value="" disabled selected>Выберите человека</option>
+						<option th:each="human: ${humans}" th:value="${human.id}"
+							th:text="${human.name} + ' ' + ${human.lastname}">
+						</option>
+					</select>
+					<button type="submit">Посмотреть</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Просмотр персональной таблицы данных</h3>
+				<p>Просмотрите персональные сырые данные для человека в табличном виде.
+				</p>
+				<form action="#" th:action="@{/squadcommander/stats/personal/table}" method="get">
+					<select name="id">
+						<option value="" disabled selected>Выберите человека</option>
+						<option th:each="human: ${humans}" th:value="${human.id}"
+							th:text="${human.name} + ' ' + ${human.lastname}">
+						</option>
+					</select>
+					<button type="submit">Посмотреть</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Просмотр общей таблицы данных</h3>
+				<p>Просмотрите все статистические данные из БД для вашего звена в табличном виде.
+				</p>
+				<button onclick="window.location.href='/squadcommander/stats/table';">Перейти</button>
+			</div>
+		</div>
+</body>
+<script src="/squadcommander/navbar.js"></script>
+<script src="/squadcommander/sidebar.js"></script>
+
+</html>
