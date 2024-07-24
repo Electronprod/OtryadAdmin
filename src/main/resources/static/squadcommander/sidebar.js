@@ -3,10 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		{ name: 'Обзор', url: '/squadcommander' },
 		{ name: 'Список звена', url: '/squadcommander/humans' },
 		{ name: 'Отметить', url: '/squadcommander/mark' },
-		{ name: 'Статистика', url: '/squadcommander/stats' },
-		{ name: 'Аналитика', url: '/squadcommander/analytics' },
-		{ name: 'Предупреждения', url: '/squadcommander/warnings' },
-		{ name: 'Настройки', url: '/squadcommander/settings' }
+		{ name: 'Статистика', url: '/squadcommander/stats' }
 	];
 	const sidebarMenu = document.querySelector('#sidebar ul');
 	sidebarMenuItems.forEach(item => {

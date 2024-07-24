@@ -6,7 +6,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Персональная статистика</title>
 	<link rel="stylesheet" href="/squadcommander/default.css">
-	<link rel="stylesheet" href="/squadcommander/data.css">
 	<link rel="icon" href="/icon.png">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -30,13 +29,15 @@
 			<h2><strong th:text="${name}"></strong>:</h2>
 			<div class="card">
 				<h3>Общая статистика по событиям:</h3>
-				<canvas id="globalStats"></canvas>
+				<canvas id="globalStats" width="400" height="200"></canvas>
 			</div>
 			<div class="card">
 				<h3>Статистика посещений по датам:</h3>
-				<canvas id="dateStats"></canvas>
-				<p><strong>ВНИМАНИЕ: </strong> график показывает был человек в этот день хотябы на одном событии. Если
-					событий несколько, то показаны они будут как одно.</p>
+				<canvas id="dateStats" width="400" height="200"></canvas>
+			</div>
+			<div class="card">
+				<h3>Причины пропусков:</h3>
+				<canvas id="reasons_for_missing_stats"></canvas>
 			</div>
 		</div>
 </body>
@@ -45,43 +46,134 @@
 
 <script th:inline="javascript">
 	/*<![CDATA[*/
-	var labels = /*[[${labels}]]*/[];
+	var events_types = /*[[${events_types}]]*/[];
 	var attendanceData = /*[[${attendanceData}]]*/[];
 	var omissionsValues = /*[[${omissionsValues}]]*/[];
 	var datesData = /*[[${datesData}]]*/[];
-	console.log("Labels: ", labels);
+	var reasons_for_missing = /*[[${reasons_for_missing}]]*/[];
+	var reasons_for_missing_types =/*[[${reasons_for_missing_types}]]*/[];;
+	console.log("events_types: ", events_types);
 	console.log("attendanceData: ", attendanceData);
 	console.log("omissionsValues: ", omissionsValues);
 	console.log("datesData: ", datesData);
+	console.log("reasons_for_missing: ", reasons_for_missing);
 	/*]]>*/
 </script>
 <script>
+	const canvas = document.getElementById('reasons_for_missing_stats').getContext('2d');
+	const reasons_for_missing_labels = Object.keys(reasons_for_missing);
+	const reasons_for_missing_data = Object.values(reasons_for_missing);
+	const data = {
+		labels: reasons_for_missing_labels,
+		datasets: [{
+			label: 'Причины пропусков',
+			data: reasons_for_missing_data,
+			backgroundColor: [
+				'rgba(255, 99, 132, 0.2)',
+				'rgba(255, 159, 64, 0.2)',
+				'rgba(255, 205, 86, 0.2)',
+				'rgba(75, 192, 192, 0.2)',
+				'rgba(54, 162, 235, 0.2)',
+				'rgba(153, 102, 255, 0.2)',
+				'rgba(201, 203, 207, 0.2)'
+			],
+			borderColor: [
+				'rgb(255, 99, 132)',
+				'rgb(255, 159, 64)',
+				'rgb(255, 205, 86)',
+				'rgb(75, 192, 192)',
+				'rgb(54, 162, 235)',
+				'rgb(153, 102, 255)',
+				'rgb(201, 203, 207)'
+			],
+			borderWidth: 1
+		}]
+	};
+	const reasons_for_missing_chart = new Chart(canvas, {
+		type: 'bar',
+		data: data,
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		},
+	});
+</script>
+<script>
 	// Преобразуем данные в формат, подходящий для Chart.js
-	const labels1 = Object.keys(datesData);
-	const dataValues = labels1.map(date => datesData[date] ? 1 : 0);
-	console.log("datesData convert: ", dataValues);
+	// General
+	const labels0 = Object.keys(datesData[0]);
+	const dataValues0 = labels0.map(date => datesData[0][date] ? 1 : 0.1);
+	//duty
+	const labels1 = Object.keys(datesData[1]);
+	const dataValues1 = labels1.map(date => datesData[1][date] ? 1 : 0.1);
+	//walk
+	const labels2 = Object.keys(datesData[2]);
+	const dataValues2 = labels2.map(date => datesData[2][date] ? 1 : 0.1);
+	// Other1
+	const labels3 = Object.keys(datesData[3]);
+	const dataValues3 = labels3.map(date => datesData[3][date] ? 1 : 0.1);
+	// Other2
+	const labels4 = Object.keys(datesData[4]);
+	const dataValues4 = labels4.map(date => datesData[4][date] ? 1 : 0.1);
+
 	const ctx = document.getElementById('dateStats').getContext('2d');
+	const labelsAll = Array.from(new Set([...labels0, ...labels1, ...labels2, ...labels3, ...labels4]));
+	console.log(labelsAll);
+
 
 	const myChart = new Chart(ctx, {
-		type: 'line',
+		type: 'scatter',
 		data: {
-			labels: labels1,
-			datasets: [{
-				label: 'Data',
-				data: dataValues,
-				borderColor: 'rgba(75, 192, 192, 1)',
-				borderWidth: 1,
-				fill: false
-			}]
+			labels: labelsAll,
+			datasets: [
+				{
+					label: 'Общие сборы',
+					data: dataValues0,
+					borderColor: 'green',
+					borderWidth: 1,
+					fill: false
+				},
+				{
+					label: 'Дежурства',
+					data: dataValues1,
+					borderColor: 'purple',
+					borderWidth: 1,
+					fill: false
+				},
+				{
+					label: 'Прогулки',
+					data: dataValues2,
+					borderColor: 'red',
+					borderWidth: 1,
+					fill: false
+				},
+				{
+					label: 'Другое №1',
+					data: dataValues3,
+					borderColor: 'blue',
+					borderWidth: 1,
+					fill: false
+				},
+				{
+					label: 'Другое №2',
+					data: dataValues4,
+					borderColor: 'yellow',
+					borderWidth: 1,
+					fill: false
+				}
+			]
 		},
 		options: {
 			scales: {
 				x: {
 					type: 'time',
 					time: {
-						tooltipFormat: 'dd.MM.yy',
+						tooltipFormat: 'dd.MM.yyyy',
 						unit: 'day',
-						parser: 'dd.MM.yy',
+						parser: 'dd.MM.yyyy',
 					},
 					title: {
 						display: true,
@@ -92,7 +184,7 @@
 					beginAtZero: true,
 					title: {
 						display: true,
-						text: 'Был / Отсутствовал'
+						text: 'Отсутствовал / Был'
 					}
 				}
 			},
@@ -117,7 +209,7 @@
 		const radarChart = new Chart(ctx, {
 			type: 'radar',
 			data: {
-				labels: ["Общие сборы", "Дежурства", "Прогулки", "Другое №1", "Другое №2"],
+				labels: events_types,
 				datasets: [{
 					label: 'Посещения',
 					data: attendanceData,

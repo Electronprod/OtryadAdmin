@@ -10,7 +10,7 @@ import ru.electronprod.OtryadAdmin.models.Stats;
 
 public interface StatsRepository extends JpaRepository<Stats, Integer> {
 	List<Stats> findByAuthor(String author);
-
+	List<Stats> findByDate(String date);
 	List<Stats> findByHuman(Human human);
 	
 	@Query("SELECT MAX(e.event_id) FROM Stats e")

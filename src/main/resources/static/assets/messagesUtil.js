@@ -12,6 +12,13 @@ if (window.location.href.includes("error_usernotfound")) {
 		icon: "error"
 	});
 }
+if (window.location.href.includes("server_incorrectreq")) {
+	Swal.fire({
+		title: "ОШИБКА!",
+		text: "Запрос был составлен неверно.",
+		icon: "error"
+	});
+}
 if (window.location.href.includes("sent")) {
 	Swal.fire({
 		title: "УСПЕХ!",

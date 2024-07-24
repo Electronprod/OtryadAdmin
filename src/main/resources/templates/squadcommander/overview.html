@@ -6,6 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Главная</title>
 	<link rel="stylesheet" href="/squadcommander/default.css">
+	<link rel="stylesheet" href="/squadcommander/data.css">
 	<link rel="icon" href="/icon.png">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
@@ -20,12 +21,28 @@
 			<h2>Меню</h2>
 			<ul>
 			</ul>
+			<p><b>Название звена:</b> <span th:text="${squadname}"></span><br>
+				<b>Логин командира:</b> <span th:text="${login}"></span><br>
+				<b>Командир:</b> <span th:text="${commander}"></span><br>
+				<b>UserID:</b> <span th:text="${userid}"></span><br>
+				<b>SquadID:</b> <span th:text="${squadid}"></span>
+			</p>
 		</div>
 		<div id="content">
 			<div class="card">
 				<h3>Добро пожаловать!</h3>
 				<p>Это ваша административная панель. Слева находятся доступные вам функции. Снизу расположены последние
 					новости.</p>
+			</div>
+			<div class="card">
+				<h3>Просмотр отметок посещений по дате</h3>
+				<p>Посмотрите посещения в выбранную дату.</p>
+				<form id="date-form" action="/squadcommander/stats/date">
+					<label for="date">Дата:</label>
+					<input type="date" id="date" name="date">
+					<br>
+					<button type="submit">Посмотреть</button>
+				</form>
 			</div>
 			<div class="card">
 				<h3>Новости</h3>
@@ -42,5 +59,6 @@
 </body>
 <script src="/squadcommander/navbar.js"></script>
 <script src="/squadcommander/sidebar.js"></script>
+<script src="/assets/messagesUtil.js"></script>
 
 </html>

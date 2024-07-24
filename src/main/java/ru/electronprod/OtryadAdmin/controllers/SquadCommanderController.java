@@ -11,8 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.Data;
 import ru.electronprod.OtryadAdmin.models.*;
 import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
+import ru.electronprod.OtryadAdmin.services.StatsHelperService;
 import ru.electronprod.OtryadAdmin.services.data.DBService;
 
 @Controller
@@ -21,9 +23,20 @@ import ru.electronprod.OtryadAdmin.services.data.DBService;
 public class SquadCommanderController {
 	@Autowired
 	private DBService dbservice;
+	@Autowired
+	private StatsHelperService statsHelper;
 
 	@GetMapping("")
 	public String overview(Model model) {
+		User user = dbservice.getAuthService().getCurrentUser();
+		Squad squad = dbservice.getAuthService().findById(user.getId()).get().getSquad();
+		// Session data
+		model.addAttribute("squadname", squad.getSquadName());
+		model.addAttribute("login", user.getLogin());
+		model.addAttribute("commander", squad.getCommanderName());
+		model.addAttribute("userid", user.getId());
+		model.addAttribute("squadid", squad.getId());
+		// News
 		List<News> news = dbservice.getNewsService().getLast5();
 		model.addAttribute("newsList", news);
 		return "squadcommander/overview.html";
@@ -120,59 +133,55 @@ public class SquadCommanderController {
 		return "redirect:/squadcommander/mark?sent";
 	}
 
-	@GetMapping("/mark/del")
-	@Deprecated
+	@GetMapping("/stats/date")
+	public String statsTable_date(@RequestParam String date, Model model) {
+		User user = dbservice.getAuthService().getCurrentUser();
+		if (user == null)
+			return "redirect:/squadcommander?error_usernotfound";
+		// Formatting date from 2024-07-24 to 24.07.2024
+		try {
+			String[] pieces = date.split("-");
+			date = pieces[2] + "." + pieces[1] + "." + pieces[0];
+		} catch (Exception e) {
+			System.err.println("[/squadcommander/stats/date] date warn: " + e.getMessage());
+			return "redirect:/squadcommander?server_incorrectreq";
+		}
+		List<Stats> statsList = dbservice.getStatsService().getRepository().findByDate(date);
+		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
+		model.addAttribute("statss", statsList);
+		return "/public/statsview_rawtable.html";
+	}
+
+	@GetMapping("/stats/table")
 	public String deleteStats(Model model) {
 		User user = dbservice.getAuthService().getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
-		model.addAttribute("statss", statsList);
-		return "/squadcommander/mark_delete.html";
+		model.addAttribute("statss", dbservice.getStatsService().findByAuthor(user.getLogin()));
+		return "/public/statsview_rawtable.html";
 	}
 
-	@GetMapping("/stats")
-	public String stats(Model model) {
+	@GetMapping("/stats/report")
+	public String statsReport(Model model) {
 		User user = dbservice.getAuthService().getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		// Getting stats for user's humans
-		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
-		String[] types = { "general", "duty", "walk", "other1", "other2" };
-		for (String type : types) {
-			List<Stats> typedStats = new ArrayList<Stats>();
-			typedStats.addAll(statsList);
-			// Deleting other types from list
-			typedStats.removeIf(stats -> !stats.getType().equals(type));
-			Map<Human, Integer> map = new HashMap<Human, Integer>();
-			// For each Stats object
-			for (Stats stats : typedStats) {
-				Human human = stats.getHuman();
-				if (stats.isPresent()) {
-					// Человек пришел
-					// Adding to map
-					if (map.containsKey(human)) {
-						map.put(human, map.get(human) + 1);
-					} else {
-						map.put(human, 1);
-					}
-				} else {
-					// Человек не пришел
-					if (!map.containsKey(human)) {
-						map.put(human, 0);
-					}
-				}
-			}
-			// Sorting
-			Map<Human, Integer> sortedMap = map.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(
-					Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-			model.addAttribute(type + "Entry", sortedMap);
-			typedStats = null;
-		}
-		return "/squadcommander/stats.html";
+		model = statsHelper.generateGeneralReport(model, dbservice.getStatsService().findByAuthor(user.getLogin()));
+		return "/squadcommander/general_stats.html";
 	}
 
-	@GetMapping("/personal_stats")
+	@GetMapping("/stats/personal/table")
+	public String personal_statsTable(@RequestParam int id, Model model) {
+		User user = dbservice.getAuthService().getCurrentUser();
+		if (user == null)
+			return "redirect:/squadcommander?error_usernotfound";
+		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
+		statsList.removeIf(stats -> stats.getHuman().getId() != id);
+		model.addAttribute("statss", statsList);
+		return "/public/statsview_rawtable.html";
+	}
+
+	@GetMapping("/stats/personal")
 	public String personal_stats(@RequestParam int id, Model model) {
 		User user = dbservice.getAuthService().getCurrentUser();
 		if (user == null)
@@ -180,54 +189,19 @@ public class SquadCommanderController {
 		// Getting stats for user's humans
 		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
 		statsList.removeIf(stats -> (stats.getHuman().getId() != id));
-		// Model data
-		String[] types = { "general", "duty", "walk", "other1", "other2" };
-		List<Integer> attendanceValues = new ArrayList<Integer>();
-		List<Integer> omissionsValues = new ArrayList<Integer>();
-		Map<String, Boolean> dateMap = new HashMap<String, Boolean>();
-		// For each type...
-		for (String type : types) {
-			// Generating typedStats list
-			List<Stats> typedStats = new ArrayList<Stats>();
-			typedStats.addAll(statsList);
-			typedStats.removeIf(stats -> !stats.getType().equals(type));
-			// --------------------------
-			int attendanceVal = 0;
-			int omissionsVal = 0;
-			for (Stats stats : typedStats) {
-				dateMap.putIfAbsent(stats.getDate(), stats.isPresent());
-				if (stats.isPresent()) {
-					// Пришел
-					attendanceVal++;
-				} else {
-					// Не пришел
-					omissionsVal++;
-				}
-			}
-			attendanceValues.add(attendanceVal);
-			omissionsValues.add(omissionsVal);
-			typedStats = null;
-		}
-		// Sorting dates to send
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy");
-		Map<String, Boolean> sortedDateMap = new TreeMap<>(new Comparator<String>() {
-			@Override
-			public int compare(String date1, String date2) {
-				try {
-					return dateFormat.parse(date1).compareTo(dateFormat.parse(date2));
-				} catch (ParseException e) {
-					throw new IllegalArgumentException(e);
-				}
-			}
-		});
-		sortedDateMap.putAll(dateMap);
+		model = statsHelper.generatePersonalReport(model, statsList);
 		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
 		model.addAttribute("name", human.getName() + " " + human.getLastname());
-		model.addAttribute("labels", types);
-		model.addAttribute("attendanceData", attendanceValues);
-		model.addAttribute("omissionsValues", omissionsValues);
-		model.addAttribute("datesData", sortedDateMap);
 		return "/squadcommander/personal_stats.html";
 	}
 
+	@GetMapping("/stats")
+	public String stats(Model model) {
+		User user = dbservice.getAuthService().getCurrentUser();
+		if (user == null)
+			return "redirect:/squadcommander?error_usernotfound";
+		model.addAttribute("humans",
+				dbservice.getAuthService().findById(user.getId()).orElseThrow().getSquad().getHumans());
+		return "/squadcommander/stats_overview.html";
+	}
 }

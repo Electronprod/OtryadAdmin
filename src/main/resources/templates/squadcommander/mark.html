@@ -73,6 +73,16 @@
 					<button type="submit">Отправить</button>
 				</form>
 			</div>
+			<div class="card">
+				<h3>Просмотр отметок посещений по дате</h3>
+				<p>Посмотрите посещения в выбранную дату.</p>
+				<form id="date-form" action="/squadcommander/stats/date">
+					<label for="date">Дата:</label>
+					<input type="date" id="date" name="date">
+					<br>
+					<button type="submit">Посмотреть</button>
+				</form>
+			</div>
 			<script>
 				document.addEventListener('DOMContentLoaded', function () {
 					const checkboxes = document.querySelectorAll('.custom-checkbox');
@@ -88,24 +98,24 @@
 						});
 					});
 				});
-				document.querySelector('form').addEventListener('submit', function(event) {
-				            if (!isAnyCheckboxChecked()) {
-				                event.preventDefault();
-								var selectElement = document.getElementById('statsType');
-								        var selectedValue = selectElement.value;
-								window.location.href = '/squadcommander/mark_allhere?statsType='+selectedValue;
-				            }
-				        });
-						
+				document.querySelector('form').addEventListener('submit', function (event) {
+					if (!isAnyCheckboxChecked()) {
+						event.preventDefault();
+						var selectElement = document.getElementById('statsType');
+						var selectedValue = selectElement.value;
+						window.location.href = '/squadcommander/mark_allhere?statsType=' + selectedValue;
+					}
+				});
+
 				function isAnyCheckboxChecked() {
-				            const checkboxes = document.querySelectorAll('.custom-checkbox');
-				            for (let checkbox of checkboxes) {
-				                if (checkbox.checked) {
-				                    return true;
-				                }
-				            }
-				            return false;
-				        }
+					const checkboxes = document.querySelectorAll('.custom-checkbox');
+					for (let checkbox of checkboxes) {
+						if (checkbox.checked) {
+							return true;
+						}
+					}
+					return false;
+				}
 			</script>
 			<script src="/assets/messagesUtil.js"></script>
 			<script src="/squadcommander/navbar.js"></script>
