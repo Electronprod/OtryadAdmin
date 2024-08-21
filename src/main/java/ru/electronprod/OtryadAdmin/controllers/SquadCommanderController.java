@@ -49,7 +49,7 @@ public class SquadCommanderController {
 			return "redirect:/squadcommander?error_usernotfound";
 		List<Human> humans = dbservice.getAuthService().findById(user.getId()).orElseThrow().getSquad().getHumans();
 		model.addAttribute("humans", humans);
-		return "squadcommander/humans.html";
+		return "public/humans_rawtable.html";
 	}
 
 	@GetMapping("/mark")

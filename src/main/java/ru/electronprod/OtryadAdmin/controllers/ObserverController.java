@@ -109,4 +109,10 @@ public class ObserverController {
 		model.addAttribute("name", human.getName() + " " + human.getLastname());
 		return "/observer/personal_stats.html";
 	}
+
+	@GetMapping("/data")
+	public String getAllData(Model model) {
+		model.addAttribute("humans", dbservice.getHumanService().findAll());
+		return "public/humans_rawtable.html";
+	}
 }
