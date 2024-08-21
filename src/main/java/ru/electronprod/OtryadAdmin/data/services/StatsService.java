@@ -28,6 +28,11 @@ public class StatsService {
 		return statsRepository.findById(id);
 	}
 
+	@Transactional(readOnly = true)
+	public List<Stats> findByDate(String date) {
+		return statsRepository.findByDate(date);
+	}
+
 	// Сохранение нового или обновлённого Stats
 	@Transactional
 	public Stats save(Stats stats) {
@@ -49,7 +54,7 @@ public class StatsService {
 	@Transactional(readOnly = true)
 	public int findMaxEventIDValue() {
 		Integer val = statsRepository.findMaxEventIDValue();
-		if(val==null)
+		if (val == null)
 			return -1;
 		return val.intValue();
 	}
@@ -59,8 +64,13 @@ public class StatsService {
 		return statsRepository.findByAuthor(author);
 	}
 
+	@Transactional(readOnly = true)
+	public int countByIsPresent(boolean isPresent) {
+		return statsRepository.countByIsPresent(isPresent);
+	}
+
 	@Transactional
-	public StatsRepository getRepository() {
-		return statsRepository;
+	public void saveAll(List<Stats> statsArr) {
+		statsRepository.saveAll(statsArr);
 	}
 }

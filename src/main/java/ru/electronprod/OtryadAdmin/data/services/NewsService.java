@@ -1,7 +1,5 @@
 package ru.electronprod.OtryadAdmin.data.services;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ru.electronprod.OtryadAdmin.data.repositories.NewsRepository;
 import ru.electronprod.OtryadAdmin.models.News;
-import ru.electronprod.OtryadAdmin.models.Squad;
 
 @Service
 public class NewsService {
@@ -19,9 +16,7 @@ public class NewsService {
 	private NewsRepository rep;
 
 	public void createNews(News news) {
-		Calendar calendar = Calendar.getInstance();
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-		news.setDate(dateFormat.format(calendar.getTime()));
+		news.setDate(DBService.getStringDate());
 		save(news);
 	}
 
