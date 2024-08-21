@@ -26,6 +26,8 @@ public class lkController {
 			return "redirect:/admin";
 		} else if (roles.contains("ROLE_SQUADCOMMANDER")) {
 			return "redirect:/squadcommander";
+		} else if (roles.contains("ROLE_OBSERVER")) {
+			return "redirect:/observer";
 		} else {
 			// If user is guest
 			return "index";

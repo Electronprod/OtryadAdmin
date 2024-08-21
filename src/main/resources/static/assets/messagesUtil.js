@@ -5,10 +5,24 @@ if (window.location.href.includes("saved")) {
 		icon: "success"
 	});
 }
+if (window.location.href.includes("published")) {
+	Swal.fire({
+		title: "УСПЕХ!",
+		text: "Опубликовано.",
+		icon: "success"
+	});
+}
 if (window.location.href.includes("error_usernotfound")) {
 	Swal.fire({
 		title: "ОШИБКА АВТОРИЗАЦИИ!",
 		text: "Пользователь не найден в сессии.",
+		icon: "error"
+	});
+}
+if (window.location.href.includes("error_notfound")) {
+	Swal.fire({
+		title: "ОШИБКА!",
+		text: "Обьект не найден в базе данных.",
 		icon: "error"
 	});
 }

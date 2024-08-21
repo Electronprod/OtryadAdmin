@@ -46,12 +46,24 @@ public class HumanService {
 	public void deleteById(int id) {
 		humanRepository.deleteById(id);
 	}
+
 	@Transactional(readOnly = true)
 	public List<Human> findAll(Sort by) {
 		return humanRepository.findAll(by);
 	}
+
 	@Transactional(readOnly = true)
 	public List<Human> findByIds(List<Integer> ids) {
-        return humanRepository.findAllById(ids);
-    }
+		return humanRepository.findAllById(ids);
+	}
+
+	@Transactional
+	public HumanRepository getRepository() {
+		return humanRepository;
+	}
+
+	@Transactional(readOnly = true)
+	public int getSize() {
+		return humanRepository.getSize();
+	}
 }
