@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const pages = [
         { name: 'Главная', url: '/observer' },
         { name: 'Статистика', url: '/observer/stats' },
-        { name: 'Данные', url: '/observer/info' }
+        { name: 'Список отряда', url: '/observer/data' }
     ];
 
     const navbar = document.getElementById('navbar');

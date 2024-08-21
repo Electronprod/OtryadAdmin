@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Список ребят</title>
+	<link rel="stylesheet" href="/assets/tablemgr.css">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+	<link rel="icon" href="/icon.png">
+</head>
+
+<body>
+	<table id="userTable">
+		<thead>
+			<tr>
+				<th>ID<br><button onclick="sortTable(0)" class="sortbtn">Сортировать</button></th>
+				<th>Имя<br><button onclick="sortTable(1)" class="sortbtn">Сортировать</button></th>
+				<th>Фамилия<br><button onclick="sortTable(2)" class="sortbtn">Сортировать</button></th>
+				<th>Отчество<br><button onclick="sortTable(3)" class="sortbtn">Сортировать</button></th>
+				<th>ДР<br><button onclick="sortTable(4)" class="sortbtn">Сортировать</button></th>
+				<th>Школа<br><button onclick="sortTable(5)" class="sortbtn">Сортировать</button></th>
+				<th>Класс<br><button onclick="sortTable(6)" class="sortbtn">Сортировать</button></th>
+				<th>Буква<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
+				<th>Адрес<br><button onclick="sortTable(8)" class="sortbtn">Сортировать</button></th>
+				<th>Телефон<br><button onclick="sortTable(9)" class="sortbtn">Сортировать</button></th>
+				<th>Вступление<br><button onclick="sortTable(10)" class="sortbtn">Сортировать</button></th>
+				<th>Посвящение<br><button onclick="sortTable(11)" class="sortbtn">Сортировать</button></th>
+				<th>Мама<br><button onclick="sortTable(12)" class="sortbtn">Сортировать</button></th>
+				<th>Папа<br><button onclick="sortTable(13)" class="sortbtn">Сортировать</button></th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="human : ${humans}">
+				<td th:text="${human.id}"></td>
+				<td th:text="${human.name}"></td>
+				<td th:text="${human.lastname}"></td>
+				<td th:text="${human.surname}"></td>
+				<td th:text="${human.birthday}"></td>
+				<td th:text="${human.school}"></td>
+				<td th:text="${human.classnum}"></td>
+				<td th:text="${human.classchar}"></td>
+				<td th:text="${human.address}"></td>
+				<td th:text="${human.phone}"></td>
+				<td th:text="${human.year_of_admission}"></td>
+				<td th:text="${human.dedicated}"></td>
+				<td th:text="${human.mother}"></td>
+				<td th:text="${human.father}"></td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="bottomPanel">
+		<button class="btn" onclick="window.history.back();">Вернуться</button>
+	</div>
+</body>
+<script src="/assets/mgr.js"></script>
+
+</html>
