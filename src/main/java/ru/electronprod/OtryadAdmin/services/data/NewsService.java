@@ -1,5 +1,7 @@
 package ru.electronprod.OtryadAdmin.services.data;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +17,13 @@ import ru.electronprod.OtryadAdmin.models.Squad;
 public class NewsService {
 	@Autowired
 	private NewsRepository rep;
+
+	public void createNews(News news) {
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+		news.setDate(dateFormat.format(calendar.getTime()));
+		save(news);
+	}
 
 	// Получение всех Squad
 	@Transactional(readOnly = true)
@@ -45,6 +54,7 @@ public class NewsService {
 	public void deleteById(int id) {
 		rep.deleteById(id);
 	}
+
 	@Transactional(readOnly = true)
 	public List<News> getLast5() {
 		return rep.findTop5ByIdDesc();
