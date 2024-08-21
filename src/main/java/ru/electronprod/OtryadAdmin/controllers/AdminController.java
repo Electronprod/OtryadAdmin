@@ -18,6 +18,8 @@ import lombok.NonNull;
 import ru.electronprod.OtryadAdmin.data.repositories.HumanRepository;
 import ru.electronprod.OtryadAdmin.data.repositories.SquadRepository;
 import ru.electronprod.OtryadAdmin.data.repositories.UserRepository;
+import ru.electronprod.OtryadAdmin.data.services.DBService;
+import ru.electronprod.OtryadAdmin.data.services.UserService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.Stats;
@@ -25,8 +27,6 @@ import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.helpers.HumanHelper;
 import ru.electronprod.OtryadAdmin.models.helpers.SquadHelper;
 import ru.electronprod.OtryadAdmin.services.AdminService;
-import ru.electronprod.OtryadAdmin.services.auth.AuthService;
-import ru.electronprod.OtryadAdmin.services.data.DBService;
 
 @Controller
 @RequestMapping("/admin")

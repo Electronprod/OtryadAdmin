@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.services.auth;
+package ru.electronprod.OtryadAdmin.data.services;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,12 +10,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ru.electronprod.OtryadAdmin.data.UsrDetails;
 import ru.electronprod.OtryadAdmin.data.repositories.UserRepository;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.security.UsrDetails;
 
 @Service
-public class AuthService {
+public class UserService {
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired

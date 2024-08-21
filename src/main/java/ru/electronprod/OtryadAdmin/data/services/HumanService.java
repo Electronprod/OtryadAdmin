@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.services.data;
+package ru.electronprod.OtryadAdmin.data.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;

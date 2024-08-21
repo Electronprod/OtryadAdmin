@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.services.data;
+package ru.electronprod.OtryadAdmin.data.services;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -10,13 +10,12 @@ import org.springframework.stereotype.Service;
 
 import lombok.Getter;
 import ru.electronprod.OtryadAdmin.models.User;
-import ru.electronprod.OtryadAdmin.services.auth.AuthService;
 
 @Getter
 @Service
 public class DBService {
 	@Autowired
-	private AuthService authService;
+	private UserService authService;
 	@Autowired
 	private SquadService squadService;
 	@Autowired

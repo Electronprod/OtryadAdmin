@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.services.data;
+package ru.electronprod.OtryadAdmin.data.services;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
