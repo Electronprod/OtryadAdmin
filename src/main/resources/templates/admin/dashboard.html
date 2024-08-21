@@ -5,7 +5,8 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Административная панель</title>
-	<link rel="stylesheet" href="/admin/overview.css">
+	<link rel="stylesheet" href="/observer/default.css">
+	<link rel="stylesheet" href="/observer/data.css">
 	<link rel="icon" href="/icon.png">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
@@ -16,24 +17,14 @@
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="navbar"></div>
 	<div id="dashboard">
-		<div id="sidebar">
-			<h2>Меню</h2>
-			<ul>
-				<li><a href="/overview">Обзор</a></li>
-				<li><a href="/analytics">Аналитика</a></li>
-				<li><a href="/reports">Отчёты</a></li>
-				<li><a href="/settings">Настройки</a></li>
-				<!-- Добавьте другие элементы бокового меню -->
-			</ul>
-		</div>
 		<div id="content">
 			<div class="card">
 				<h3>Добро пожаловать!</h3>
 				<p>Это ваша административная панель. Здесь вы можете управлять вашим сайтом.</p>
 			</div>
 			<div class="card">
-				<h3>Последние обновления</h3>
-				<p>Описание последних обновлений и действий.</p>
+				<h3>Перейти в панель наблюдателя</h3>
+				<button onclick="window.location.href='/observer'">Перейти</button>
 			</div>
 			<!-- Добавьте больше карточек или контента по необходимости -->
 		</div>
