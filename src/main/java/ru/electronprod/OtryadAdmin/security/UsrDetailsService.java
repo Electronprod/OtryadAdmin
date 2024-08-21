@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.services.auth;
+package ru.electronprod.OtryadAdmin.security;
 
 import java.util.Optional;
 
@@ -8,7 +8,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import ru.electronprod.OtryadAdmin.data.UsrDetails;
 import ru.electronprod.OtryadAdmin.data.repositories.UserRepository;
 import ru.electronprod.OtryadAdmin.models.User;
 

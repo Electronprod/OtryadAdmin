@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.data;
+package ru.electronprod.OtryadAdmin.security;
 
 import java.util.Collection;
 import java.util.Collections;

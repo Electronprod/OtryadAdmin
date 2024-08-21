@@ -12,10 +12,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.Data;
+import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
 import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
 import ru.electronprod.OtryadAdmin.services.StatsHelperService;
-import ru.electronprod.OtryadAdmin.services.data.DBService;
 
 @Controller
 @RequestMapping("/squadcommander")

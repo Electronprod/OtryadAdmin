@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import ru.electronprod.OtryadAdmin.data.services.NewsService;
+import ru.electronprod.OtryadAdmin.data.services.UserService;
 import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.User;
-import ru.electronprod.OtryadAdmin.services.auth.AuthService;
-import ru.electronprod.OtryadAdmin.services.data.NewsService;
 
 @Service
 public class AdminService implements InitializingBean {
@@ -20,7 +20,7 @@ public class AdminService implements InitializingBean {
 	@Value("${security.admin.password}")
 	private String admin_password;
 	@Autowired
-	private AuthService regService;
+	private UserService regService;
 	@Autowired
 	private NewsService newsService;
 
