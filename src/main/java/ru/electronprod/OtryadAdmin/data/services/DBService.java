@@ -15,7 +15,7 @@ import ru.electronprod.OtryadAdmin.models.User;
 @Service
 public class DBService {
 	@Autowired
-	private UserService authService;
+	private UserService userService;
 	@Autowired
 	private SquadService squadService;
 	@Autowired
@@ -25,9 +25,9 @@ public class DBService {
 	@Autowired
 	private NewsService newsService;
 
-	public String getStringDate() {
+	public static String getStringDate() {
 		Calendar calendar = Calendar.getInstance();
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
 		return dateFormat.format(calendar.getTime());
 	}
 }

@@ -20,6 +20,7 @@ import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.Stats;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsHelperService;
 
 @Controller
@@ -29,6 +30,8 @@ public class ObserverController {
 	@Autowired
 	private DBService dbservice;
 	@Autowired
+	private AuthHelper authHelper;
+	@Autowired
 	private StatsHelperService statsHelper;
 
 	/*
@@ -36,7 +39,7 @@ public class ObserverController {
 	 */
 	@GetMapping("")
 	public String overview(Model model) {
-		model.addAttribute("login", dbservice.getAuthService().getCurrentUser().getLogin());
+		model.addAttribute("login", authHelper.getCurrentUser().getLogin());
 		model.addAttribute("newsList", dbservice.getNewsService().getLast5());
 		return "/observer/overview.html";
 	}
@@ -52,7 +55,7 @@ public class ObserverController {
 
 	@PostMapping("/addnews")
 	public String addNews(@ModelAttribute("user") News news) {
-		news.setAuthor(dbservice.getAuthService().getCurrentUser().getLogin());
+		news.setAuthor(authHelper.getCurrentUser().getLogin());
 		dbservice.getNewsService().createNews(news);
 		return "redirect:/observer?published";
 	}
@@ -66,8 +69,8 @@ public class ObserverController {
 		model.addAttribute("squadList", dbservice.getSquadService().findAll());
 		// People view
 		model.addAttribute("people_size", dbservice.getHumanService().getSize());
-		model.addAttribute("people_missed", dbservice.getStatsService().getRepository().countByIsPresent(false));
-		model.addAttribute("people_attended", dbservice.getStatsService().getRepository().countByIsPresent(true));
+		model.addAttribute("people_missed", dbservice.getStatsService().countByIsPresent(false));
+		model.addAttribute("people_attended", dbservice.getStatsService().countByIsPresent(true));
 		return "/observer/stats_overview.html";
 	}
 

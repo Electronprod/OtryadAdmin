@@ -14,15 +14,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import lombok.NonNull;
-import ru.electronprod.OtryadAdmin.data.repositories.HumanRepository;
-import ru.electronprod.OtryadAdmin.data.repositories.SquadRepository;
-import ru.electronprod.OtryadAdmin.data.repositories.UserRepository;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
-import ru.electronprod.OtryadAdmin.data.services.UserService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
-import ru.electronprod.OtryadAdmin.models.Stats;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.helpers.HumanHelper;
 import ru.electronprod.OtryadAdmin.models.helpers.SquadHelper;
@@ -35,7 +29,8 @@ public class AdminController {
 	@Autowired
 	private DBService dbservice;
 	@Autowired
-	private AdminService adminservice;
+	private AdminService adminService;
+
 	/*
 	 * Main page
 	 */
@@ -43,36 +38,35 @@ public class AdminController {
 	public String dash() {
 		return "admin/dashboard";
 	}
+
 	/*
 	 * User manager
 	 */
 	@GetMapping("/usermgr")
 	public String usermgr(Model model) {
-		List<User> users = dbservice.getAuthService().findAll();
-		model.addAttribute("users", users);
+		model.addAttribute("users", dbservice.getUserService().findAll());
 		return "admin/usermgr/usermgr";
 	}
 
 	@GetMapping("/usermgr/add")
 	public String userManager_add(Model model) {
-		User user = new User();
-		model.addAttribute("user", user);
+		model.addAttribute("user", new User());
 		return "admin/usermgr/usermgr_add";
 	}
 
 	@PostMapping("/usermgr/add")
 	public String userManager_addAction(@ModelAttribute("user") User user) {
-		dbservice.getAuthService().register(user);
+		dbservice.getUserService().register(user);
 		return "redirect:/admin/usermgr?saved";
 	}
 
 	@GetMapping("/usermgr/edit")
 	public String userManager_edit(@RequestParam int id, Model model) {
-		Optional<User> user = dbservice.getAuthService().findById(id);
+		Optional<User> user = dbservice.getUserService().findById(id);
 		if (user.isEmpty()) {
 			return "redirect:/admin/usermgr?error";
 		}
-		if (adminservice.isNativeAdmin(user.get())) {
+		if (adminService.isNativeAdmin(user.get())) {
 			return "redirect:/admin/usermgr?error_protected";
 		}
 		model.addAttribute("user", user);
@@ -81,20 +75,20 @@ public class AdminController {
 
 	@PostMapping("/usermgr/edit")
 	public String userManager_editAction(@ModelAttribute("user") User user) {
-		dbservice.getAuthService().register(user);
+		dbservice.getUserService().register(user);
 		return "redirect:/admin/usermgr?edited";
 	}
 
 	@GetMapping("/usermgr/delete")
 	public String userManager_delete(@RequestParam() int id) {
-		Optional<User> user = dbservice.getAuthService().findById(id);
+		Optional<User> user = dbservice.getUserService().findById(id);
 		if (user.isEmpty()) {
 			return "redirect:/admin/usermgr?error";
 		}
-		if (adminservice.isNativeAdmin(user.get())) {
+		if (adminService.isNativeAdmin(user.get())) {
 			return "redirect:/admin/usermgr?error_protected";
 		}
-		dbservice.getAuthService().deleteById(id);
+		dbservice.getUserService().deleteById(id);
 		return "redirect:/admin/usermgr?deleted";
 	}
 
@@ -103,15 +97,14 @@ public class AdminController {
 	 */
 	@GetMapping("/squadmgr")
 	public String squadManager(Model model) {
-		List<Squad> squads = dbservice.getSquadService().findAll();
-		model.addAttribute("squads", squads);
+		model.addAttribute("squads", dbservice.getSquadService().findAll());
 		return "admin/squadmgr/squadmgr";
 	}
 
 	// id - from usermgr
 	@GetMapping("/squadmgr/add")
 	public String squadManager_add(@RequestParam() int id, Model model) {
-		Optional<User> usr = dbservice.getAuthService().findById(id);
+		Optional<User> usr = dbservice.getUserService().findById(id);
 		if (usr.isEmpty() || !usr.get().getRole().equals("ROLE_SQUADCOMMANDER")) {
 			return "redirect:/admin/squadmgr?error";
 		}
@@ -130,7 +123,7 @@ public class AdminController {
 		Squad squad = new Squad();
 		squad.setSquadName(squadHelper.getSquadName());
 		squad.setCommanderName(squadHelper.getCommanderName());
-		squad.setCommander(dbservice.getAuthService().findById(squadHelper.getCommander_id()).orElseThrow());
+		squad.setCommander(dbservice.getUserService().findById(squadHelper.getCommander_id()).orElseThrow());
 		dbservice.getSquadService().save(squad);
 		return "redirect:/admin/squadmgr?saved";
 	}
@@ -154,7 +147,7 @@ public class AdminController {
 		Squad squad = dbservice.getSquadService().findById(squadHelper.getId()).orElseThrow();
 		squad.setCommanderName(squadHelper.getCommanderName());
 		squad.setSquadName(squadHelper.getSquadName());
-		Optional<User> usr = dbservice.getAuthService().findById(squadHelper.getCommander_id());
+		Optional<User> usr = dbservice.getUserService().findById(squadHelper.getCommander_id());
 		if (usr.isEmpty() || !usr.get().getRole().equals("ROLE_SQUADCOMMANDER")) {
 			return "redirect:/admin/squadmgr?error";
 		}

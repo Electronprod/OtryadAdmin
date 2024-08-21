@@ -57,11 +57,6 @@ public class HumanService {
 		return humanRepository.findAllById(ids);
 	}
 
-	@Transactional
-	public HumanRepository getRepository() {
-		return humanRepository;
-	}
-
 	@Transactional(readOnly = true)
 	public int getSize() {
 		return humanRepository.getSize();

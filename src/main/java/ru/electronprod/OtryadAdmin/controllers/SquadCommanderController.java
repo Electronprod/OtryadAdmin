@@ -15,6 +15,7 @@ import lombok.Data;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
 import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
+import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsHelperService;
 
 @Controller
@@ -24,12 +25,14 @@ public class SquadCommanderController {
 	@Autowired
 	private DBService dbservice;
 	@Autowired
+	private AuthHelper authHelper;
+	@Autowired
 	private StatsHelperService statsHelper;
 
 	@GetMapping("")
 	public String overview(Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
-		Squad squad = dbservice.getAuthService().findById(user.getId()).get().getSquad();
+		User user = authHelper.getCurrentUser();
+		Squad squad = dbservice.getUserService().findById(user.getId()).get().getSquad();
 		// Session data
 		model.addAttribute("squadname", squad.getSquadName());
 		model.addAttribute("login", user.getLogin());
@@ -37,40 +40,39 @@ public class SquadCommanderController {
 		model.addAttribute("userid", user.getId());
 		model.addAttribute("squadid", squad.getId());
 		// News
-		List<News> news = dbservice.getNewsService().getLast5();
-		model.addAttribute("newsList", news);
+		model.addAttribute("newsList", dbservice.getNewsService().getLast5());
 		return "squadcommander/overview.html";
 	}
 
 	@GetMapping("/humans")
 	public String humans(Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		List<Human> humans = dbservice.getAuthService().findById(user.getId()).orElseThrow().getSquad().getHumans();
+		List<Human> humans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans();
 		model.addAttribute("humans", humans);
 		return "public/humans_rawtable.html";
 	}
 
 	@GetMapping("/mark")
 	public String mark(Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		// Getting humans from database using user's ID
-		List<Human> humans = dbservice.getAuthService().findById(user.getId()).orElseThrow().getSquad().getHumans();
+		List<Human> humans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans();
 		model.addAttribute("humanList", humans);
 		return "squadcommander/mark.html";
 	}
 
 	@PostMapping("/mark")
 	public String markAbsent(@ModelAttribute StatsFormHelper detail, @RequestParam("statsType") String statsType) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		// Getting all required data
 		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
-		List<Human> remainingHumans = dbservice.getAuthService().findById(user.getId()).orElseThrow().getSquad()
+		List<Human> remainingHumans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad()
 				.getHumans();
 		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
 		// Generating Stats array
@@ -103,17 +105,17 @@ public class SquadCommanderController {
 			statsArr.add(stats);
 		}
 		// Saving result to database
-		dbservice.getStatsService().getRepository().saveAll(statsArr);
+		dbservice.getStatsService().saveAll(statsArr);
 		return "redirect:/squadcommander/mark?sent";
 	}
 
 	@GetMapping("/mark_allhere")
 	public String markAbsent(@RequestParam("statsType") String statsType) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		// Getting all required data
-		List<Human> allHumans = dbservice.getAuthService().findById(user.getId()).orElseThrow().getSquad().getHumans();
+		List<Human> allHumans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans();
 		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
 		// Generating Stats array
 		List<Stats> statsArr = new ArrayList<Stats>();
@@ -129,13 +131,13 @@ public class SquadCommanderController {
 			statsArr.add(stats);
 		}
 		// Saving result to database
-		dbservice.getStatsService().getRepository().saveAll(statsArr);
+		dbservice.getStatsService().saveAll(statsArr);
 		return "redirect:/squadcommander/mark?sent";
 	}
 
 	@GetMapping("/stats/date")
 	public String statsTable_date(@RequestParam String date, Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		// Formatting date from 2024-07-24 to 24.07.2024
@@ -146,7 +148,7 @@ public class SquadCommanderController {
 			System.err.println("[/squadcommander/stats/date] date warn: " + e.getMessage());
 			return "redirect:/squadcommander?server_incorrectreq";
 		}
-		List<Stats> statsList = dbservice.getStatsService().getRepository().findByDate(date);
+		List<Stats> statsList = dbservice.getStatsService().findByDate(date);
 		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model.addAttribute("statss", statsList);
 		return "/public/statsview_rawtable.html";
@@ -154,7 +156,7 @@ public class SquadCommanderController {
 
 	@GetMapping("/stats/table")
 	public String deleteStats(Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("statss", dbservice.getStatsService().findByAuthor(user.getLogin()));
@@ -163,7 +165,7 @@ public class SquadCommanderController {
 
 	@GetMapping("/stats/report")
 	public String statsReport(Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		model = statsHelper.generateGeneralReport(model, dbservice.getStatsService().findByAuthor(user.getLogin()));
@@ -172,7 +174,7 @@ public class SquadCommanderController {
 
 	@GetMapping("/stats/personal/table")
 	public String personal_statsTable(@RequestParam int id, Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
@@ -183,7 +185,7 @@ public class SquadCommanderController {
 
 	@GetMapping("/stats/personal")
 	public String personal_stats(@RequestParam int id, Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		// Getting stats for user's humans
@@ -197,11 +199,11 @@ public class SquadCommanderController {
 
 	@GetMapping("/stats")
 	public String stats(Model model) {
-		User user = dbservice.getAuthService().getCurrentUser();
+		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("humans",
-				dbservice.getAuthService().findById(user.getId()).orElseThrow().getSquad().getHumans());
+				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
 		return "/squadcommander/stats_overview.html";
 	}
 }
