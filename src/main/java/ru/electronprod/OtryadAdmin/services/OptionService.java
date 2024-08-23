@@ -19,8 +19,8 @@ public class OptionService implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() {
 		event_types.put("general", "Посещение общего сбора");
-		event_types.put("duty", "Дежурство (вызвался(ась) дежурить в кабинете)");
-		event_types.put("walk", "Прогулка (гулял(а) со звеном)");
+		event_types.put("duty", "Дежурство (вызвался{ась} дежурить в кабинете)");
+		event_types.put("walk", "Прогулка (гулял{а} со звеном)");
 		event_types.put("other1", "Другое #1 (используйте эту категорию по своему усмотрению)");
 		event_types.put("other2", "Другое #2 (используйте эту категорию по своему усмотрению)");
 

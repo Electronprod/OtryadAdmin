@@ -18,11 +18,47 @@ import org.springframework.ui.Model;
 import lombok.Getter;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Stats;
+import ru.electronprod.OtryadAdmin.models.helpers.PersonalStatsHelper;
 
 @Service
 public class StatsHelperService {
 	@Autowired
 	private OptionService optionServ;
+
+	public Model generatePersonalStatsReport(List<Stats> personalStats, Model model) {
+		Map<String, PersonalStatsHelper> visitsData = new LinkedHashMap<String, PersonalStatsHelper>();
+		int visits_total = 0;
+		int omissions_total = 0;
+		// For each type
+		for (String type : optionServ.getEvent_types().keySet()) {
+			// Getting type name
+			String typeName = optionServ.getEvent_types().get(type).replaceAll("\\s*\\([^()]*\\)\\s*", "");
+			// Getting stats lists
+			List<Stats> typedStats = personalStats.stream().filter(stats -> stats.getType().equals(type)).toList();
+			List<Stats> omissionsList = typedStats.stream().filter(stats -> !stats.isPresent()).toList();
+			List<Stats> visitsList = typedStats.stream().filter(stats -> stats.isPresent()).toList();
+			// Adding to total result
+			visits_total = visits_total + visitsList.size();
+			omissions_total = omissions_total + omissionsList.size();
+			// Adding omissions/visits stats
+			PersonalStatsHelper visitStats = new PersonalStatsHelper();
+			visitStats.setVisits(visitsList.size());
+			visitStats.setOmissions(omissionsList.size());
+			visitsData.put(typeName, visitStats);
+		}
+
+		Map<String, Long> reasons_for_absences = new LinkedHashMap<String, Long>();
+		// For each absence reason
+		for (String reason : optionServ.getReasons_for_absences().keySet()) {
+			long reasonCount = personalStats.stream().filter(stats -> stats.getReason().equals(reason)).count();
+			reasons_for_absences.put(optionServ.getReasons_for_absences().get(reason), reasonCount);
+		}
+		model.addAttribute("visits_total", visits_total);
+		model.addAttribute("omissions_total", omissions_total);
+		model.addAttribute("visitsData", visitsData);
+		model.addAttribute("reasons_for_absences", reasons_for_absences);
+		return model;
+	}
 
 	public Model generatePersonalReport(Model model, List<Stats> statsList) {
 		List<Integer> attendanceValues = new ArrayList<Integer>();
@@ -30,7 +66,7 @@ public class StatsHelperService {
 		List<Map<String, Boolean>> datesResult = new ArrayList<Map<String, Boolean>>();
 		Map<String, Integer> reasons_for_missing = new HashMap<String, Integer>();
 		// For each type...
-		for (String type : events_types) {
+		for (String type : optionServ.getEvent_types().keySet()) {
 			// Generating typedStats list
 			List<Stats> typedStats = new ArrayList<Stats>();
 			typedStats.addAll(statsList);
@@ -75,7 +111,7 @@ public class StatsHelperService {
 			dateMap = null;
 			sortedDateMap = null;
 		}
-		model.addAttribute("events_types", events_types);
+		model.addAttribute("events_types", optionServ.getEvent_types().keySet());
 		model.addAttribute("attendanceData", attendanceValues);
 		model.addAttribute("omissionsValues", omissionsValues);
 		model.addAttribute("datesData", datesResult);

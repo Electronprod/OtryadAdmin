@@ -189,12 +189,26 @@ public class SquadCommanderController {
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		// Getting stats for user's humans
-		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
-		statsList.removeIf(stats -> (stats.getHuman().getId() != id));
-		model = statsHelper.generatePersonalReport(model, statsList);
 		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
-		model.addAttribute("name", human.getName() + " " + human.getLastname());
+		List<Stats> s = dbservice.getStatsService().findByHuman(human);
+		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
+		model = statsHelper.generatePersonalStatsReport(s, model);
+		model.addAttribute("person", human.getName() + " " + human.getLastname());
 		return "/squadcommander/personal_stats.html";
+	}
+
+	@GetMapping("/stats/personal_old")
+	public String personal_stats_old(@RequestParam int id, Model model) {
+		User user = authHelper.getCurrentUser();
+		if (user == null)
+			return "redirect:/squadcommander?error_usernotfound";
+		// Getting stats for user's humans
+		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
+		List<Stats> s = dbservice.getStatsService().findByHuman(human);
+		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
+		model = statsHelper.generatePersonalReport(model, s);
+		model.addAttribute("name", human.getName() + " " + human.getLastname());
+		return "/squadcommander/personal_stats_old.html";
 	}
 
 	@GetMapping("/stats")
