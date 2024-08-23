@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -20,10 +21,8 @@ import ru.electronprod.OtryadAdmin.models.Stats;
 
 @Service
 public class StatsHelperService {
-	@Getter
-	private String[] events_types = { "general", "duty", "walk", "other1", "other2" };
-	@Getter
-	private String[] reasons_for_missing_types = { "ill", "away", "study", "respect", "disrespect" };
+	@Autowired
+	private OptionService optionServ;
 
 	public Model generatePersonalReport(Model model, List<Stats> statsList) {
 		List<Integer> attendanceValues = new ArrayList<Integer>();
@@ -57,7 +56,7 @@ public class StatsHelperService {
 				}
 			}
 			// Sorting dates to send
-			SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
 			Map<String, Boolean> sortedDateMap = new TreeMap<>(new Comparator<String>() {
 				@Override
 				public int compare(String date1, String date2) {
@@ -84,40 +83,6 @@ public class StatsHelperService {
 		return model;
 	}
 
-	public Model generateGeneralReport(Model model, List<Stats> statsList) {
-		for (String type : events_types) {
-			List<Stats> typedStats = new ArrayList<Stats>();
-			typedStats.addAll(statsList);
-			// Deleting other types from list
-			typedStats.removeIf(stats -> !stats.getType().equals(type));
-			Map<Human, Integer> map = new HashMap<Human, Integer>();
-			// For each Stats object
-			for (Stats stats : typedStats) {
-				Human human = stats.getHuman();
-				if (stats.isPresent()) {
-					// Человек пришел
-					// Adding to map
-					if (map.containsKey(human)) {
-						map.put(human, map.get(human) + 1);
-					} else {
-						map.put(human, 1);
-					}
-				} else {
-					// Человек не пришел
-					if (!map.containsKey(human)) {
-						map.put(human, 0);
-					}
-				}
-			}
-			// Sorting
-			Map<Human, Integer> sortedMap = map.entrySet().stream().sorted(Map.Entry.comparingByValue()).collect(
-					Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-			model.addAttribute(type + "Entry", sortedMap);
-			typedStats = null;
-		}
-		return model;
-	}
-
 	public List<Stats> getMissedList(List<Stats> statsList) {
 		List<Stats> stats1 = new ArrayList();
 		stats1.addAll(statsList);
@@ -125,39 +90,35 @@ public class StatsHelperService {
 		return stats1;
 	}
 
-	/**
-	 * @author OpenAI ChatGPT 3.5
-	 */
-	private static int findLCSLength(String str1, String str2) {
-		int m = str1.length();
-		int n = str2.length();
-		int[][] dp = new int[m + 1][n + 1];
-
-		for (int i = 0; i <= m; i++) {
-			for (int j = 0; j <= n; j++) {
-				if (i == 0 || j == 0) {
-					dp[i][j] = 0;
-				} else if (str1.charAt(i - 1) == str2.charAt(j - 1)) {
-					dp[i][j] = dp[i - 1][j - 1] + 1;
+	public Map<String, Map<Human, Integer>> generateGlobalReport(List<Stats> allStats) {
+		Map<String, Map<Human, Integer>> result = new LinkedHashMap<String, Map<Human, Integer>>();
+		// For each type
+		for (String type : optionServ.getEvent_types().keySet()) {
+			List<Stats> typedStats = allStats.stream().filter(stats -> stats.getType().equals(type)).toList();
+			Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
+			for (Stats stats : typedStats) {
+				Human human = stats.getHuman();
+				if (stats.isPresent()) {
+					// Человек пришел
+					if (typedStatsMap.containsKey(human)) {
+						typedStatsMap.put(human, typedStatsMap.get(human) + 1);
+					} else {
+						typedStatsMap.put(human, 1);
+					}
 				} else {
-					dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+					// Человек не пришел
+					if (!typedStatsMap.containsKey(human)) {
+						typedStatsMap.put(human, 0);
+					}
 				}
 			}
+			// Sorting
+			Map<Human, Integer> sortedMap = typedStatsMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
+					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
+							LinkedHashMap::new));
+			// Adding to result
+			result.put(optionServ.getEvent_types().get(type), sortedMap);
 		}
-		return dp[m][n];
-	}
-
-	public static Human findMostSimilarHuman(String input, List<Human> humanList) {
-		Human mostSimilar = new Human();
-		int maxLCSLength = 0;
-
-		for (Human human : humanList) {
-			int lcsLength = findLCSLength(input, human.getLastname() + " " + human.getName());
-			if (lcsLength > maxLCSLength) {
-				maxLCSLength = lcsLength;
-				mostSimilar = human;
-			}
-		}
-		return mostSimilar;
+		return result;
 	}
 }

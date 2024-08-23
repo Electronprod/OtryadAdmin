@@ -52,11 +52,9 @@
 								<td>
 									<select class="details-input" th:name="'details[' + ${human.id} + ']'"
 										th:disabled="disabled" th:id="'details-' + ${iterStat.index}">
-										<option value="ill">Заболел(а)</option>
-										<option value="away">Уехал(а)</option>
-										<option value="study">Учеба</option>
-										<option value="respect">Уважительная причина</option>
-										<option value="disrespect">Неуважительная причина</option>
+										<option th:each="entry : ${reasons_for_absences_map}" th:value="${entry.key}"
+											th:text="${entry.value}">
+										</option>
 									</select>
 								</td>
 							</tr>
@@ -64,11 +62,8 @@
 					</table>
 					<label>Выберите тип статистики:</label>
 					<select name="statsType" id="statsType">
-						<option value="general">Посещение общего сбора</option>
-						<option value="duty">Дежурство (вызвался(ась) дежурить в кабинете)</option>
-						<option value="walk">Прогулка (гулял(а) со звеном)</option>
-						<option value="other1">Другое #1 (используйте эту категорию по своему усмотрению)</option>
-						<option value="other2">Другое #2 (используйте эту категорию по своему усмотрению)</option>
+						<option th:each="entry : ${event_types_map}" th:value="${entry.key}" th:text="${entry.value}">
+						</option>
 					</select>
 					<button type="submit">Отправить</button>
 				</form>

@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Персональная статистика</title>
+	<link rel="stylesheet" href="/squadcommander/default.css">
+	<link rel="icon" href="/icon.png">
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+	<script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="navbar"></div>
+	<div id="dashboard">
+		<div id="sidebar">
+			<h2>Меню</h2>
+			<ul>
+			</ul>
+		</div>
+		<div id="content">
+			<h2><strong th:text="${name}"></strong>:</h2>
+			<div class="card">
+				<h3>Общая статистика по событиям:</h3>
+				<canvas id="globalStats" width="400" height="200"></canvas>
+			</div>
+			<div class="card">
+				<h3>Статистика посещений по датам:</h3>
+				<canvas id="dateStats" width="400" height="200"></canvas>
+			</div>
+			<div class="card">
+				<h3>Причины пропусков:</h3>
+				<canvas id="reasons_for_missing_stats"></canvas>
+			</div>
+		</div>
+</body>
+<script src="/squadcommander/navbar.js"></script>
+<script src="/squadcommander/sidebar.js"></script>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+	var events_types = /*[[${events_types}]]*/[];
+	var attendanceData = /*[[${attendanceData}]]*/[];
+	var omissionsValues = /*[[${omissionsValues}]]*/[];
+	var datesData = /*[[${datesData}]]*/[];
+	var reasons_for_missing = /*[[${reasons_for_missing}]]*/[];
+	var reasons_for_missing_types =/*[[${reasons_for_missing_types}]]*/[];;
+	console.log("events_types: ", events_types);
+	console.log("attendanceData: ", attendanceData);
+	console.log("omissionsValues: ", omissionsValues);
+	console.log("datesData: ", datesData);
+	console.log("reasons_for_missing: ", reasons_for_missing);
+	/*]]>*/
+</script>
+<script>
+	const canvas = document.getElementById('reasons_for_missing_stats').getContext('2d');
+	const reasons_for_missing_labels = Object.keys(reasons_for_missing);
+	const reasons_for_missing_data = Object.values(reasons_for_missing);
+	const data = {
+		labels: reasons_for_missing_labels,
+		datasets: [{
+			label: 'Причины пропусков',
+			data: reasons_for_missing_data,
+			backgroundColor: [
+				'rgba(255, 99, 132, 0.2)',
+				'rgba(255, 159, 64, 0.2)',
+				'rgba(255, 205, 86, 0.2)',
+				'rgba(75, 192, 192, 0.2)',
+				'rgba(54, 162, 235, 0.2)',
+				'rgba(153, 102, 255, 0.2)',
+				'rgba(201, 203, 207, 0.2)'
+			],
+			borderColor: [
+				'rgb(255, 99, 132)',
+				'rgb(255, 159, 64)',
+				'rgb(255, 205, 86)',
+				'rgb(75, 192, 192)',
+				'rgb(54, 162, 235)',
+				'rgb(153, 102, 255)',
+				'rgb(201, 203, 207)'
+			],
+			borderWidth: 1
+		}]
+	};
+	const reasons_for_missing_chart = new Chart(canvas, {
+		type: 'bar',
+		data: data,
+		options: {
+			scales: {
+				y: {
+					beginAtZero: true
+				}
+			}
+		},
+	});
+</script>
+<script>
+	// Преобразуем данные в формат, подходящий для Chart.js
+	// General
+	const labels0 = Object.keys(datesData[0]);
+	const dataValues0 = labels0.map(date => datesData[0][date] ? 1 : 0.1);
+	//duty
+	const labels1 = Object.keys(datesData[1]);
+	const dataValues1 = labels1.map(date => datesData[1][date] ? 1 : 0.1);
+	//walk
+	const labels2 = Object.keys(datesData[2]);
+	const dataValues2 = labels2.map(date => datesData[2][date] ? 1 : 0.1);
+	// Other1
+	const labels3 = Object.keys(datesData[3]);
+	const dataValues3 = labels3.map(date => datesData[3][date] ? 1 : 0.1);
+	// Other2
+	const labels4 = Object.keys(datesData[4]);
+	const dataValues4 = labels4.map(date => datesData[4][date] ? 1 : 0.1);
+
+	const ctx = document.getElementById('dateStats').getContext('2d');
+	const labelsAll = Array.from(new Set([...labels0, ...labels1, ...labels2, ...labels3, ...labels4]));
+	console.log(labelsAll);
+
+
+	const myChart = new Chart(ctx, {
+		type: 'scatter',
+		data: {
+			labels: labelsAll,
+			datasets: [
+				{
+					label: 'Общие сборы',
+					data: dataValues0,
+					borderColor: 'green',
+					borderWidth: 1,
+					fill: false
+				},
+				{
+					label: 'Дежурства',
+					data: dataValues1,
+					borderColor: 'purple',
+					borderWidth: 1,
+					fill: false
+				},
+				{
+					label: 'Прогулки',
+					data: dataValues2,
+					borderColor: 'red',
+					borderWidth: 1,
+					fill: false
+				},
+				{
+					label: 'Другое №1',
+					data: dataValues3,
+					borderColor: 'blue',
+					borderWidth: 1,
+					fill: false
+				},
+				{
+					label: 'Другое №2',
+					data: dataValues4,
+					borderColor: 'yellow',
+					borderWidth: 1,
+					fill: false
+				}
+			]
+		},
+		options: {
+			scales: {
+				x: {
+					type: 'time',
+					time: {
+						tooltipFormat: 'dd.MM.yyyy',
+						unit: 'day',
+						parser: 'dd.MM.yyyy',
+					},
+					title: {
+						display: true,
+						text: 'Дата'
+					}
+				},
+				y: {
+					beginAtZero: true,
+					title: {
+						display: true,
+						text: 'Отсутствовал / Был'
+					}
+				}
+			},
+			plugins: {
+				zoom: {
+					pan: {
+						enabled: true,
+						mode: 'xy'
+					},
+					zoom: {
+						enabled: true,
+						mode: 'xy'
+					}
+				}
+			}
+		}
+	});
+</script>
+<script>
+	document.addEventListener('DOMContentLoaded', (event) => {
+		const ctx = document.getElementById('globalStats').getContext('2d');
+		const radarChart = new Chart(ctx, {
+			type: 'radar',
+			data: {
+				labels: events_types,
+				datasets: [{
+					label: 'Посещения',
+					data: attendanceData,
+					fill: true,
+					backgroundColor: 'rgba(255, 99, 132, 0.2)',
+					borderColor: 'rgb(255, 99, 132)',
+					pointBackgroundColor: 'rgb(255, 99, 132)',
+					pointBorderColor: '#fff',
+					pointHoverBackgroundColor: '#fff',
+					pointHoverBorderColor: 'rgb(255, 99, 132)'
+				}, {
+					label: 'Пропуски',
+					data: omissionsValues,
+					fill: true,
+					backgroundColor: 'rgba(54, 162, 235, 0.2)',
+					borderColor: 'rgb(54, 162, 235)',
+					pointBackgroundColor: 'rgb(54, 162, 235)',
+					pointBorderColor: '#fff',
+					pointHoverBackgroundColor: '#fff',
+					pointHoverBorderColor: 'rgb(54, 162, 235)'
+				}]
+			},
+			options: {
+				scales: {
+					r: {
+						beginAtZero: true,
+						ticks: {
+							callback: function (value) {
+								// Отобразить только целые числа
+								if (Number.isInteger(value)) {
+									return value;
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+	});
+</script>
+
+</html>
