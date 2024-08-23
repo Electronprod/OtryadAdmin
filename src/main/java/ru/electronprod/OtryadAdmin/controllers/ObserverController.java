@@ -1,5 +1,6 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -11,6 +12,7 @@ import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.Squad;
+import ru.electronprod.OtryadAdmin.models.Stats;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.SearchService;
 import ru.electronprod.OtryadAdmin.services.StatsHelperService;
@@ -81,7 +83,7 @@ public class ObserverController {
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
 		model.addAttribute("dataMap", statsHelper
-				.generateGlobalReport(dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin())));
+				.squad_generateGlobalReport(dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin())));
 		return "/observer/squadstats/general_stats.html";
 	}
 
@@ -100,9 +102,21 @@ public class ObserverController {
 		if (human == null || human.getStats() == null) {
 			return "redirect:/observer/stats?error_notfound";
 		}
-		model = statsHelper.generatePersonalReport(model, human.getStats());
-		model.addAttribute("name", human.getName() + " " + human.getLastname());
+		List<Stats> s = dbservice.getStatsService().findByHuman(human);
+		model = statsHelper.squad_generatePersonalReport(s, model);
+		model.addAttribute("person", human.getName() + " " + human.getLastname());
 		return "/observer/personal_stats.html";
+	}
+
+	@GetMapping("/stats/personal/table")
+	public String personalStatsTable(@RequestParam String name, Model model) {
+		Human human = SearchService.findMostSimilarHuman(name, dbservice.getHumanService().findAll());
+		if (human == null || human.getStats() == null) {
+			return "redirect:/observer/stats?error_notfound";
+		}
+		List<Stats> s = dbservice.getStatsService().findByHuman(human);
+		model.addAttribute("statss", s);
+		return "/public/statsview_rawtable.html";
 	}
 
 	@GetMapping("/data")

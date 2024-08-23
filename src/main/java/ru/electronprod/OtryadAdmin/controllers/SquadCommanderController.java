@@ -168,7 +168,7 @@ public class SquadCommanderController {
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("dataMap",
-				statsHelper.generateGlobalReport(dbservice.getStatsService().findByAuthor(user.getLogin())));
+				statsHelper.squad_generateGlobalReport(dbservice.getStatsService().findByAuthor(user.getLogin())));
 		return "/squadcommander/general_stats.html";
 	}
 
@@ -192,7 +192,7 @@ public class SquadCommanderController {
 		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
 		List<Stats> s = dbservice.getStatsService().findByHuman(human);
 		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
-		model = statsHelper.generatePersonalStatsReport(s, model);
+		model = statsHelper.squad_generatePersonalReport(s, model);
 		model.addAttribute("person", human.getName() + " " + human.getLastname());
 		return "/squadcommander/personal_stats.html";
 	}
@@ -206,7 +206,7 @@ public class SquadCommanderController {
 		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
 		List<Stats> s = dbservice.getStatsService().findByHuman(human);
 		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
-		model = statsHelper.generatePersonalReport(model, s);
+		model = statsHelper.old_squad_generatePersonalReport(model, s);
 		model.addAttribute("name", human.getName() + " " + human.getLastname());
 		return "/squadcommander/personal_stats_old.html";
 	}

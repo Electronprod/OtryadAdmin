@@ -71,10 +71,40 @@
 					</tbody>
 				</table>
 			</div>
+			<div class="card">
+				<h3>Последние отметки посещений</h3>
+				<p><strong>ВНИМАНИЕ:</strong> этот список ограничен 30 записями. Чтобы посмотреть все записи с
+					сортировкой
+					воспользуйтесь функцией
+					"Просмотр персональной таблицы данных"</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Дата</th>
+							<th>Событие</th>
+							<th>Посещено</th>
+							<th>Причина пропуска</th>
+							<th>Event ID</th>
+							<th>ID</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="stats : ${lastEventsData}">
+							<td th:text="${stats.date}">-</td>
+							<td th:text="${stats.type}">-</td>
+							<td th:text="${stats.isPresent}">-</td>
+							<td th:text="${stats.reason}">-</td>
+							<td th:text="${stats.event_id}">-</td>
+							<td th:text="${stats.id}">-</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </body>
 <script src="/squadcommander/navbar.js"></script>
 <script src="/squadcommander/sidebar.js"></script>
+<script src="/assets/stats_renamer.js"></script>
 
 </html>

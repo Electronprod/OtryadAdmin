@@ -25,7 +25,7 @@ public class StatsHelperService {
 	@Autowired
 	private OptionService optionServ;
 
-	public Model generatePersonalStatsReport(List<Stats> personalStats, Model model) {
+	public Model squad_generatePersonalReport(List<Stats> personalStats, Model model) {
 		Map<String, PersonalStatsHelper> visitsData = new LinkedHashMap<String, PersonalStatsHelper>();
 		int visits_total = 0;
 		int omissions_total = 0;
@@ -53,14 +53,19 @@ public class StatsHelperService {
 			long reasonCount = personalStats.stream().filter(stats -> stats.getReason().equals(reason)).count();
 			reasons_for_absences.put(optionServ.getReasons_for_absences().get(reason), reasonCount);
 		}
+
+		// Adding visits data
+		personalStats.sort(Comparator.comparingInt(Stats::getEvent_id).reversed());
+		List<Stats> lastEventsData = personalStats.stream().limit(30).toList();
 		model.addAttribute("visits_total", visits_total);
 		model.addAttribute("omissions_total", omissions_total);
 		model.addAttribute("visitsData", visitsData);
 		model.addAttribute("reasons_for_absences", reasons_for_absences);
+		model.addAttribute("lastEventsData", lastEventsData);
 		return model;
 	}
 
-	public Model generatePersonalReport(Model model, List<Stats> statsList) {
+	public Model old_squad_generatePersonalReport(Model model, List<Stats> statsList) {
 		List<Integer> attendanceValues = new ArrayList<Integer>();
 		List<Integer> omissionsValues = new ArrayList<Integer>();
 		List<Map<String, Boolean>> datesResult = new ArrayList<Map<String, Boolean>>();
@@ -126,7 +131,7 @@ public class StatsHelperService {
 		return stats1;
 	}
 
-	public Map<String, Map<Human, Integer>> generateGlobalReport(List<Stats> allStats) {
+	public Map<String, Map<Human, Integer>> squad_generateGlobalReport(List<Stats> allStats) {
 		Map<String, Map<Human, Integer>> result = new LinkedHashMap<String, Map<Human, Integer>>();
 		// For each type
 		for (String type : optionServ.getEvent_types().keySet()) {
