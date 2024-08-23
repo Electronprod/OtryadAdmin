@@ -1,13 +1,6 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.*;
@@ -18,9 +11,8 @@ import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.Squad;
-import ru.electronprod.OtryadAdmin.models.Stats;
-import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
+import ru.electronprod.OtryadAdmin.services.SearchService;
 import ru.electronprod.OtryadAdmin.services.StatsHelperService;
 
 @Controller
@@ -84,12 +76,12 @@ public class ObserverController {
 	}
 
 	@GetMapping("/stats/squad/{id}/report")
-	public String statsReport(@PathVariable("id") int id, Model model) {
+	public String SquadStatsReport(@PathVariable("id") int id, Model model) {
 		Optional<Squad> squad = dbservice.getSquadService().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model = statsHelper.generateGeneralReport(model,
-				dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin()));
+		model.addAttribute("dataMap", statsHelper
+				.generateGlobalReport(dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin())));
 		return "/observer/squadstats/general_stats.html";
 	}
 
@@ -104,7 +96,7 @@ public class ObserverController {
 
 	@GetMapping("/stats/personal")
 	public String personalStats(@RequestParam String name, Model model) {
-		Human human = statsHelper.findMostSimilarHuman(name, dbservice.getHumanService().findAll());
+		Human human = SearchService.findMostSimilarHuman(name, dbservice.getHumanService().findAll());
 		if (human == null || human.getStats() == null) {
 			return "redirect:/observer/stats?error_notfound";
 		}

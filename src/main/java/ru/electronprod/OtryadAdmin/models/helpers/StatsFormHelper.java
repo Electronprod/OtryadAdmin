@@ -1,8 +1,6 @@
 package ru.electronprod.OtryadAdmin.models.helpers;
 
 import lombok.*;
-import ru.electronprod.OtryadAdmin.models.Human;
-import java.util.List;
 import java.util.Map;
 
 @Getter

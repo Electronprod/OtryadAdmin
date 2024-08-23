@@ -1,21 +1,17 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import lombok.Data;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
 import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
+import ru.electronprod.OtryadAdmin.services.OptionService;
 import ru.electronprod.OtryadAdmin.services.StatsHelperService;
 
 @Controller
@@ -27,12 +23,14 @@ public class SquadCommanderController {
 	@Autowired
 	private AuthHelper authHelper;
 	@Autowired
+	private OptionService optionService;
+	@Autowired
 	private StatsHelperService statsHelper;
 
 	@GetMapping("")
 	public String overview(Model model) {
 		User user = authHelper.getCurrentUser();
-		Squad squad = dbservice.getUserService().findById(user.getId()).get().getSquad();
+		Squad squad = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad();
 		// Session data
 		model.addAttribute("squadname", squad.getSquadName());
 		model.addAttribute("login", user.getLogin());
@@ -49,8 +47,8 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		List<Human> humans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans();
-		model.addAttribute("humans", humans);
+		model.addAttribute("humans",
+				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
 		return "public/humans_rawtable.html";
 	}
 
@@ -59,9 +57,10 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		// Getting humans from database using user's ID
-		List<Human> humans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans();
-		model.addAttribute("humanList", humans);
+		model.addAttribute("humanList",
+				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
+		model.addAttribute("reasons_for_absences_map", optionService.getReasons_for_absences());
+		model.addAttribute("event_types_map", optionService.getEvent_types());
 		return "squadcommander/mark.html";
 	}
 
@@ -83,7 +82,7 @@ public class SquadCommanderController {
 			Human human1 = remainingHumans.stream().filter(human -> human.getId() == id).findFirst().orElseThrow();
 			Stats stats = new Stats(human1);
 			stats.setAuthor(user.getLogin());
-			stats.setDate(dbservice.getStringDate());
+			stats.setDate(DBService.getStringDate());
 			stats.setPresent(false);
 			stats.setReason(reason);
 			stats.setType(statsType);
@@ -96,7 +95,7 @@ public class SquadCommanderController {
 		for (Human human : remainingHumans) {
 			Stats stats = new Stats(human);
 			stats.setAuthor(user.getLogin());
-			stats.setDate(dbservice.getStringDate());
+			stats.setDate(DBService.getStringDate());
 			stats.setPresent(true);
 			stats.setReason("error:present");
 			stats.setType(statsType);
@@ -141,14 +140,14 @@ public class SquadCommanderController {
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		// Formatting date from 2024-07-24 to 24.07.2024
-		try {
-			String[] pieces = date.split("-");
-			date = pieces[2] + "." + pieces[1] + "." + pieces[0];
-		} catch (Exception e) {
-			System.err.println("[/squadcommander/stats/date] date warn: " + e.getMessage());
-			return "redirect:/squadcommander?server_incorrectreq";
-		}
-		List<Stats> statsList = dbservice.getStatsService().findByDate(date);
+//		try {
+//			String[] pieces = date.split("-");
+//			date = pieces[2] + "." + pieces[1] + "." + pieces[0];
+//		} catch (Exception e) {
+//			System.err.println("[/squadcommander/stats/date] date warn: " + e.getMessage());
+//			return "redirect:/squadcommander?server_incorrectreq";
+//		}
+		List<Stats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
 		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model.addAttribute("statss", statsList);
 		return "/public/statsview_rawtable.html";
@@ -164,11 +163,12 @@ public class SquadCommanderController {
 	}
 
 	@GetMapping("/stats/report")
-	public String statsReport(Model model) {
+	public String general_stats(Model model) {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		model = statsHelper.generateGeneralReport(model, dbservice.getStatsService().findByAuthor(user.getLogin()));
+		model.addAttribute("dataMap",
+				statsHelper.generateGlobalReport(dbservice.getStatsService().findByAuthor(user.getLogin())));
 		return "/squadcommander/general_stats.html";
 	}
 
@@ -198,7 +198,7 @@ public class SquadCommanderController {
 	}
 
 	@GetMapping("/stats")
-	public String stats(Model model) {
+	public String stats_overview(Model model) {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";

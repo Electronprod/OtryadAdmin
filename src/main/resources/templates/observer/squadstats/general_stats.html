@@ -18,105 +18,29 @@
 	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
-			<div class="card">
-				<h3>Посещения общих сборов</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Имя</th>
-							<th>Фамилия</th>
-							<th>Посещений</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="entry : ${generalEntry}">
-							<td th:text="${entry.key.name}">Name</td>
-							<td th:text="${entry.key.lastname}">LastName</td>
-							<td th:text="${entry.value}">Count</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<div class="card">
-				<h3>Дежурства</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Имя</th>
-							<th>Фамилия</th>
-							<th>Дежурств</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="entry : ${dutyEntry}">
-							<td th:text="${entry.key.name}">Name</td>
-							<td th:text="${entry.key.lastname}">LastName</td>
-							<td th:text="${entry.value}">Count</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<div class="card">
-				<h3>Прогулки</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Имя</th>
-							<th>Фамилия</th>
-							<th>Посещений</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="entry : ${walkEntry}">
-							<td th:text="${entry.key.name}">Name</td>
-							<td th:text="${entry.key.lastname}">LastName</td>
-							<td th:text="${entry.value}">Count</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<div class="card">
-				<h3>Другое #1</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Имя</th>
-							<th>Фамилия</th>
-							<th>Посещений</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="entry : ${other1Entry}">
-							<td th:text="${entry.key.name}">Name</td>
-							<td th:text="${entry.key.lastname}">LastName</td>
-							<td th:text="${entry.value}">Count</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<div class="card">
-				<h3>Другое #2</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Имя</th>
-							<th>Фамилия</th>
-							<th>Посещений</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="entry : ${other2Entry}">
-							<td th:text="${entry.key.name}">Name</td>
-							<td th:text="${entry.key.lastname}">LastName</td>
-							<td th:text="${entry.value}">Count</td>
-						</tr>
-					</tbody>
-				</table>
+			<div th:each="entry : ${dataMap}">
+				<div class="card">
+					<h3 th:text="${entry.key}">Заголовок</h3>
+					<table>
+						<thead>
+							<tr>
+								<th>Имя</th>
+								<th>Фамилия</th>
+								<th>Посещений</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="humansEntry : ${entry.value}">
+								<td th:text="${humansEntry.key.name}">Имя</td>
+								<td th:text="${humansEntry.key.lastname}">Фамилия</td>
+								<td th:text="${humansEntry.value}">-1</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
-	</div>
 </body>
 <script src="/observer/navbar.js"></script>
-<script src="/observer/sidebar.js"></script>
 
 </html>
