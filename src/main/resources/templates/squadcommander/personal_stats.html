@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Общая статистика</title>
+	<title>Персональная статистика</title>
 	<link rel="stylesheet" href="/squadcommander/default.css">
 	<link rel="stylesheet" href="/squadcommander/data.css">
 	<link rel="icon" href="/icon.png">
@@ -23,29 +23,55 @@
 			</ul>
 		</div>
 		<div id="content">
-			<div th:each="entry : ${dataMap}">
-				<div class="card">
-					<h3 th:text="${entry.key}">Заголовок</h3>
-					<table>
-						<thead>
-							<tr>
-								<th>Имя</th>
-								<th>Фамилия</th>
-								<th>Посещений</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr th:each="humansEntry : ${entry.value}">
-								<td th:text="${humansEntry.key.name}">Имя</td>
-								<td th:text="${humansEntry.key.lastname}">Фамилия</td>
-								<td th:text="${humansEntry.value}">-1</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+			<div class="card">
+				<h3>Персональная статистика <strong th:text="${person}"></strong></h3>
+				<p>На этой странице представлена персональная статистика для этого человека. Если вы предпочитаете
+					таблицам графики нажмите кнопку ниже (Данная страница устарела, однако еще функционирует).
+				</p>
+				<button onclick="window.location.href=window.location.href.replace('personal', 'personal_old');">Перейти
+					к графикам (<b>!УСТАРЕЛО!</b>)</button>
+			</div>
+			<div class="card">
+				<h3>Пропуски и посещения</h3>
+				<h4>Суммарная статистика:</h4>
+				<p>Посещено <strong th:text="${visits_total}"></strong> событий<br>Пропущено <strong
+						th:text="${omissions_total}"></strong> событий</p>
+				<h4>Статистика по событиям:</h4>
+				<table>
+					<thead>
+						<tr>
+							<th>Событие</th>
+							<th>Посещений</th>
+							<th>Пропусков</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="data : ${visitsData}">
+							<td th:text="${data.key}">Событие</td>
+							<td th:text="${data.value.visits}">Посещений</td>
+							<td th:text="${data.value.omissions}">Пропусков</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="card">
+				<h3>Причины пропусков</h3>
+				<table>
+					<thead>
+						<tr>
+							<th>Причина</th>
+							<th>Количество пропусков</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="data : ${reasons_for_absences}">
+							<td th:text="${data.key}">-</td>
+							<td th:text="${data.value}">-1</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
-
 	</div>
 </body>
 <script src="/squadcommander/navbar.js"></script>

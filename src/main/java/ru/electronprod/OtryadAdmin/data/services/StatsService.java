@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import ru.electronprod.OtryadAdmin.data.repositories.StatsRepository;
+import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Stats;
 
 import java.util.List;
@@ -62,6 +63,11 @@ public class StatsService {
 	@Transactional(readOnly = true)
 	public List<Stats> findByAuthor(String author) {
 		return statsRepository.findByAuthor(author);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Stats> findByHuman(Human human) {
+		return statsRepository.findByHuman(human);
 	}
 
 	@Transactional(readOnly = true)
