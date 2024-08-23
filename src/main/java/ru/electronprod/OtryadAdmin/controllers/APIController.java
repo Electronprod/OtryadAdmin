@@ -34,8 +34,7 @@ public class APIController {
 		Map<String, String> map = new HashMap<String, String>();
 		map.putAll(optionServ.getEvent_types());
 		map.putAll(optionServ.getReasons_for_absences());
-		map.put("true", "+");
-		map.put("false", "-");
+		map.putAll(optionServ.getReplacements());
 		map.put("error:present", "N/A");
 		return gson.toJson(map);
 	}
