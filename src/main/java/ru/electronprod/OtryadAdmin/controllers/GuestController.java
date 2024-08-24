@@ -22,7 +22,7 @@ public class GuestController {
 	}
 
 	@GetMapping("/public/event-calendar")
-	public String licenses() {
+	public String event_calendar() {
 		return "/public/event-calendar.html";
 	}
 
@@ -46,5 +46,10 @@ public class GuestController {
 			model.addAttribute("dateEvents", des.getAllData());
 		}
 		return "/public/event-calendar-report.html";
+	}
+
+	@GetMapping("/public/licenses")
+	public String licenses() {
+		return "/public/licenses.html";
 	}
 }
