@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.services;
+package ru.electronprod.OtryadAdmin.data.filesystem;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,8 +11,9 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Service;
 
 import lombok.Getter;
-import ru.electronprod.OtryadAdmin.data.filesystem.FileOptions;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class OptionService implements InitializingBean {
 	@Getter
@@ -43,26 +44,25 @@ public class OptionService implements InitializingBean {
 			}
 			if (lastType.equalsIgnoreCase("!event_types")) {
 				if (!line.contains(":")) {
-					System.err.println("[OptionService]: can't load line: " + line);
+					log.warn("Can't load line: " + line);
 				}
 				event_types.put(line.split(":")[0], line.split(":")[1]);
 			} else if (lastType.equalsIgnoreCase("!reasons_for_absences")) {
 				if (!line.contains(":")) {
-					System.err.println("[OptionService]: can't load line: " + line);
+					log.warn("Can't load line: " + line);
 				}
 				reasons_for_absences.put(line.split(":")[0], line.split(":")[1]);
 			} else if (lastType.equalsIgnoreCase("!replacements")) {
 				if (!line.contains(":")) {
-					System.err.println("[OptionService]: can't load line: " + line);
+					log.warn("Can't load line: " + line);
 				}
 				replacements.put(line.split(":")[0], line.split(":")[1]);
 			} else {
-				System.err.println(
-						"[OptionService]: error parsing config! Operation was stopped. Caused by line: " + line);
+				log.error("Error parsing config! Operation was stopped. Caused by line: " + line);
 				return;
 			}
 		}
-		System.out.println("[OptionService]: loaded data from file.");
+		log.warn("Loaded data from file.");
 	}
 
 	private void writeDefaults(File config) throws IOException {
@@ -85,7 +85,7 @@ public class OptionService implements InitializingBean {
 		data.add("true:+");
 		data.add("false:-");
 		FileOptions.writeLinesToFile(data, config.getPath());
-		System.out.println("[OptionService]: created and wrote defaults to file.");
+		log.warn("Created and wrote defaults to file.");
 	}
 
 }

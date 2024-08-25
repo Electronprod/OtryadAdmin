@@ -55,6 +55,11 @@ public class UserService {
 		return userRepository.findByLogin(login).orElse(null);
 	}
 
+	@Transactional(readOnly = true)
+	public Optional<User> findByTelegram(String tg) {
+		return userRepository.findByTelegram(tg);
+	}
+
 	@Transactional
 	public void save(User user) {
 		userRepository.save(user);
