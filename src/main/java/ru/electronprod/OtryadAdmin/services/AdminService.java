@@ -5,11 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.services.NewsService;
 import ru.electronprod.OtryadAdmin.data.services.UserService;
 import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.telegram.TelegramBot;
 
+@Slf4j
 @Service
 public class AdminService implements InitializingBean {
 	@Value("${security.admin.login}")
@@ -28,7 +31,7 @@ public class AdminService implements InitializingBean {
 	@Override
 	public void afterPropertiesSet() {
 		if (userService.exists(admin_login) == false) {
-			System.out.println("[AdminService]: administrator profile not found, creating a new one...");
+			log.info("Administrator profile not found, creating a new one...");
 			User user = new User();
 			user.setRole("ROLE_ADMIN");
 			user.setLogin(admin_login);
@@ -36,10 +39,9 @@ public class AdminService implements InitializingBean {
 			userService.register(user);
 		}
 
-		System.out
-				.println("[AdminService]: admin registered. Use authorization data from application.properties file.");
+		log.info("Admin registered. Use authorization data from application.properties file.");
 		if (newsService.findAll().isEmpty()) {
-			System.out.println("[AdminService]: couldn't find any news. Creating a new one...");
+			log.info("Couldn't find any news. Creating a new one...");
 
 			News news = new News();
 			news.setTitle("First launch!");
@@ -47,7 +49,7 @@ public class AdminService implements InitializingBean {
 			news.setContent("In this day this application was launched for the first time.");
 			newsService.createNews(news);
 
-			System.out.println("[AdminService]: created.");
+			log.info("Created.");
 		}
 	}
 
