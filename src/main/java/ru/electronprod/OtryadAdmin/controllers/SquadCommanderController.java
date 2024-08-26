@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import lombok.extern.slf4j.Slf4j;
+import ru.electronprod.OtryadAdmin.data.filesystem.LanguageService;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
@@ -14,6 +16,7 @@ import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsHelperService;
 
+@Slf4j
 @Controller
 @RequestMapping("/squadcommander")
 @PreAuthorize("hasAuthority('ROLE_SQUADCOMMANDER')")
@@ -69,42 +72,12 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		// Getting all required data
-		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
-		List<Human> remainingHumans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad()
-				.getHumans();
-		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
-		// Generating Stats array
-		List<Stats> statsArr = new ArrayList<Stats>();
-		// Those who didn't come
-		details1.forEach((id, reason) -> {
-			// System.out.println("ID: " + id + ", Reason: " + reason);
-			Human human1 = remainingHumans.stream().filter(human -> human.getId() == id).findFirst().orElseThrow();
-			Stats stats = new Stats(human1);
-			stats.setAuthor(user.getLogin());
-			stats.setDate(DBService.getStringDate());
-			stats.setPresent(false);
-			stats.setReason(reason);
-			stats.setType(statsType);
-			stats.setUser_role(user.getRole());
-			stats.setEvent_id(event_id);
-			statsArr.add(stats);
-			remainingHumans.remove(human1);
-		});
-		// Those who come
-		for (Human human : remainingHumans) {
-			Stats stats = new Stats(human);
-			stats.setAuthor(user.getLogin());
-			stats.setDate(DBService.getStringDate());
-			stats.setPresent(true);
-			stats.setReason("error:present");
-			stats.setType(statsType);
-			stats.setUser_role(user.getRole());
-			stats.setEvent_id(event_id);
-			statsArr.add(stats);
+		try {
+			statsHelper.squad_mark(detail, statsType, user);
+		} catch (Exception e) {
+			log.error("Error marking: " + e.getMessage());
+			return "redirect:/squadcommander/mark?error_unknown";
 		}
-		// Saving result to database
-		dbservice.getStatsService().saveAll(statsArr);
 		return "redirect:/squadcommander/mark?sent";
 	}
 
@@ -113,24 +86,14 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		// Getting all required data
-		List<Human> allHumans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans();
-		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
-		// Generating Stats array
-		List<Stats> statsArr = new ArrayList<Stats>();
-		for (Human human : allHumans) {
-			Stats stats = new Stats(human);
-			stats.setAuthor(user.getLogin());
-			stats.setDate(dbservice.getStringDate());
-			stats.setPresent(true);
-			stats.setReason("error:present");
-			stats.setType(statsType);
-			stats.setUser_role(user.getRole());
-			stats.setEvent_id(event_id);
-			statsArr.add(stats);
+		try {
+			StatsFormHelper s = new StatsFormHelper();
+			s.setDetails(new HashMap<Integer, String>());
+			statsHelper.squad_mark(s, statsType, user);
+		} catch (Exception e) {
+			log.error("Error marking: " + e.getMessage());
+			return "redirect:/squadcommander/mark?error_unknown";
 		}
-		// Saving result to database
-		dbservice.getStatsService().saveAll(statsArr);
 		return "redirect:/squadcommander/mark?sent";
 	}
 
