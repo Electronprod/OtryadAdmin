@@ -1,5 +1,6 @@
 package ru.electronprod.OtryadAdmin.data.services;
 
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -7,7 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ru.electronprod.OtryadAdmin.data.repositories.HumanRepository;
 import ru.electronprod.OtryadAdmin.models.Human;
+import ru.electronprod.OtryadAdmin.models.Squad;
+import ru.electronprod.OtryadAdmin.models.User;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,5 +64,9 @@ public class HumanService {
 	@Transactional(readOnly = true)
 	public int getSize() {
 		return humanRepository.getSize();
+	}
+	@Transactional(readOnly = true)
+	public List<Human>  findBySquad(Squad squad) {
+		return humanRepository.findBySquad(squad);
 	}
 }

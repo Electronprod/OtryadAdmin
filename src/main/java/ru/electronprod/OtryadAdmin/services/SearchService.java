@@ -2,9 +2,18 @@ package ru.electronprod.OtryadAdmin.services;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.models.Human;
 
+@Service
 public class SearchService {
+	@Autowired
+	private OptionService optionServ;
+
 	/**
 	 * @author OpenAI ChatGPT 3.5
 	 */
@@ -36,6 +45,32 @@ public class SearchService {
 			if (lcsLength > maxLCSLength) {
 				maxLCSLength = lcsLength;
 				mostSimilar = human;
+			}
+		}
+		return mostSimilar;
+	}
+
+	public String findMostSimilarEvent(String event) {
+		String mostSimilar = "";
+		int maxLCSLength = 0;
+		for (String val : optionServ.getEvent_types().values()) {
+			int lcsLength = findLCSLength(event, val);
+			if (lcsLength > maxLCSLength) {
+				maxLCSLength = lcsLength;
+				mostSimilar = val;
+			}
+		}
+		return mostSimilar;
+	}
+
+	public String findMostSimilarReason(String reason) {
+		String mostSimilar = "";
+		int maxLCSLength = 0;
+		for (String val : optionServ.getReasons_for_absences().values()) {
+			int lcsLength = findLCSLength(reason, val);
+			if (lcsLength > maxLCSLength) {
+				maxLCSLength = lcsLength;
+				mostSimilar = val;
 			}
 		}
 		return mostSimilar;

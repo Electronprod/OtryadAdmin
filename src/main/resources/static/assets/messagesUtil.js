@@ -19,6 +19,13 @@ if (window.location.href.includes("error_usernotfound")) {
 		icon: "error"
 	});
 }
+if (window.location.href.includes("error_unknown")) {
+	Swal.fire({
+		title: "НЕИЗВЕСТНАЯ ОШИБКА!",
+		text: "При выполнении действия произошла неизвестная ошибка.",
+		icon: "error"
+	});
+}
 if (window.location.href.includes("error_notfound")) {
 	Swal.fire({
 		title: "ОШИБКА!",

@@ -17,14 +17,19 @@ import org.springframework.ui.Model;
 
 import lombok.Getter;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
+import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Stats;
+import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.helpers.PersonalStatsHelper;
+import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
 
 @Service
 public class StatsHelperService {
 	@Autowired
 	private OptionService optionServ;
+	@Autowired
+	private DBService dbservice;
 
 	public Model squad_generatePersonalReport(List<Stats> personalStats, Model model) {
 		Map<String, PersonalStatsHelper> visitsData = new LinkedHashMap<String, PersonalStatsHelper>();
@@ -125,13 +130,6 @@ public class StatsHelperService {
 		return model;
 	}
 
-	public List<Stats> getMissedList(List<Stats> statsList) {
-		List<Stats> stats1 = new ArrayList();
-		stats1.addAll(statsList);
-		stats1.removeIf(stats -> stats.isPresent());
-		return stats1;
-	}
-
 	public Map<String, Map<Human, Integer>> squad_generateGlobalReport(List<Stats> allStats) {
 		Map<String, Map<Human, Integer>> result = new LinkedHashMap<String, Map<Human, Integer>>();
 		// For each type
@@ -162,5 +160,42 @@ public class StatsHelperService {
 			result.put(optionServ.getEvent_types().get(type), sortedMap);
 		}
 		return result;
+	}
+
+	public void squad_mark(StatsFormHelper detail, String eventType, User user) throws Exception {
+		// TODO eventType check and search
+		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
+		List<Stats> resultArray = new ArrayList<Stats>(); // Result we will add to database
+		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
+		// People managed by this user
+		List<Human> humans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans();
+		// Those who didn't come
+		details1.forEach((id, reason) -> {
+			Human human1 = humans.stream().filter(human -> human.getId() == id).findFirst().orElseThrow();
+			Stats stats = new Stats(human1);
+			stats.setAuthor(user.getLogin());
+			stats.setDate(DBService.getStringDate());
+			stats.setPresent(false);
+			stats.setReason(reason);
+			stats.setType(eventType);
+			stats.setUser_role(user.getRole());
+			stats.setEvent_id(event_id);
+			resultArray.add(stats);
+			humans.remove(human1);
+		});
+		// Those who come
+		for (Human human : humans) {
+			Stats stats = new Stats(human);
+			stats.setAuthor(user.getLogin());
+			stats.setDate(DBService.getStringDate());
+			stats.setPresent(true);
+			stats.setReason("error:present");
+			stats.setType(eventType);
+			stats.setUser_role(user.getRole());
+			stats.setEvent_id(event_id);
+			resultArray.add(stats);
+		}
+		// Saving result to database
+		dbservice.getStatsService().saveAll(resultArray);
 	}
 }
