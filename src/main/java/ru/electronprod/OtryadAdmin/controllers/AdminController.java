@@ -1,5 +1,8 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
@@ -56,27 +60,11 @@ public class AdminController {
 
 	@PostMapping("/usermgr/add")
 	public String userManager_addAction(@ModelAttribute("user") User user) {
+		if (user.getTelegram().equalsIgnoreCase("null")) {
+			user.setTelegram(null);
+		}
 		dbservice.getUserService().register(user);
 		return "redirect:/admin/usermgr?saved";
-	}
-
-	@GetMapping("/usermgr/edit")
-	public String userManager_edit(@RequestParam int id, Model model) {
-		Optional<User> user = dbservice.getUserService().findById(id);
-		if (user.isEmpty()) {
-			return "redirect:/admin/usermgr?error";
-		}
-		if (adminService.isNativeAdmin(user.get())) {
-			return "redirect:/admin/usermgr?error_protected";
-		}
-		model.addAttribute("user", user);
-		return "admin/usermgr/usermgr_edit";
-	}
-
-	@PostMapping("/usermgr/edit")
-	public String userManager_editAction(@ModelAttribute("user") User user) {
-		dbservice.getUserService().register(user);
-		return "redirect:/admin/usermgr?edited";
 	}
 
 	@GetMapping("/usermgr/delete")
@@ -181,7 +169,7 @@ public class AdminController {
 	// id - squad_id
 	@GetMapping("/humanmgr/add")
 	public String humanManager_add(@RequestParam() int id, Model model) {
-		// Checking existence
+		// Checking squad existence
 		if (dbservice.getSquadService().findById(id).isEmpty())
 			return "redirect:/admin/humanmgr?errorsquad";
 
@@ -204,10 +192,57 @@ public class AdminController {
 
 		// Generating human object
 		Human human = HumanHelper.fillDefaultValues(helper);
-		helper = null; // helping cleaner
-		human.setSquad(squad.get());
+		human.setSquad(squad.orElseThrow());
 		// Saving to DB
 		dbservice.getHumanService().save(human);
+		return "redirect:/admin/humanmgr?saved";
+	}
+
+	@PostMapping("/humanmgr/addlist")
+	public String handleFileUpload(@RequestParam("file") MultipartFile file, Model model) {
+		List<Human> records = new ArrayList<Human>();
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))) {
+			String line;
+			boolean simpleMode = false;
+			while ((line = reader.readLine()) != null) {
+				if (line.toLowerCase().startsWith("!simplemode")) {
+					simpleMode = !simpleMode;
+					continue;
+				}
+				String[] data = line.split(";");
+				Human result = new Human();
+				if (simpleMode) {
+					result.setLastname(data[1]);
+					result.setName(data[2]);
+					result.setSurname(data[3]);
+					result.setSchool(data[4]);
+					result.setClassnum(Integer.parseInt(data[5]));
+					result.setPhone(data[6]);
+				} else {
+					// ID_ЗВЕНА;Фамилия;Имя;Отчество;Дата рождения;Школа;Класс;Буква класса;Дом.
+					// Адрес;Номер
+					// телефона;Год поступления в отряд;Посвящен?;Мама;Папа
+					result.setName(data[1]);
+					result.setLastname(data[0]);
+					result.setSurname(data[2]);
+					result.setBirthday(data[3]);
+					result.setSchool(data[4]);
+					result.setClassnum(Integer.parseInt(data[5]));
+					result.setClasschar(data[6]);
+					result.setAddress(data[7]);
+					result.setPhone(data[8]);
+					result.setYear_of_admission(Integer.parseInt(data[9]));
+					result.setDedicated(Boolean.parseBoolean(data[10]));
+					result.setMother(data[11]);
+					result.setFather(data[12]);
+				}
+				records.add(result);
+			}
+			dbservice.getHumanService().saveAll(records);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "redirect:/admin/humanmgr?error&" + e.getMessage();
+		}
 		return "redirect:/admin/humanmgr?saved";
 	}
 

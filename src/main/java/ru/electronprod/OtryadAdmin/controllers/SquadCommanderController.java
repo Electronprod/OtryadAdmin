@@ -153,7 +153,7 @@ public class SquadCommanderController {
 			return "redirect:/squadcommander?error_usernotfound";
 		// Getting stats for user's humans
 		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
-		List<Stats> s = dbservice.getStatsService().findByHuman(human);
+		List<Stats> s = human.getStats();
 		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model = statsHelper.squad_generatePersonalReport(s, model);
 		model.addAttribute("person", human.getName() + " " + human.getLastname());

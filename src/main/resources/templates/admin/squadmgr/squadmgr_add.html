@@ -3,7 +3,7 @@
 
 <head>
 	<meta charset="UTF-8">
-	<title>Создать звено</title>
+	<title>добавить звено</title>
 	<link rel="stylesheet" href="/assets/formpage.css">
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@8"></script>
 	<link rel="icon" href="/icon.png">
@@ -12,9 +12,10 @@
 <body>
 	<div id="navbar"></div>
 	<form action="#" th:action="@{/admin/squadmgr/add}" th:object="${squadHelper}" method="post">
-		<h1>Создать звено</h1>
+		<h1>Добавить звено</h1>
 		<label>Название:</label>
 		<input type="text" th:field="*{squadName}">
+		<label>ФИ Командира:</label>
 		<input type="text" th:field="*{commanderName}">
 		<input type="hidden" th:field="*{commander_id}">
 		<input type="hidden" th:field="*{id}">

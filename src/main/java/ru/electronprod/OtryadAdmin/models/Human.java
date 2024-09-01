@@ -19,7 +19,7 @@ public class Human implements Serializable {
 	@JoinColumn(name = "squad_id")
 	private Squad squad;
 
-	@OneToMany(mappedBy = "human" ,cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToMany(mappedBy = "human", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<Stats> stats;
 
 	@Column
@@ -48,4 +48,8 @@ public class Human implements Serializable {
 	private String mother;
 	@Column
 	private String father;
+
+	public void addStats(Stats stats1) {
+		stats.add(stats1);
+	}
 }

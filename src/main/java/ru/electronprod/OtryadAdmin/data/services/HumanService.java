@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.electronprod.OtryadAdmin.data.repositories.HumanRepository;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
+import ru.electronprod.OtryadAdmin.models.Stats;
 import ru.electronprod.OtryadAdmin.models.User;
 
 import java.util.ArrayList;
@@ -65,8 +66,14 @@ public class HumanService {
 	public int getSize() {
 		return humanRepository.getSize();
 	}
+
 	@Transactional(readOnly = true)
-	public List<Human>  findBySquad(Squad squad) {
+	public List<Human> findBySquad(Squad squad) {
 		return humanRepository.findBySquad(squad);
+	}
+
+	@Transactional
+	public void saveAll(List<Human> HumanArr) {
+		humanRepository.saveAll(HumanArr);
 	}
 }

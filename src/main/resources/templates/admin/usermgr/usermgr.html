@@ -20,6 +20,7 @@
 				<th onclick="sortTable(1)">Логин</th>
 				<th onclick="sortTable(2)">Роль</th>
 				<th onclick="sortTable(3)">Telegram</th>
+				<th onclick="sortTable(4)">Есть звено</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -28,15 +29,21 @@
 				<td th:text="${user.login}"></td>
 				<td th:text="${user.role}"></td>
 				<td th:text="${user.telegram}"></td>
+				<td>
+					<span th:if="${user.squad != null}">+</span>
+					<span th:if="${user.squad == null}">-</span>
+				</td>
+
 			</tr>
 		</tbody>
 	</table>
 	<div class="bottomPanel">
 		<button class="btn" onclick="window.location.href = '/admin/usermgr/add'">Добавить</button>
 		<button class="btn" onclick="deleteF('/admin/usermgr');">Удалить</button>
-		<button class="btn" onclick="editF('/admin/usermgr');">Редактировать</button>
+		<!--<button class="btn" onclick="editF('/admin/usermgr');">Редактировать</button>-->
 	</div>
 </body>
 <script src="/assets/mgr.js"></script>
 <script src="/admin/navbar.js"></script>
+
 </html>

@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import ru.electronprod.OtryadAdmin.data.repositories.SquadRepository;
 import ru.electronprod.OtryadAdmin.models.Squad;
+import ru.electronprod.OtryadAdmin.models.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +39,11 @@ public class SquadService {
 	@Transactional
 	public void delete(Squad squad) {
 		squadRepository.delete(squad);
+	}
+
+	@Transactional
+	public Squad findByUser(User user) {
+		return squadRepository.findByCommander(user);
 	}
 
 	// Удаление Squad по id

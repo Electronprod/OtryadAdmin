@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
 import lombok.Getter;
@@ -162,13 +163,14 @@ public class StatsHelperService {
 		return result;
 	}
 
+	@Transactional
 	public void squad_mark(StatsFormHelper detail, String eventType, User user) throws Exception {
 		// TODO eventType check and search
 		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
 		List<Stats> resultArray = new ArrayList<Stats>(); // Result we will add to database
 		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
 		// People managed by this user
-		List<Human> humans = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans();
+		List<Human> humans = dbservice.getSquadService().findByUser(user).getHumans();
 		// Those who didn't come
 		details1.forEach((id, reason) -> {
 			Human human1 = humans.stream().filter(human -> human.getId() == id).findFirst().orElseThrow();
