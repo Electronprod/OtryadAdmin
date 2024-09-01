@@ -17,37 +17,25 @@
 		<thead>
 			<tr>
 				<th onclick="sortTable(0)">ID</th>
-				<th onclick="sortTable(1)">Имя</th>
-				<th onclick="sortTable(2)">Фамилия</th>
+				<th onclick="sortTable(1)">Фамилия</th>
+				<th onclick="sortTable(2)">Имя</th>
 				<th onclick="sortTable(3)">Отчество</th>
 				<th onclick="sortTable(4)">Д. Р.</th>
 				<th onclick="sortTable(5)">Школа</th>
 				<th onclick="sortTable(6)">Класс</th>
-				<th onclick="sortTable(7)">Буква</th>
-				<th onclick="sortTable(8)">Адрес</th>
-				<th onclick="sortTable(9)">Телефон</th>
-				<th onclick="sortTable(10)">Вступление</th>
-				<th onclick="sortTable(11)">Посвящение</th>
-				<th onclick="sortTable(12)">Мама</th>
-				<th onclick="sortTable(13)">Папа</th>
+				<th onclick="sortTable(7)">Телефон</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr th:each="human : ${humans}">
 				<td th:text="${human.id}"></td>
-				<td th:text="${human.name}"></td>
 				<td th:text="${human.lastname}"></td>
+				<td th:text="${human.name}"></td>
 				<td th:text="${human.surname}"></td>
 				<td th:text="${human.birthday}"></td>
 				<td th:text="${human.school}"></td>
 				<td th:text="${human.classnum}"></td>
-				<td th:text="${human.classchar}"></td>
-				<td th:text="${human.address}"></td>
 				<td th:text="${human.phone}"></td>
-				<td th:text="${human.year_of_admission}"></td>
-				<td th:text="${human.dedicated}"></td>
-				<td th:text="${human.mother}"></td>
-				<td th:text="${human.father}"></td>
 			</tr>
 		</tbody>
 	</table>
@@ -56,12 +44,31 @@
 		<button class="btn" onclick="addList()">Массовое добавление</button>
 		<button class="btn" onclick="editF('/admin/humanmgr');">Редактировать</button>
 		<button class="btn" onclick="deleteF('/admin/humanmgr');">Удалить</button>
+		<button class="btn" onclick="deleteAll();">Удалить ВСЕ</button>
 	</div>
 </body>
 <script src="/assets/mgr.js"></script>
 <script src="/admin/navbar.js"></script>
 <script>
+	function deleteAll() {
+		Swal.fire({
+			title: "Вы уверены?",
+			text: "Вы не сможете это отменить!",
+			icon: "warning",
+			showCancelButton: true,
+			confirmButtonColor: "#3085d6",
+			cancelButtonColor: "#d33",
+			cancelButtonText: "Отмена",
+			confirmButtonText: "Да, удалить все!"
+		}).then((result) => {
+				window.location.href = "/admin/humanmgr/deleteall"
+		});
+	}
+
 	function addList() {
+		const csrfParam = document.querySelector('input[name="_csrf"]').getAttribute('name'); // Получаем название CSRF параметра
+		const csrfToken = document.querySelector('input[name="_csrf"]').value; // Получаем значение CSRF токена
+
 		Swal.fire({
 			title: "Загрузите файл",
 			icon: "info",
@@ -70,16 +77,27 @@
 			cancelButtonText: "Отмена",
 			cancelButtonColor: "#d33",
 			html: `
-			<p><strong>Эта функция добавляет новых людей</strong></p><br>
-			<p>Формат файла должен соответствовать шаблону:<br>Фамилия;Имя;Отчество;Дата рождения;Школа;Класс;Буква класса;Дом. Адрес;Номер телефона;Год поступления в отряд;Посвящен;Мама;Папа<br> Рекомендуется контролировать этот процесс в консоли.</p>
-			<br>
-			<form method="post" action="/admin/humanmgr/addlist" enctype="multipart/form-data">
-			    <input type="file" name="file" accept=".csv" required>
-			    <button type="submit">Загрузить</button>
-			</form>
-		  `
+	        <p><strong>Эта функция добавляет новых людей</strong></p><br>
+	        <p><b>Формат файла должен соответствовать шаблону:</b><br>squad_id;Фамилия;Имя;Отчество;Дата рождения;Школа;Класс;Номер телефона<br></p>
+	        <br>
+	        <form id="uploadForm" method="post" action="/admin/humanmgr/addlist" enctype="multipart/form-data">
+	            <input type="hidden" name="${csrfParam}" value="${csrfToken}"><!-- CSRF токен -->
+	            <input type="file" name="file" accept=".csv" required>
+	            <button type="submit">Загрузить</button>
+	        </form>
+	        `,
+			didRender: () => {
+				document.getElementById("uploadForm").onsubmit = function (event) {
+					// Прекращаем стандартное поведение, чтобы не было дополнительных обработчиков событий
+					event.preventDefault();
+
+					// Здесь можно добавить функции для обработки загрузки (например, AJAX) если нужно
+					this.submit();
+				};
+			}
 		});
 	}
+
 </script>
 
 </html>

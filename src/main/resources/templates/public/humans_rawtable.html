@@ -20,13 +20,7 @@
 				<th>ДР<br><button onclick="sortTable(4)" class="sortbtn">Сортировать</button></th>
 				<th>Школа<br><button onclick="sortTable(5)" class="sortbtn">Сортировать</button></th>
 				<th>Класс<br><button onclick="sortTable(6)" class="sortbtn">Сортировать</button></th>
-				<th>Буква<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
-				<th>Адрес<br><button onclick="sortTable(8)" class="sortbtn">Сортировать</button></th>
-				<th>Телефон<br><button onclick="sortTable(9)" class="sortbtn">Сортировать</button></th>
-				<th>Вступление<br><button onclick="sortTable(10)" class="sortbtn">Сортировать</button></th>
-				<th>Посвящение<br><button onclick="sortTable(11)" class="sortbtn">Сортировать</button></th>
-				<th>Мама<br><button onclick="sortTable(12)" class="sortbtn">Сортировать</button></th>
-				<th>Папа<br><button onclick="sortTable(13)" class="sortbtn">Сортировать</button></th>
+				<th>Телефон<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -38,13 +32,7 @@
 				<td th:text="${human.birthday}"></td>
 				<td th:text="${human.school}"></td>
 				<td th:text="${human.classnum}"></td>
-				<td th:text="${human.classchar}"></td>
-				<td th:text="${human.address}"></td>
 				<td th:text="${human.phone}"></td>
-				<td th:text="${human.year_of_admission}"></td>
-				<td th:text="${human.dedicated}"></td>
-				<td th:text="${human.mother}"></td>
-				<td th:text="${human.father}"></td>
 			</tr>
 		</tbody>
 	</table>

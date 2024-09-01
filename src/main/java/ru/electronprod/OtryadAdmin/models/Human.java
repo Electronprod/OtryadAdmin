@@ -8,9 +8,9 @@ import lombok.*;
 
 @Entity
 @Table(name = "people")
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 public class Human implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,23 +33,7 @@ public class Human implements Serializable {
 	@Column
 	private String school;
 	@Column
-	private int classnum;
-	@Column
-	private String classchar;
-	@Column
-	private String address;
+	private String classnum;
 	@Column
 	private String phone;
-	@Column
-	private int year_of_admission;
-	@Column
-	private boolean dedicated;
-	@Column
-	private String mother;
-	@Column
-	private String father;
-
-	public void addStats(Stats stats1) {
-		stats.add(stats1);
-	}
 }
