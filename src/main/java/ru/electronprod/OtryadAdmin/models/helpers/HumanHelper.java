@@ -16,14 +16,8 @@ public class HumanHelper {
 	private String surname;
 	private String birthday;
 	private String school;
-	private int classnum;
-	private String classchar;
-	private String address;
+	private String classnum;
 	private String phone;
-	private int year_of_admission;
-	private boolean dedicated;
-	private String mother;
-	private String father;
 	private String details;
 
 	public static HumanHelper fillDefaultValues(@NonNull Human human) {
@@ -34,13 +28,7 @@ public class HumanHelper {
 		result.setBirthday(human.getBirthday());
 		result.setSchool(human.getSchool());
 		result.setClassnum(human.getClassnum());
-		result.setClasschar(human.getClasschar());
-		result.setAddress(human.getAddress());
 		result.setPhone(human.getPhone());
-		result.setYear_of_admission(human.getYear_of_admission());
-		result.setDedicated(human.isDedicated());
-		result.setMother(human.getMother());
-		result.setFather(human.getFather());
 		result.setId(human.getId());
 		return result;
 	}
@@ -53,13 +41,7 @@ public class HumanHelper {
 		result.setBirthday(human.getBirthday());
 		result.setSchool(human.getSchool());
 		result.setClassnum(human.getClassnum());
-		result.setClasschar(human.getClasschar());
-		result.setAddress(human.getAddress());
 		result.setPhone(human.getPhone());
-		result.setYear_of_admission(human.getYear_of_admission());
-		result.setDedicated(human.isDedicated());
-		result.setMother(human.getMother());
-		result.setFather(human.getFather());
 		result.setId(human.getId());
 		return result;
 	}
@@ -71,13 +53,7 @@ public class HumanHelper {
 		result.setBirthday(human.getBirthday());
 		result.setSchool(human.getSchool());
 		result.setClassnum(human.getClassnum());
-		result.setClasschar(human.getClasschar());
-		result.setAddress(human.getAddress());
 		result.setPhone(human.getPhone());
-		result.setYear_of_admission(human.getYear_of_admission());
-		result.setDedicated(human.isDedicated());
-		result.setMother(human.getMother());
-		result.setFather(human.getFather());
 		result.setId(human.getId());
 		return result;
 	}

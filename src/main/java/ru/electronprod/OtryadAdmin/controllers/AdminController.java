@@ -175,10 +175,6 @@ public class AdminController {
 
 		HumanHelper helper = new HumanHelper();
 		helper.setSquad_id(id);
-		// Setting default values
-		helper.setClassnum(6);
-		helper.setClasschar("А");
-		helper.setDedicated(false);
 		model.addAttribute("humanHelper", helper);
 		return "admin/humanmgr/humanmgr_add";
 	}
@@ -203,39 +199,18 @@ public class AdminController {
 		List<Human> records = new ArrayList<Human>();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))) {
 			String line;
-			boolean simpleMode = false;
 			while ((line = reader.readLine()) != null) {
-				if (line.toLowerCase().startsWith("!simplemode")) {
-					simpleMode = !simpleMode;
-					continue;
-				}
 				String[] data = line.split(";");
 				Human result = new Human();
-				if (simpleMode) {
-					result.setLastname(data[1]);
-					result.setName(data[2]);
-					result.setSurname(data[3]);
-					result.setSchool(data[4]);
-					result.setClassnum(Integer.parseInt(data[5]));
-					result.setPhone(data[6]);
-				} else {
-					// ID_ЗВЕНА;Фамилия;Имя;Отчество;Дата рождения;Школа;Класс;Буква класса;Дом.
-					// Адрес;Номер
-					// телефона;Год поступления в отряд;Посвящен?;Мама;Папа
-					result.setName(data[1]);
-					result.setLastname(data[0]);
-					result.setSurname(data[2]);
-					result.setBirthday(data[3]);
-					result.setSchool(data[4]);
-					result.setClassnum(Integer.parseInt(data[5]));
-					result.setClasschar(data[6]);
-					result.setAddress(data[7]);
-					result.setPhone(data[8]);
-					result.setYear_of_admission(Integer.parseInt(data[9]));
-					result.setDedicated(Boolean.parseBoolean(data[10]));
-					result.setMother(data[11]);
-					result.setFather(data[12]);
-				}
+				Squad squad = dbservice.getSquadService().findById(Integer.parseInt(data[0])).orElseThrow();
+				result.setSquad(squad);
+				result.setLastname(data[1]);
+				result.setName(data[2]);
+				result.setSurname(data[3]);
+				result.setBirthday(data[4]);
+				result.setSchool(data[5]);
+				result.setClassnum(data[6]);
+				result.setPhone(data[7]);
 				records.add(result);
 			}
 			dbservice.getHumanService().saveAll(records);
@@ -252,6 +227,12 @@ public class AdminController {
 			return "redirect:/admin/humanmgr?error_notfound";
 		}
 		dbservice.getHumanService().deleteById(id);
+		return "redirect:/admin/humanmgr?deleted";
+	}
+
+	@GetMapping("/humanmgr/deleteall")
+	public String humanManager_deleteAll() {
+		dbservice.getHumanService().deleteAll();
 		return "redirect:/admin/humanmgr?deleted";
 	}
 

@@ -76,4 +76,9 @@ public class HumanService {
 	public void saveAll(List<Human> HumanArr) {
 		humanRepository.saveAll(HumanArr);
 	}
+
+	@Transactional
+	public void deleteAll() {
+		humanRepository.deleteAll();
+	}
 }
