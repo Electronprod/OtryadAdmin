@@ -1,6 +1,5 @@
 package ru.electronprod.OtryadAdmin.telegram;
 
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +26,9 @@ import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
 import ru.electronprod.OtryadAdmin.services.SearchService;
+import ru.electronprod.OtryadAdmin.services.StatsHelperService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,6 +52,8 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 	private OptionService optionServ;
 	@Autowired
 	private SearchService search;
+	@Autowired
+	private StatsHelperService statsServ;
 
 	public TelegramBot() {
 		telegramClient = new OkHttpTelegramClient(getBotToken());
@@ -79,6 +82,7 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 	}
 
 	@Override
+	@Transactional
 	public void consume(Update update) {
 		try {
 			if (update.hasMessage() && update.getMessage().hasText()) {
@@ -175,6 +179,25 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 							.build();
 					telegramClient.execute(message2);
 					return;
+
+				case "squadcommander_mark_confirm":
+					EditMessageText message3 = EditMessageText.builder().chatId(chat_id).parseMode("HTML")
+							.messageId(toIntExact(message_id))
+							.text(lang_config.getLanguage().get("tg_squadcommander_mark_saved"))
+							.replyMarkup(InlineKeyboardMarkup.builder()
+									.keyboardRow(new InlineKeyboardRow(InlineKeyboardButton.builder()
+											.text(lang_config.getLanguage().get("tg_squadcommander_back_btn"))
+											.callbackData("squadcommander").build()))
+									.build())
+							.build();
+					boolean result = saveData(update.getCallbackQuery().getMessage().toString(), chat_id,
+							userOptional.get());
+					if (!result) {
+						return;
+					}
+
+					telegramClient.execute(message3);
+					return;
 				}
 			}
 		} catch (TelegramApiException e) {
@@ -193,6 +216,48 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 		return arr;
 	}
 
+	@Transactional
+	private boolean saveData(String message, long chat_id, User user) throws TelegramApiException {
+		try {
+			message = message.split("text=")[1].split(", entities")[0];
+			message = message.toLowerCase().replace(lang_config.getLanguage().get("tg_squadcommander_mark_check"), "")
+					.replaceFirst("\n", "");
+			Map<Integer, String> details = new HashMap<Integer, String>(); // human ID + Reason
+			log.debug("I save the message:\n" + message);
+			String[] lines = message.split("\n");
+			if (!lines[0].contains("!")) {
+				throw new Exception(lang_config.getLanguage().get("tg_squadcommander_error_event"));
+			}
+			String event = OptionService.getKeyByValue(optionServ.getEvent_types(),
+					search.findMostSimilarEvent(lines[0].replaceFirst("!", "")));
+			if (optionServ.getEvent_types().containsKey(event) == false) {
+				log.warn("Found unknown event: " + event + " Original: " + lines[0]);
+				throw new Exception(lang_config.getLanguage().get("tg_squadcommander_error_event"));
+			}
+			// Recognizing people
+			for (int i = 1; i < lines.length; i++) {
+				String line = lines[i];
+				if (!line.contains(":")) {
+					throw new Exception(
+							lang_config.getLanguage().get("tg_squadcommander_error_line").replaceAll("!line!", line));
+				}
+				String[] spl = line.split(":");
+				String reason = OptionService.getKeyByValue(optionServ.getReasons_for_absences(),
+						search.findMostSimilarReason(spl[1]));
+				details.put(Integer.parseInt(spl[0].split(";")[0]), reason);
+			}
+			StatsFormHelper helper = new StatsFormHelper();
+			helper.setDetails(details);
+			statsServ.squad_mark(helper, event, user);
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			sendMessage("tg_squadcommander_error_format", e.getMessage(), chat_id);
+			return false;
+		}
+	}
+
+	@Transactional
 	private String recognizeData(String original_message, long chat_id, List<Human> people)
 			throws TelegramApiException {
 		try {
@@ -201,36 +266,32 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 			String[] lines = original_message.split("\n");
 			// Recognizing event
 			if (!lines[0].contains("!")) {
-				sendMessage("tg_squadcommander_error_event", chat_id);
-				return "";
+				throw new Exception(lang_config.getLanguage().get("tg_squadcommander_error_event"));
 			}
 			String event = search.findMostSimilarEvent(lines[0].replaceFirst("!", ""));
 			if (optionServ.getEvent_types().containsValue(event) == false) {
-				sendMessage("tg_squadcommander_error_event", chat_id);
 				log.warn("Found unknown event: " + event + " Original: " + lines[0]);
-				return "";
+				throw new Exception(lang_config.getLanguage().get("tg_squadcommander_error_event"));
 			}
 			String result_message = lang_config.getLanguage().get("tg_squadcommander_mark_check") + "!" + event;
 			// Recognizing people
 			for (int i = 1; i < lines.length; i++) {
 				String line = lines[i];
 				if (!line.contains(":")) {
-					sendMessage(chat_id,
-							lang_config.getLanguage().get("tg_squadcommander_error_line").replaceAll("{line}", line));
-					return "";
+					throw new Exception(
+							lang_config.getLanguage().get("tg_squadcommander_error_line").replaceAll("!line!", line));
 				}
 				String[] spl = line.split(":");
 				Human human = SearchService.findMostSimilarHuman(spl[0], people);
 				String reason = search.findMostSimilarReason(spl[1]);
 				if (human == null || reason.isBlank()) {
-					sendMessage("tg_squadcommander_error_notfound", line, chat_id);
-					return "";
+					throw new Exception(lang_config.getLanguage().get("tg_squadcommander_error_notfound") + line);
 				}
-				result_message = result_message + "\n" + human.getLastname() + " " + human.getName() + " : " + reason;
+				result_message = result_message + "\n" + human.getId() + "; " + human.getLastname() + " "
+						+ human.getName() + " : " + reason;
 			}
 			return result_message;
 		} catch (Exception e) {
-			e.printStackTrace();
 			sendMessage("tg_squadcommander_error_format", e.getMessage(), chat_id);
 			return "";
 		}
@@ -246,11 +307,6 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 		SendMessage message = SendMessage.builder().chatId(chat_id)
 				.text(lang_config.getLanguage().get("tg_squadcommander_error_format") + " " + text).parseMode("HTML")
 				.build();
-		telegramClient.execute(message);
-	}
-
-	private void sendMessage(long chat_id, String text) throws TelegramApiException {
-		SendMessage message = SendMessage.builder().chatId(chat_id).text(text).parseMode("HTML").build();
 		telegramClient.execute(message);
 	}
 }

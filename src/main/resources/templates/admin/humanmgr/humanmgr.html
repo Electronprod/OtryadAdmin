@@ -53,11 +53,33 @@
 	</table>
 	<div class="bottomPanel">
 		<button class="btn" onclick="addHuman('/admin/humanmgr');">Добавить</button>
-		<button class="btn" onclick="deleteF('/admin/humanmgr');">Удалить</button>
+		<button class="btn" onclick="addList()">Массовое добавление</button>
 		<button class="btn" onclick="editF('/admin/humanmgr');">Редактировать</button>
+		<button class="btn" onclick="deleteF('/admin/humanmgr');">Удалить</button>
 	</div>
 </body>
 <script src="/assets/mgr.js"></script>
 <script src="/admin/navbar.js"></script>
+<script>
+	function addList() {
+		Swal.fire({
+			title: "Загрузите файл",
+			icon: "info",
+			showConfirmButton: false,
+			showCancelButton: true,
+			cancelButtonText: "Отмена",
+			cancelButtonColor: "#d33",
+			html: `
+			<p><strong>Эта функция добавляет новых людей</strong></p><br>
+			<p>Формат файла должен соответствовать шаблону:<br>Фамилия;Имя;Отчество;Дата рождения;Школа;Класс;Буква класса;Дом. Адрес;Номер телефона;Год поступления в отряд;Посвящен;Мама;Папа<br> Рекомендуется контролировать этот процесс в консоли.</p>
+			<br>
+			<form method="post" action="/admin/humanmgr/addlist" enctype="multipart/form-data">
+			    <input type="file" name="file" accept=".csv" required>
+			    <button type="submit">Загрузить</button>
+			</form>
+		  `
+		});
+	}
+</script>
 
 </html>

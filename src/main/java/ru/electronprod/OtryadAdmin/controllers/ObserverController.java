@@ -82,8 +82,8 @@ public class ObserverController {
 		Optional<Squad> squad = dbservice.getSquadService().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model.addAttribute("dataMap", statsHelper
-				.squad_generateGlobalReport(dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin())));
+		model.addAttribute("dataMap", statsHelper.squad_generateGlobalReport(
+				dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin())));
 		return "/observer/squadstats/general_stats.html";
 	}
 

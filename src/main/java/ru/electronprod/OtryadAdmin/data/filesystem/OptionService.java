@@ -88,4 +88,12 @@ public class OptionService implements InitializingBean {
 		log.warn("Created and wrote defaults to file.");
 	}
 
+	public static String getKeyByValue(Map<String, String> map, String value) {
+		for (Map.Entry<String, String> entry : map.entrySet()) {
+			if (entry.getValue().equals(value)) {
+				return entry.getKey(); // Возвращаем найденный ключ
+			}
+		}
+		return null; // Если ключ не найден
+	}
 }

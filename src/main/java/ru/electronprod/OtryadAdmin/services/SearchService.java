@@ -36,6 +36,7 @@ public class SearchService {
 		return dp[m][n];
 	}
 
+	@Transactional
 	public static Human findMostSimilarHuman(String input, List<Human> humanList) {
 		Human mostSimilar = new Human();
 		int maxLCSLength = 0;

@@ -12,7 +12,7 @@
 <body>
 	<div id="navbar"></div>
 	<form action="#" th:action="@{/admin/usermgr/add}" th:object="${user}" method="post">
-		<h1>Создать пользователя</h1>
+		<h1>Добавить пользователя</h1>
 		<label>Логин:</label>
 		<input type="text" th:field="*{login}"><br>
 
@@ -23,11 +23,12 @@
 		<input type="text" th:field="*{role}"><br>
 
 		<label>Telegram:</label>
-		<input type="text" th:field="*{telegram}"><br>
+		<input placeholder="Пишите null, если нет" type="text" th:field="*{telegram}"><br>
 
 		<button type="submit">Создать</button>
 	</form>
 	<button type="button" onclick="window.location.href = '/admin/usermgr'">Отмена</button>
 </body>
 <script src="/assets/formcheck.js"></script>
+
 </html>
