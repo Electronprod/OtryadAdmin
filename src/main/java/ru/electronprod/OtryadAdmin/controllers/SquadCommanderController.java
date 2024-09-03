@@ -42,7 +42,7 @@ public class SquadCommanderController {
 		model.addAttribute("squadid", squad.getId());
 		// News
 		model.addAttribute("newsList", dbservice.getNewsService().getLast5());
-		return "squadcommander/overview.html";
+		return "squadcommander/overview";
 	}
 
 	@GetMapping("/humans")
@@ -52,7 +52,7 @@ public class SquadCommanderController {
 			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("humans",
 				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
-		return "public/humans_rawtable.html";
+		return "public/humans_rawtable";
 	}
 
 	@GetMapping("/mark")
@@ -64,7 +64,7 @@ public class SquadCommanderController {
 				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
 		model.addAttribute("reasons_for_absences_map", optionService.getReasons_for_absences());
 		model.addAttribute("event_types_map", optionService.getEvent_types());
-		return "squadcommander/mark.html";
+		return "squadcommander/mark";
 	}
 
 	@PostMapping("/mark")
@@ -113,7 +113,7 @@ public class SquadCommanderController {
 		List<Stats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
 		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model.addAttribute("statss", statsList);
-		return "/public/statsview_rawtable.html";
+		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/table")
@@ -122,7 +122,7 @@ public class SquadCommanderController {
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("statss", dbservice.getStatsService().findByAuthor(user.getLogin()));
-		return "/public/statsview_rawtable.html";
+		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/report")
@@ -132,7 +132,7 @@ public class SquadCommanderController {
 			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("dataMap",
 				statsHelper.squad_generateGlobalReport(dbservice.getStatsService().findByAuthor(user.getLogin())));
-		return "/squadcommander/general_stats.html";
+		return "squadcommander/general_stats";
 	}
 
 	@GetMapping("/stats/personal/table")
@@ -143,7 +143,7 @@ public class SquadCommanderController {
 		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
 		statsList.removeIf(stats -> stats.getHuman().getId() != id);
 		model.addAttribute("statss", statsList);
-		return "/public/statsview_rawtable.html";
+		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/personal")
@@ -157,7 +157,7 @@ public class SquadCommanderController {
 		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model = statsHelper.squad_generatePersonalReport(s, model);
 		model.addAttribute("person", human.getName() + " " + human.getLastname());
-		return "/squadcommander/personal_stats.html";
+		return "squadcommander/personal_stats";
 	}
 
 	@GetMapping("/stats/personal_old")
@@ -171,7 +171,7 @@ public class SquadCommanderController {
 		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model = statsHelper.old_squad_generatePersonalReport(model, s);
 		model.addAttribute("name", human.getName() + " " + human.getLastname());
-		return "/squadcommander/personal_stats_old.html";
+		return "squadcommander/personal_stats_old";
 	}
 
 	@GetMapping("/stats")
@@ -181,6 +181,6 @@ public class SquadCommanderController {
 			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("humans",
 				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
-		return "/squadcommander/stats_overview.html";
+		return "squadcommander/stats_overview";
 	}
 }

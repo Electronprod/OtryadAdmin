@@ -139,8 +139,8 @@ public class AdminController {
 		if (usr.isEmpty() || !usr.get().getRole().equals("ROLE_SQUADCOMMANDER")) {
 			return "redirect:/admin/squadmgr?error";
 		}
-		if (usr.get().getSquad() != null) {
-			return "redirect:/admin/squadmgr?error_hasvalue";
+		if (usr.get().getSquad() == null) {
+			return "redirect:/admin/squadmgr?error";
 		}
 		squad.setCommander(usr.get());
 		dbservice.getSquadService().save(squad);
