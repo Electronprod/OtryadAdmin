@@ -35,7 +35,7 @@ public class ObserverController {
 	public String overview(Model model) {
 		model.addAttribute("login", authHelper.getCurrentUser().getLogin());
 		model.addAttribute("newsList", dbservice.getNewsService().getLast5());
-		return "/observer/overview.html";
+		return "observer/overview";
 	}
 
 	/*
@@ -44,7 +44,7 @@ public class ObserverController {
 	@GetMapping("/addnews")
 	public String addNews(Model model) {
 		model.addAttribute("news", new News());
-		return "/observer/add_news.html";
+		return "observer/add_news";
 	}
 
 	@PostMapping("/addnews")
@@ -65,7 +65,7 @@ public class ObserverController {
 		model.addAttribute("people_size", dbservice.getHumanService().getSize());
 		model.addAttribute("people_missed", dbservice.getStatsService().countByIsPresent(false));
 		model.addAttribute("people_attended", dbservice.getStatsService().countByIsPresent(true));
-		return "/observer/stats_overview.html";
+		return "observer/stats_overview";
 	}
 
 	@GetMapping("/stats/squad/{id}")
@@ -74,7 +74,7 @@ public class ObserverController {
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
 		model.addAttribute("humans", squad.get().getHumans());
-		return "/observer/squadstats/stats_overview.html";
+		return "observer/squadstats/stats_overview";
 	}
 
 	@GetMapping("/stats/squad/{id}/report")
@@ -84,7 +84,7 @@ public class ObserverController {
 			return "redirect:/observer/stats?error_notfound";
 		model.addAttribute("dataMap", statsHelper.squad_generateGlobalReport(
 				dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin())));
-		return "/observer/squadstats/general_stats.html";
+		return "observer/squadstats/general_stats";
 	}
 
 	@GetMapping("/stats/squad/{id}/table")
@@ -93,7 +93,7 @@ public class ObserverController {
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
 		model.addAttribute("statss", dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin()));
-		return "/public/statsview_rawtable.html";
+		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/personal")
@@ -105,7 +105,7 @@ public class ObserverController {
 		List<Stats> s = dbservice.getStatsService().findByHuman(human);
 		model = statsHelper.squad_generatePersonalReport(s, model);
 		model.addAttribute("person", human.getName() + " " + human.getLastname());
-		return "/observer/personal_stats.html";
+		return "observer/personal_stats";
 	}
 
 	@GetMapping("/stats/personal/table")
@@ -116,12 +116,12 @@ public class ObserverController {
 		}
 		List<Stats> s = dbservice.getStatsService().findByHuman(human);
 		model.addAttribute("statss", s);
-		return "/public/statsview_rawtable.html";
+		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/data")
 	public String getAllData(Model model) {
 		model.addAttribute("humans", dbservice.getHumanService().findAll());
-		return "public/humans_rawtable.html";
+		return "public/humans_rawtable";
 	}
 }
