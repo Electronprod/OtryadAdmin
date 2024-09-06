@@ -1,3 +1,11 @@
+// Loading style
+var link = document.createElement("link");
+link.rel = "stylesheet";
+link.type = "text/css";
+link.href = "/public_resources/sweetalert2.css";
+document.head.appendChild(link);
+
+
 /*!
 * sweetalert2 v11.13.2
 * Released under the MIT License.
