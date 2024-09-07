@@ -24,6 +24,7 @@
 				<th onclick="sortTable(5)">Школа</th>
 				<th onclick="sortTable(6)">Класс</th>
 				<th onclick="sortTable(7)">Телефон</th>
+				<th onclick="sortTable(8)">Звено</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -36,6 +37,7 @@
 				<td th:text="${human.school}"></td>
 				<td th:text="${human.classnum}"></td>
 				<td th:text="${human.phone}"></td>
+				<td th:text="${human.squad.squadName}"></td>
 			</tr>
 		</tbody>
 	</table>
@@ -52,16 +54,9 @@
 <script>
 	function deleteAll() {
 		Swal.fire({
-			title: "Вы уверены?",
-			text: "Вы не сможете это отменить!",
-			icon: "warning",
-			showCancelButton: true,
-			confirmButtonColor: "#3085d6",
-			cancelButtonColor: "#d33",
-			cancelButtonText: "Отмена",
-			confirmButtonText: "Да, удалить все!"
-		}).then((result) => {
-			window.location.href = "/admin/humanmgr/deleteall"
+		  title: "Опасная фунция!",
+		  text: "Вручную введите url в браузере для удаления: /admin/humanmgr/deleteall",
+		  icon: "info"
 		});
 	}
 

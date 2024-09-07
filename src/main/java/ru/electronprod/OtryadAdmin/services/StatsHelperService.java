@@ -1,14 +1,11 @@
 package ru.electronprod.OtryadAdmin.services;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
-import lombok.Getter;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
@@ -69,65 +65,6 @@ public class StatsHelperService {
 		model.addAttribute("visitsData", visitsData);
 		model.addAttribute("reasons_for_absences", reasons_for_absences);
 		model.addAttribute("lastEventsData", lastEventsData);
-		return model;
-	}
-
-	public Model old_squad_generatePersonalReport(Model model, List<Stats> statsList) {
-		List<Integer> attendanceValues = new ArrayList<Integer>();
-		List<Integer> omissionsValues = new ArrayList<Integer>();
-		List<Map<String, Boolean>> datesResult = new ArrayList<Map<String, Boolean>>();
-		Map<String, Integer> reasons_for_missing = new HashMap<String, Integer>();
-		// For each type...
-		for (String type : optionServ.getEvent_types().keySet()) {
-			// Generating typedStats list
-			List<Stats> typedStats = new ArrayList<Stats>();
-			typedStats.addAll(statsList);
-			typedStats.removeIf(stats -> !stats.getType().equals(type));
-			// Data
-			Map<String, Boolean> dateMap = new HashMap<String, Boolean>();
-			int attendanceVal = 0;
-			int omissionsVal = 0;
-			for (Stats stats : typedStats) {
-				dateMap.putIfAbsent(stats.getDate(), stats.isPresent());
-				if (stats.isPresent()) {
-					// Пришел
-					attendanceVal++;
-				} else {
-					// Не пришел
-					omissionsVal++;
-					String reason = stats.getReason();
-					if (reasons_for_missing.containsKey(reason)) {
-						reasons_for_missing.put(reason, reasons_for_missing.get(reason) + 1);
-					} else {
-						reasons_for_missing.put(reason, 1);
-					}
-				}
-			}
-			// Sorting dates to send
-			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
-			Map<String, Boolean> sortedDateMap = new TreeMap<>(new Comparator<String>() {
-				@Override
-				public int compare(String date1, String date2) {
-					try {
-						return dateFormat.parse(date1).compareTo(dateFormat.parse(date2));
-					} catch (ParseException e) {
-						throw new IllegalArgumentException(e);
-					}
-				}
-			});
-			sortedDateMap.putAll(dateMap);
-			datesResult.add(sortedDateMap);
-			attendanceValues.add(attendanceVal);
-			omissionsValues.add(omissionsVal);
-			typedStats = null;
-			dateMap = null;
-			sortedDateMap = null;
-		}
-		model.addAttribute("events_types", optionServ.getEvent_types().keySet());
-		model.addAttribute("attendanceData", attendanceValues);
-		model.addAttribute("omissionsValues", omissionsValues);
-		model.addAttribute("datesData", datesResult);
-		model.addAttribute("reasons_for_missing", reasons_for_missing);
 		return model;
 	}
 

@@ -252,7 +252,7 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			sendMessage("tg_squadcommander_error_format", e.getMessage(), chat_id);
+			sendMessage(chat_id, e.getMessage());
 			return false;
 		}
 	}
@@ -292,21 +292,19 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 			}
 			return result_message;
 		} catch (Exception e) {
-			sendMessage("tg_squadcommander_error_format", e.getMessage(), chat_id);
+			sendMessage(chat_id, e.getMessage());
 			return "";
 		}
 	}
 
 	private void sendMessage(String langid, long chat_id) throws TelegramApiException {
-		SendMessage message = SendMessage.builder().chatId(chat_id)
-				.text(lang_config.getLanguage().get("tg_squadcommander_error_format")).parseMode("HTML").build();
+		SendMessage message = SendMessage.builder().chatId(chat_id).text(lang_config.getLanguage().get(langid))
+				.parseMode("HTML").build();
 		telegramClient.execute(message);
 	}
 
-	private void sendMessage(String langid, String text, long chat_id) throws TelegramApiException {
-		SendMessage message = SendMessage.builder().chatId(chat_id)
-				.text(lang_config.getLanguage().get("tg_squadcommander_error_format") + " " + text).parseMode("HTML")
-				.build();
+	private void sendMessage(long chat_id, String l) throws TelegramApiException {
+		SendMessage message = SendMessage.builder().chatId(chat_id).text(l).parseMode("HTML").build();
 		telegramClient.execute(message);
 	}
 }

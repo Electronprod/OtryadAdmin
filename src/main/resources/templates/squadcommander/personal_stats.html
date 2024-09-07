@@ -24,14 +24,6 @@
 		</div>
 		<div id="content">
 			<div class="card">
-				<h3>Персональная статистика <strong th:text="${person}"></strong></h3>
-				<p>На этой странице представлена персональная статистика для этого человека. Если вы предпочитаете
-					таблицам графики нажмите кнопку ниже (Данная страница устарела, однако еще функционирует).
-				</p>
-				<button onclick="window.location.href=window.location.href.replace('personal', 'personal_old');">Перейти
-					к графикам (<b>!УСТАРЕЛО!</b>)</button>
-			</div>
-			<div class="card">
 				<h3>Пропуски и посещения</h3>
 				<h4>Суммарная статистика:</h4>
 				<p>Посещено <strong th:text="${visits_total}"></strong> событий<br>Пропущено <strong
