@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
@@ -25,7 +26,9 @@ import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.helpers.HumanHelper;
 import ru.electronprod.OtryadAdmin.models.helpers.SquadHelper;
 import ru.electronprod.OtryadAdmin.services.AdminService;
+import ru.electronprod.OtryadAdmin.telegram.TelegramBot;
 
+@Slf4j
 @Controller
 @RequestMapping("/admin")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -39,7 +42,22 @@ public class AdminController {
 	 * Main page
 	 */
 	@GetMapping("")
-	public String dash() {
+	public String dash(Model model) {
+		double processCpuLoad = adminService.getSystemInfoBean().getProcessCpuLoad();
+		double cpuLoad = adminService.getSystemInfoBean().getCpuLoad();
+		model.addAttribute("cpu", String.format("%.2f%% / %.2f%%", processCpuLoad * 100, cpuLoad * 100));
+		long committedMemory = adminService.getSystemInfoBean().getCommittedVirtualMemorySize();
+		long freeMemory = adminService.getSystemInfoBean().getFreeMemorySize();
+		long totalMemory = adminService.getSystemInfoBean().getTotalMemorySize();
+		model.addAttribute("memory", String.format("%.2f GB / %d MB / %d MB",
+				committedMemory / (1024.0 * 1024.0 * 1024.0), freeMemory / (1024 * 1024), totalMemory / (1024 * 1024)));
+
+		double freePhysicalMemory = adminService.getFreeDiskSpace();
+		double usablePhysicalMemory = adminService.getUsableDiskSpace();
+		double totalPhysicalMemory = adminService.getTotalDiskSpace();
+		model.addAttribute("disk", String.format("%.2f GB / %.2f GB / %.2f GB", freePhysicalMemory,
+				usablePhysicalMemory, totalPhysicalMemory));
+
 		return "admin/dashboard";
 	}
 
@@ -64,6 +82,18 @@ public class AdminController {
 			user.setTelegram(null);
 		}
 		dbservice.getUserService().register(user);
+		return "redirect:/admin/usermgr?saved";
+	}
+
+	@GetMapping("/usermgr/updatetg")
+	public String userManager_setTelegram(@RequestParam() int id, @RequestParam() String tg) {
+		Optional<User> user = dbservice.getUserService().findById(id);
+		if (user.isEmpty()) {
+			return "redirect:/admin/usermgr?error";
+		}
+		User usr = user.get();
+		usr.setTelegram(tg);
+		dbservice.getUserService().save(usr);
 		return "redirect:/admin/usermgr?saved";
 	}
 
@@ -200,18 +230,23 @@ public class AdminController {
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
-				String[] data = line.split(";");
-				Human result = new Human();
-				Squad squad = dbservice.getSquadService().findById(Integer.parseInt(data[0])).orElseThrow();
-				result.setSquad(squad);
-				result.setLastname(data[1]);
-				result.setName(data[2]);
-				result.setSurname(data[3]);
-				result.setBirthday(data[4]);
-				result.setSchool(data[5]);
-				result.setClassnum(data[6]);
-				result.setPhone(data[7]);
-				records.add(result);
+				try {
+					String[] data = line.split(";");
+					Human result = new Human();
+					Squad squad = dbservice.getSquadService().findById(Integer.parseInt(data[0])).orElseThrow();
+					result.setSquad(squad);
+					result.setLastname(data[1]);
+					result.setName(data[2]);
+					result.setSurname(data[3]);
+					result.setBirthday(data[4]);
+					result.setSchool(data[5]);
+					result.setClassnum(data[6]);
+					result.setPhone(data[7]);
+					records.add(result);
+				} catch (Exception e) {
+					log.error("Error parsing line: " + line);
+					return "redirect:/admin/humanmgr?error&" + e.getMessage() + "&line" + line;
+				}
 			}
 			dbservice.getHumanService().saveAll(records);
 		} catch (Exception e) {

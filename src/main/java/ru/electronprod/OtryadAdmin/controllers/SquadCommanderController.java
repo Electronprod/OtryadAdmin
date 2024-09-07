@@ -160,20 +160,6 @@ public class SquadCommanderController {
 		return "squadcommander/personal_stats";
 	}
 
-	@GetMapping("/stats/personal_old")
-	public String personal_stats_old(@RequestParam int id, Model model) {
-		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
-		// Getting stats for user's humans
-		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
-		List<Stats> s = dbservice.getStatsService().findByHuman(human);
-		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
-		model = statsHelper.old_squad_generatePersonalReport(model, s);
-		model.addAttribute("name", human.getName() + " " + human.getLastname());
-		return "squadcommander/personal_stats_old";
-	}
-
 	@GetMapping("/stats")
 	public String stats_overview(Model model) {
 		User user = authHelper.getCurrentUser();

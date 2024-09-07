@@ -29,9 +29,32 @@
 				</p>
 				<button onclick="window.location.href=window.location+'/table'">Перейти</button>
 			</div>
+			<div class="card">
+				<h3>Просмотр отметок посещений по дате</h3>
+				<p>Посмотрите посещения в выбранную дату.</p>
+				<form id="date-form" method="get" onsubmit="return submitForm()">
+					<label for="date">Дата:</label>
+					<input type="date" id="date" name="date">
+					<br>
+					<button type="submit">Посмотреть</button>
+				</form>
+			</div>
 		</div>
 </body>
 <script src="/observer/navbar.js"></script>
 <script src="/observer/sidebar.js"></script>
+<script>
+	function submitForm() {
+		const form = document.getElementById('date-form');
+		const dateInput = document.getElementById('date').value;
+		// Получаем текущий адрес страницы
+		const currentUrl = window.location.href;
+		// Формируем новый URL
+		const newUrl = `${currentUrl}/date?${dateInput}`;
+		// Изменяем действие формы
+		form.action = newUrl;
+		return true;
+	}
+</script>
 
 </html>

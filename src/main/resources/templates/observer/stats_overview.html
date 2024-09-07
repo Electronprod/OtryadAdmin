@@ -36,10 +36,7 @@
 				<p>
 					<b>Всего ребят:</b> <span th:text="${people_size}"></span><br>
 					<b>Количество пропусков:</b> <span th:text="${people_missed}"></span><br>
-					<b>Количество посещений:</b> <span th:text="${people_attended}"></span><br>
-					<br>Для подробной статистики для конкретного человека перейдите в подраздел "Персональная
-					статистика".
-					Для просмотра списка отряда перейдите в раздел "Данные"
+					<b>Количество посещений:</b> <span th:text="${people_attended}"></span>
 				</p>
 			</div>
 			<div class="card">
@@ -70,6 +67,16 @@
 
 					</tbody>
 				</table>
+			</div>
+			<div class="card">
+				<h3>Просмотр отметок посещений по дате</h3>
+				<p>Посмотрите посещения в выбранную дату.</p>
+				<form id="date-form" action="/observer/stats/date">
+					<label for="date">Дата:</label>
+					<input type="date" id="date" name="date">
+					<br>
+					<button type="submit">Посмотреть</button>
+				</form>
 			</div>
 			<div class="card">
 				<h3>Просмотр персональной статистики</h3>

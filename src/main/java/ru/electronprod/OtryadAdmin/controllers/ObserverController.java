@@ -13,6 +13,7 @@ import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.Stats;
+import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.SearchService;
 import ru.electronprod.OtryadAdmin.services.StatsHelperService;
@@ -68,6 +69,13 @@ public class ObserverController {
 		return "observer/stats_overview";
 	}
 
+	@GetMapping("/stats/date")
+	public String statsTable_date(@RequestParam String date, Model model) {
+		List<Stats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
+		model.addAttribute("statss", statsList);
+		return "public/statsview_rawtable";
+	}
+
 	@GetMapping("/stats/squad/{id}")
 	public String stats(@PathVariable("id") int id, Model model) {
 		Optional<Squad> squad = dbservice.getSquadService().findById(id);
@@ -75,6 +83,15 @@ public class ObserverController {
 			return "redirect:/observer/stats?error_notfound";
 		model.addAttribute("humans", squad.get().getHumans());
 		return "observer/squadstats/stats_overview";
+	}
+
+	@GetMapping("/stats/squad/{id}/date")
+	public String statsTable_date_squad(@PathVariable("id") int id, @RequestParam String date, Model model) {
+		List<Stats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
+		statsList.removeIf(stats -> !stats.getAuthor()
+				.equals(dbservice.getSquadService().findById(id).orElseThrow().getCommander().getLogin()));
+		model.addAttribute("statss", statsList);
+		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/squad/{id}/report")

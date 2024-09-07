@@ -21,6 +21,8 @@
 				<th>Школа<br><button onclick="sortTable(5)" class="sortbtn">Сортировать</button></th>
 				<th>Класс<br><button onclick="sortTable(6)" class="sortbtn">Сортировать</button></th>
 				<th>Телефон<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
+				<th>Звено<br><button onclick="sortTable(8)" class="sortbtn">Сортировать</button></th>
+				<th>Командир<br><button onclick="sortTable(9)" class="sortbtn">Сортировать</button></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -33,6 +35,8 @@
 				<td th:text="${human.school}"></td>
 				<td th:text="${human.classnum}"></td>
 				<td th:text="${human.phone}"></td>
+				<td th:text="${human.squad.squadName}"></td>
+				<td th:text="${human.squad.commanderName}"></td>
 			</tr>
 		</tbody>
 	</table>
