@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Редактировать пользователя</title>
+	<link rel="stylesheet" href="/observer/default.css">
+	<link rel="stylesheet" href="/observer/data.css">
+	<link rel="icon" href="/icon.png">
+	<script src="/public_resources/sweetalert2.js"></script>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+	<style type="text/css">
+		input[type="text"],
+		input[type="password"],
+		input[type="date"],
+		input[type="number"] {
+			width: 100%;
+			padding: 10px;
+			margin: 5px 0;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			box-sizing: border-box;
+		}
+	</style>
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="dashboard">
+		<div id="content">
+			<div class="card">
+				<h3>Изменить логин</h3>
+				<form method="GET" action="/admin/usermgr/setlogin">
+					<input type="text" name="login" placeholder="Новый логин">
+					<input type="hidden" name="id" th:value="${id}">
+					<button type="submit">Изменить</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Изменить пароль</h3>
+				<form method="GET" action="/admin/usermgr/setpassword">
+					<input type="text" name="password" placeholder="Новый пароль">
+					<input type="hidden" name="id" th:value="${id}">
+					<button type="submit">Изменить</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Изменить телеграм</h3>
+				<form method="GET" action="/admin/usermgr/settelegram">
+					<input type="text" name="telegram" placeholder="Новый telegram">
+					<input type="hidden" name="id" th:value="${id}">
+					<button type="submit">Изменить</button>
+				</form>
+			</div>
+			<button type="button" onclick="window.location.href = '/admin/usermgr'">Отмена</button>
+		</div>
+	</div>
+</body>
+
+</html>

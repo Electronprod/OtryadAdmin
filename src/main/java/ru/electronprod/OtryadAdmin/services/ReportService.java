@@ -13,16 +13,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Stats;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.helpers.PersonalStatsHelper;
-import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
+import ru.electronprod.OtryadAdmin.models.helpers.SquadMarksDataModel;
 
+@Slf4j
 @Service
-public class StatsHelperService {
+public class ReportService {
 	@Autowired
 	private OptionService optionServ;
 	@Autowired
@@ -101,7 +103,7 @@ public class StatsHelperService {
 	}
 
 	@Transactional
-	public void squad_mark(StatsFormHelper detail, String eventType, User user) throws Exception {
+	public void squad_mark(SquadMarksDataModel detail, String eventType, User user) throws Exception {
 		// TODO eventType check and search
 		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
 		List<Stats> resultArray = new ArrayList<Stats>(); // Result we will add to database
@@ -136,5 +138,6 @@ public class StatsHelperService {
 		}
 		// Saving result to database
 		dbservice.getStatsService().saveAll(resultArray);
+		log.info("User " + user.getLogin() + " marked " + resultArray.size() + " people. EventID: " + event_id);
 	}
 }

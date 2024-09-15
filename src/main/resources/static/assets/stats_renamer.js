@@ -23,7 +23,7 @@ function replaceText(replacements) {
 }
 
 // Пример URL для GET-запроса
-const url = window.location.origin + '/api/getrenamerdata'; // Замените на нужный URL
+const url = window.location.origin + '/api/getrenamerdata';
 
 // Основная функция для выполнения GET-запроса и замены текста
 async function main() {

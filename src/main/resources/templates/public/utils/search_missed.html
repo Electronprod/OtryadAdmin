@@ -1,0 +1,5 @@
+<form id="uploadForm" method="post" action="/public/utils/search_missed" enctype="multipart/form-data">
+	<input type="hidden" name="${csrfParam}" value="${csrfToken}"><!-- CSRF токен -->
+	<input type="file" name="file" accept=".csv" required>
+	<button type="submit">Загрузить</button>
+</form>

@@ -14,8 +14,8 @@
 		<thead>
 			<tr>
 				<th>ID<br><button onclick="sortTable(0)" class="sortbtn">Сортировать</button></th>
-				<th>Имя<br><button onclick="sortTable(1)" class="sortbtn">Сортировать</button></th>
-				<th>Фамилия<br><button onclick="sortTable(2)" class="sortbtn">Сортировать</button></th>
+				<th>Фамилия<br><button onclick="sortTable(1)" class="sortbtn">Сортировать</button></th>
+				<th>Имя<br><button onclick="sortTable(2)" class="sortbtn">Сортировать</button></th>
 				<th>Отчество<br><button onclick="sortTable(3)" class="sortbtn">Сортировать</button></th>
 				<th>ДР<br><button onclick="sortTable(4)" class="sortbtn">Сортировать</button></th>
 				<th>Школа<br><button onclick="sortTable(5)" class="sortbtn">Сортировать</button></th>
@@ -28,8 +28,8 @@
 		<tbody>
 			<tr th:each="human : ${humans}">
 				<td th:text="${human.id}"></td>
-				<td th:text="${human.name}"></td>
 				<td th:text="${human.lastname}"></td>
+				<td th:text="${human.name}"></td>
 				<td th:text="${human.surname}"></td>
 				<td th:text="${human.birthday}"></td>
 				<td th:text="${human.school}"></td>

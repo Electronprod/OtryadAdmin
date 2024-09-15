@@ -26,9 +26,9 @@ import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.User;
-import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
+import ru.electronprod.OtryadAdmin.models.helpers.SquadMarksDataModel;
 import ru.electronprod.OtryadAdmin.services.SearchService;
-import ru.electronprod.OtryadAdmin.services.StatsHelperService;
+import ru.electronprod.OtryadAdmin.services.ReportService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +53,7 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 	@Autowired
 	private SearchService search;
 	@Autowired
-	private StatsHelperService statsServ;
+	private ReportService statsServ;
 
 	public TelegramBot() {
 		telegramClient = new OkHttpTelegramClient(getBotToken());
@@ -223,7 +223,6 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 			message = message.toLowerCase().replace(lang_config.getLanguage().get("tg_squadcommander_mark_check"), "")
 					.replaceFirst("\n", "");
 			Map<Integer, String> details = new HashMap<Integer, String>(); // human ID + Reason
-			log.debug("I save the message:\n" + message);
 			String[] lines = message.split("\n");
 			if (!lines[0].contains("!")) {
 				throw new Exception(lang_config.getLanguage().get("tg_squadcommander_error_event"));
@@ -231,7 +230,7 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 			String event = OptionService.getKeyByValue(optionServ.getEvent_types(),
 					search.findMostSimilarEvent(lines[0].replaceFirst("!", "")));
 			if (optionServ.getEvent_types().containsKey(event) == false) {
-				log.warn("Found unknown event: " + event + " Original: " + lines[0]);
+				log.error("Found unknown event: " + event + " Original: " + lines[0]);
 				throw new Exception(lang_config.getLanguage().get("tg_squadcommander_error_event"));
 			}
 			// Recognizing people
@@ -246,9 +245,10 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 						search.findMostSimilarReason(spl[1]));
 				details.put(Integer.parseInt(spl[0].split(";")[0]), reason);
 			}
-			StatsFormHelper helper = new StatsFormHelper();
+			SquadMarksDataModel helper = new SquadMarksDataModel();
 			helper.setDetails(details);
 			statsServ.squad_mark(helper, event, user);
+			log.info("Marked people from Telegram Bot.");
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -262,7 +262,6 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 			throws TelegramApiException {
 		try {
 			original_message = original_message.toLowerCase().replace("report", "").replaceFirst("\n", "");
-			log.debug("I recognize the message:\n" + original_message);
 			String[] lines = original_message.split("\n");
 			// Recognizing event
 			if (!lines[0].contains("!")) {
