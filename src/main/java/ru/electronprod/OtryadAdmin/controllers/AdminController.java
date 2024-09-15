@@ -85,15 +85,45 @@ public class AdminController {
 		return "redirect:/admin/usermgr?saved";
 	}
 
-	@GetMapping("/usermgr/updatetg")
-	public String userManager_setTelegram(@RequestParam() int id, @RequestParam() String tg) {
+	@GetMapping("/usermgr/edit")
+	public String userManager_edit(@RequestParam() int id, Model model) {
+		model.addAttribute("id", id);
+		return "admin/usermgr/usermgr_edit";
+	}
+
+	@GetMapping("/usermgr/settelegram")
+	public String userManager_setTelegram(@RequestParam() int id, @RequestParam() String telegram) {
 		Optional<User> user = dbservice.getUserService().findById(id);
 		if (user.isEmpty()) {
 			return "redirect:/admin/usermgr?error";
 		}
 		User usr = user.get();
-		usr.setTelegram(tg);
+		usr.setTelegram(telegram);
 		dbservice.getUserService().save(usr);
+		return "redirect:/admin/usermgr?saved";
+	}
+
+	@GetMapping("/usermgr/setlogin")
+	public String userManager_setLogin(@RequestParam() int id, @RequestParam() String login) {
+		Optional<User> user = dbservice.getUserService().findById(id);
+		if (user.isEmpty()) {
+			return "redirect:/admin/usermgr?error";
+		}
+		User usr = user.get();
+		usr.setLogin(login);
+		dbservice.getUserService().save(usr);
+		return "redirect:/admin/usermgr?saved";
+	}
+
+	@GetMapping("/usermgr/setpassword")
+	public String userManager_setPassword(@RequestParam() int id, @RequestParam() String password) {
+		Optional<User> user = dbservice.getUserService().findById(id);
+		if (user.isEmpty()) {
+			return "redirect:/admin/usermgr?error";
+		}
+		User usr = user.get();
+		usr.setPassword(password);
+		dbservice.getUserService().register(usr);
 		return "redirect:/admin/usermgr?saved";
 	}
 

@@ -5,7 +5,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class StatsFormHelper {
+public class SquadMarksDataModel {
     private Map<Integer, String> details;
 
     // Getters and Setters

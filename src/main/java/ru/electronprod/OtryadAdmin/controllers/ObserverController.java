@@ -1,5 +1,8 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,16 +10,16 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.*;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.Stats;
-import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.SearchService;
-import ru.electronprod.OtryadAdmin.services.StatsHelperService;
+import ru.electronprod.OtryadAdmin.services.ReportService;
 
 @Controller
 @RequestMapping("/observer")
@@ -27,7 +30,7 @@ public class ObserverController {
 	@Autowired
 	private AuthHelper authHelper;
 	@Autowired
-	private StatsHelperService statsHelper;
+	private ReportService statsHelper;
 
 	/*
 	 * Overview page

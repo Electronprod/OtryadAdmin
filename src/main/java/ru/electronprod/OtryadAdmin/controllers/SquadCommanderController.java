@@ -12,9 +12,9 @@ import ru.electronprod.OtryadAdmin.data.filesystem.LanguageService;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
-import ru.electronprod.OtryadAdmin.models.helpers.StatsFormHelper;
+import ru.electronprod.OtryadAdmin.models.helpers.SquadMarksDataModel;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
-import ru.electronprod.OtryadAdmin.services.StatsHelperService;
+import ru.electronprod.OtryadAdmin.services.ReportService;
 
 @Slf4j
 @Controller
@@ -28,7 +28,7 @@ public class SquadCommanderController {
 	@Autowired
 	private OptionService optionService;
 	@Autowired
-	private StatsHelperService statsHelper;
+	private ReportService statsHelper;
 
 	@GetMapping("")
 	public String overview(Model model) {
@@ -68,7 +68,7 @@ public class SquadCommanderController {
 	}
 
 	@PostMapping("/mark")
-	public String markAbsent(@ModelAttribute StatsFormHelper detail, @RequestParam("statsType") String statsType) {
+	public String markAbsent(@ModelAttribute SquadMarksDataModel detail, @RequestParam("statsType") String statsType) {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
@@ -87,7 +87,7 @@ public class SquadCommanderController {
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		try {
-			StatsFormHelper s = new StatsFormHelper();
+			SquadMarksDataModel s = new SquadMarksDataModel();
 			s.setDetails(new HashMap<Integer, String>());
 			statsHelper.squad_mark(s, statsType, user);
 		} catch (Exception e) {
