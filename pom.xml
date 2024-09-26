@@ -11,9 +11,9 @@
 	</parent>
 	<groupId>ru.electronprod</groupId>
 	<artifactId>OtryadAdmin</artifactId>
-	<version>1.2</version>
+	<version>1.2.1</version>
 	<name>OtryadAdmin</name>
-	<description>Statistics application developed for otryad-nadezhda.ru</description>
+	<description>Statistics application</description>
 	<url />
 	<licenses>
 		<license />
