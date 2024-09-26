@@ -1,5 +1,8 @@
 HELP.md
 telegram_config.txt
+telegram_language.txt
+data_config.txt
+global_config.json
 target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/

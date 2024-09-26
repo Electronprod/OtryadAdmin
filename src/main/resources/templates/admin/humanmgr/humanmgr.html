@@ -24,7 +24,8 @@
 				<th onclick="sortTable(5)">Школа</th>
 				<th onclick="sortTable(6)">Класс</th>
 				<th onclick="sortTable(7)">Телефон</th>
-				<th onclick="sortTable(8)">Звено</th>
+				<th onclick="sortTable(8)">Командир</th>
+				<th onclick="sortTable(9)">Звено</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -37,6 +38,7 @@
 				<td th:text="${human.school}"></td>
 				<td th:text="${human.classnum}"></td>
 				<td th:text="${human.phone}"></td>
+				<td th:text="${human.squad.commanderName}"></td>
 				<td th:text="${human.squad.squadName}"></td>
 			</tr>
 		</tbody>

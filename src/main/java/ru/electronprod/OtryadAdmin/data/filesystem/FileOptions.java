@@ -12,19 +12,25 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.locks.LockSupport;
 
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * Simple methods for interaction with file. Contains: file loader,file
  * writer,JSON parser
  * 
  * @author Electron
  */
+@Slf4j
 public class FileOptions {
 	private static void log(String msg) {
-		return;
+		log.debug(msg);
 	}
 
 	private static void logerr(String msg) {
-		System.err.println(msg);
+		log.error(msg);
 	}
 
 	/**
@@ -124,5 +130,39 @@ public class FileOptions {
 			e.printStackTrace(); // Логируем ошибку, если она возникла
 			throw e; // Прокидываем исключение дальше
 		}
+	}
+
+	/**
+	 * JSON format checker & loader
+	 * 
+	 * @param d - string in JSON format
+	 * @return Object JSON
+	 */
+	public static Object ParseJs(String d) {
+		if (d == null) {
+			logerr("Error loading JSON. Please, check configs. Program will exit. \nError message: input string = null");
+			System.exit(1);
+			return null;
+		}
+		try {
+			Object obj = (new JSONParser()).parse(d);
+			return obj;
+		} catch (ParseException e) {
+			logerr("Error loading JSON. Please, check configs. Program will exit. \nError message: " + e.getMessage());
+			System.exit(1);
+			return null;
+		}
+	}
+
+	/**
+	 * JSON format checker & loader
+	 * 
+	 * @param d - string in JSON format
+	 * @return Object JSON
+	 * @throws ParseException
+	 */
+	public static Object ParseJsThrought(String d) throws ParseException {
+		Object obj = (new JSONParser()).parse(d);
+		return obj;
 	}
 }

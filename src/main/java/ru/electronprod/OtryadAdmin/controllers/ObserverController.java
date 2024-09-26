@@ -1,8 +1,5 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +7,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.*;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.News;
@@ -116,6 +111,13 @@ public class ObserverController {
 		return "public/statsview_rawtable";
 	}
 
+	@GetMapping("/stats/table")
+	public String statsTableAll(Model model) {
+		List<Stats> squads = dbservice.getStatsService().findAll();
+		model.addAttribute("statss", squads);
+		return "public/statsview_rawtable";
+	}
+
 	@GetMapping("/stats/personal")
 	public String personalStats(@RequestParam String name, Model model) {
 		Human human = SearchService.findMostSimilarHuman(name, dbservice.getHumanService().findAll());
@@ -143,5 +145,10 @@ public class ObserverController {
 	public String getAllData(Model model) {
 		model.addAttribute("humans", dbservice.getHumanService().findAll());
 		return "public/humans_rawtable";
+	}
+
+	@GetMapping("/utils")
+	public String utils_overview() {
+		return "observer/utils_overview";
 	}
 }

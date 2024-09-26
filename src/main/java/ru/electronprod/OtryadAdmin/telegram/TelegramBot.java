@@ -20,8 +20,8 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.filesystem.FileOptions;
-import ru.electronprod.OtryadAdmin.data.filesystem.LanguageService;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
+import ru.electronprod.OtryadAdmin.data.filesystem.AppLanguageRepository;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
@@ -41,13 +41,13 @@ import java.io.File;
 
 @Slf4j
 @Component
-public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThreadUpdateConsumer, InitializingBean {
+public class TelegramBot implements SpringLongPollingBot, InitializingBean, LongPollingSingleThreadUpdateConsumer {
 	private final TelegramClient telegramClient;
-	private File config = new File("telegram_config.txt");
+	private File botConfig = new File("telegram_config.txt");
 	@Autowired
 	private DBService db;
 	@Autowired
-	private LanguageService lang_config;
+	private AppLanguageRepository lang_config;
 	@Autowired
 	private OptionService optionServ;
 	@Autowired
@@ -61,14 +61,14 @@ public class TelegramBot implements SpringLongPollingBot, LongPollingSingleThrea
 
 	@Override
 	public void afterPropertiesSet() {
-		if (FileOptions.loadFile(config) || FileOptions.getFileLines(config.getPath()).isEmpty()) {
-			FileOptions.writeFile("your_token_here", config);
+		if (FileOptions.loadFile(botConfig) || FileOptions.getFileLines(botConfig.getPath()).isEmpty()) {
+			FileOptions.writeFile("your_token_here", botConfig);
 		}
 	}
 
 	@Override
 	public String getBotToken() {
-		return FileOptions.getFileLine(config);
+		return FileOptions.getFileLine(botConfig);
 	}
 
 	@Override

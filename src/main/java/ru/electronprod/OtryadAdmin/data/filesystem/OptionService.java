@@ -8,13 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@Repository
 public class OptionService implements InitializingBean {
 	@Getter
 	private Map<String, String> event_types = new LinkedHashMap<String, String>();
