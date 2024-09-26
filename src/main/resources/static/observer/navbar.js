@@ -1,16 +1,16 @@
 var csrfToken = document.querySelector('input[name="_csrf"]').value;
 document.addEventListener('DOMContentLoaded', function() {
-    const pages = [
-        { name: 'Главная', url: '/observer' },
-        { name: 'Статистика', url: '/observer/stats' },
-        { name: 'Список отряда', url: '/observer/data' }
-    ];
+	const pages = [
+		{ name: 'Главная', url: '/observer' },
+		{ name: 'Статистика', url: '/observer/stats' },
+		{ name: 'Список отряда', url: '/observer/data' }
+	];
 
-    const navbar = document.getElementById('navbar');
+	const navbar = document.getElementById('navbar');
 
-    // Adding styles dynamically
-    const style = document.createElement('style');
-    style.textContent = `
+	// Adding styles dynamically
+	const style = document.createElement('style');
+	style.textContent = `
         #navbar {
             display: flex;
             align-items: center;
@@ -62,40 +62,40 @@ document.addEventListener('DOMContentLoaded', function() {
             border: 2px solid #f44336;
         }
     `;
-    
-    document.head.appendChild(style);
 
-    // Adding site icon dynamically
-    const icon = document.createElement('img');
-    icon.src = '/icon.png'; // Замените на путь к вашей иконке
-    icon.alt = 'Site Icon';
-    navbar.appendChild(icon);
+	document.head.appendChild(style);
 
-    // Constructing navbar
-    pages.forEach(page => {
-        const link = document.createElement('a');
-        link.href = page.url;
-        link.textContent = page.name;
-        navbar.appendChild(link);
-    });
+	// Adding site icon dynamically
+	const icon = document.createElement('img');
+	icon.src = '/icon.png'; // Замените на путь к вашей иконке
+	icon.alt = 'Site Icon';
+	navbar.appendChild(icon);
 
-    // Adding logout form
-    const logoutForm = document.createElement('form');
-    logoutForm.id = 'logoutForm';
-    logoutForm.method = 'POST';
-    logoutForm.action = '/auth/logout';
+	// Constructing navbar
+	pages.forEach(page => {
+		const link = document.createElement('a');
+		link.href = page.url;
+		link.textContent = page.name;
+		navbar.appendChild(link);
+	});
 
-    // Adding CSRF token if needed
-    const csrfTokenInput = document.createElement('input');
-    csrfTokenInput.type = 'hidden';
-    csrfTokenInput.name = '_csrf'; // Замените на имя поля CSRF токена, если используется
-    csrfTokenInput.value = csrfToken; // Замените на значение CSRF токена
-    logoutForm.appendChild(csrfTokenInput);
+	// Adding logout form
+	const logoutForm = document.createElement('form');
+	logoutForm.id = 'logoutForm';
+	logoutForm.method = 'POST';
+	logoutForm.action = '/auth/logout';
 
-    const logoutButton = document.createElement('button');
-    logoutButton.type = 'submit';
-    logoutButton.textContent = 'Выйти';
-    logoutForm.appendChild(logoutButton);
+	// Adding CSRF token if needed
+	const csrfTokenInput = document.createElement('input');
+	csrfTokenInput.type = 'hidden';
+	csrfTokenInput.name = '_csrf'; // Замените на имя поля CSRF токена, если используется
+	csrfTokenInput.value = csrfToken; // Замените на значение CSRF токена
+	logoutForm.appendChild(csrfTokenInput);
 
-    navbar.appendChild(logoutForm);
+	const logoutButton = document.createElement('button');
+	logoutButton.type = 'submit';
+	logoutButton.textContent = 'Выйти';
+	logoutForm.appendChild(logoutButton);
+
+	navbar.appendChild(logoutForm);
 });

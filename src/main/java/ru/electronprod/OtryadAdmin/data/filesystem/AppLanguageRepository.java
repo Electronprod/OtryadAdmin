@@ -8,14 +8,18 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
-public class LanguageService implements InitializingBean {
+@Repository
+public class AppLanguageRepository implements InitializingBean {
 	@Getter
 	private Map<String, String> language = new HashMap<String, String>();
 
@@ -26,8 +30,8 @@ public class LanguageService implements InitializingBean {
 			try {
 				writeDefaults(config);
 			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
+				log.error("Error writing defaults to " + config.getName());
+				throw e;
 			}
 		}
 		// Loading data from file
