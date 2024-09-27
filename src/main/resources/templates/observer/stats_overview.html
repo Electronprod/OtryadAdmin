@@ -19,6 +19,21 @@
 			border-radius: 5px;
 			box-sizing: border-box;
 		}
+	    .container {
+	        display: flex;
+	        justify-content: space-between;
+	        border: 1px solid #ccc;
+			border-style: none;
+	        padding: 10px;
+	    }
+	    .cardc {
+	        flex: 1;
+	        margin: 5px;
+	        padding: 10px;
+			border-radius: 5px;
+	        border: 1px solid #ddd;
+			background-color: rgb(249, 250, 251);
+	    }
 	</style>
 	<link rel="icon" href="/icon.png">
 	<script src="/public_resources/sweetalert2.js"></script>
@@ -31,13 +46,24 @@
 	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
-			<div class="card">
-				<h3>Суммарная статистика</h3>
-				<p>
-					<b>Всего ребят:</b> <span th:text="${people_size}"></span><br>
-					<b>Количество пропусков:</b> <span th:text="${people_missed}"></span><br>
-					<b>Количество посещений:</b> <span th:text="${people_attended}"></span>
-				</p>
+			<div class="container">
+				<div class="cardc">
+					<h3>Суммарная статистика</h3>
+					<p>
+						<b>Всего ребят:</b> <span th:text="${people_size}"></span><br>
+						<b>Количество пропусков:</b> <span th:text="${people_missed}"></span><br>
+						<b>Количество посещений:</b> <span th:text="${people_attended}"></span>
+					</p>
+				</div>
+
+				<div class="cardc">
+					<h3>Статистика за сегодня</h3>
+					<p>
+						<b>Количество пропусков:</b> <span th:text="${people_missed_today}"></span><br>
+						<b>Количество посещений:</b> <span th:text="${people_attended_today}"></span><br>
+						<b>Сегодня ребят отметили:</b> <span th:text="${commanders_marked_today}"></span> командиров.
+					</p>
+				</div>
 			</div>
 			<div class="card">
 				<h3>Звеньевая статистика</h3>
