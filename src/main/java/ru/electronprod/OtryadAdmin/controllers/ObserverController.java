@@ -2,6 +2,8 @@ package ru.electronprod.OtryadAdmin.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.*;
@@ -64,6 +66,12 @@ public class ObserverController {
 		model.addAttribute("people_size", dbservice.getHumanService().getSize());
 		model.addAttribute("people_missed", dbservice.getStatsService().countByIsPresent(false));
 		model.addAttribute("people_attended", dbservice.getStatsService().countByIsPresent(true));
+		model.addAttribute("people_missed_today", dbservice.getStatsService().findByDate(dbservice.getStringDate())
+				.stream().filter(stats -> !stats.isPresent()).count());
+		model.addAttribute("people_attended_today", dbservice.getStatsService().findByDate(dbservice.getStringDate())
+				.stream().filter(stats -> stats.isPresent()).count());
+		model.addAttribute("commanders_marked_today", dbservice.getStatsService().findByDate(dbservice.getStringDate())
+				.stream().map(Stats::getAuthor).distinct().count());
 		return "observer/stats_overview";
 	}
 
