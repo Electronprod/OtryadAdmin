@@ -11,7 +11,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
-import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.Stats;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
@@ -34,25 +33,8 @@ public class ObserverController {
 	 */
 	@GetMapping("")
 	public String overview(Model model) {
-		model.addAttribute("login", authHelper.getCurrentUser().getLogin());
-		model.addAttribute("newsList", dbservice.getNewsService().getLast5());
-		return "observer/overview";
-	}
-
-	/*
-	 * News creator form
-	 */
-	@GetMapping("/addnews")
-	public String addNews(Model model) {
-		model.addAttribute("news", new News());
-		return "observer/add_news";
-	}
-
-	@PostMapping("/addnews")
-	public String addNews(@ModelAttribute("user") News news) {
-		news.setAuthor(authHelper.getCurrentUser().getLogin());
-		dbservice.getNewsService().createNews(news);
-		return "redirect:/observer?published";
+		// A placeholder for the future
+		return "forward:/observer/stats";
 	}
 
 	/*
@@ -60,6 +42,8 @@ public class ObserverController {
 	 */
 	@GetMapping("/stats")
 	public String stats_overview(Model model) {
+		model.addAttribute("login", authHelper.getCurrentUser().getLogin());
+		model.addAttribute("user_role", authHelper.getCurrentUser().getRole());
 		// Squads view
 		model.addAttribute("squadList", dbservice.getSquadService().findAll());
 		// People view
@@ -153,10 +137,5 @@ public class ObserverController {
 	public String getAllData(Model model) {
 		model.addAttribute("humans", dbservice.getHumanService().findAll());
 		return "public/humans_rawtable";
-	}
-
-	@GetMapping("/utils")
-	public String utils_overview() {
-		return "observer/utils_overview";
 	}
 }

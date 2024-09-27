@@ -5,8 +5,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Статистика</title>
-	<link rel="stylesheet" href="/observer/default.css">
-	<link rel="stylesheet" href="/observer/data.css">
+	<link rel="stylesheet" href="/assets/default_style.css">
 	<style type="text/css">
 		input[type="text"],
 		input[type="password"],
@@ -19,21 +18,39 @@
 			border-radius: 5px;
 			box-sizing: border-box;
 		}
-	    .container {
-	        display: flex;
-	        justify-content: space-between;
-	        border: 1px solid #ccc;
+
+		.container {
+			display: flex;
+			justify-content: space-between;
+			border: 1px solid #ccc;
 			border-style: none;
-	        padding: 10px;
-	    }
-	    .cardc {
-	        flex: 1;
-	        margin: 5px;
-	        padding: 10px;
+			padding: 10px;
+		}
+
+		.cardc {
+			flex: 1;
+			margin: 5px;
+			padding: 10px;
 			border-radius: 5px;
-	        border: 1px solid #ddd;
+			border: 1px solid #ddd;
 			background-color: rgb(249, 250, 251);
-	    }
+		}
+
+		.admin-button {
+			background-color: red;
+			color: white;
+			/* Для лучшей читаемости текста на красном фоне */
+			border: none;
+			/* Убрать рамку, если требуется */
+			padding: 10px 20px;
+			/* Добавить отступы вокруг текста */
+			cursor: pointer;
+			/* Изменить курсор на указатель при наведении */
+		}
+
+		.admin-button:hover {
+			background-color: orangered;
+		}
 	</style>
 	<link rel="icon" href="/icon.png">
 	<script src="/public_resources/sweetalert2.js"></script>
@@ -46,9 +63,18 @@
 	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
+			<div class="card">
+				<h3>Добро пожаловать, <span th:text="${login}"></span>!</h3>
+				<p>Это ваша панель наблюдателя. Сверху вы можете перейти в другие разделы сайта. Снизу находятся данные
+					о статистике. Приятного пользования!</p>
+				<div th:if="${user_role == 'ROLE_ADMIN'}">
+					<button onclick="window.location.href='/admin'" class="admin-button">Вернуться в панель
+						администратора</button>
+				</div>
+			</div>
 			<div class="container">
 				<div class="cardc">
-					<h3>Суммарная статистика</h3>
+					<h3>Общая статистика</h3>
 					<p>
 						<b>Всего ребят:</b> <span th:text="${people_size}"></span><br>
 						<b>Количество пропусков:</b> <span th:text="${people_missed}"></span><br>
@@ -89,8 +115,6 @@
 									статистике</button>
 							</td>
 						</tr>
-
-
 					</tbody>
 				</table>
 			</div>

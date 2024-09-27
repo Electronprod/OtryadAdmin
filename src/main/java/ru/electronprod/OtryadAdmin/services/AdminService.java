@@ -10,9 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.electronprod.OtryadAdmin.data.services.NewsService;
 import ru.electronprod.OtryadAdmin.data.services.UserService;
-import ru.electronprod.OtryadAdmin.models.News;
 import ru.electronprod.OtryadAdmin.models.User;
 
 @Slf4j
@@ -26,8 +24,6 @@ public class AdminService implements InitializingBean {
 
 	@Autowired
 	private UserService userService;
-	@Autowired
-	private NewsService newsService;
 
 	/**
 	 * Checks the existence of admin account
@@ -44,17 +40,6 @@ public class AdminService implements InitializingBean {
 		}
 
 		log.info("Admin registered. Use authorization data from application.properties file.");
-		if (newsService.findAll().isEmpty()) {
-			log.info("Couldn't find any news. Creating a new one...");
-
-			News news = new News();
-			news.setTitle("First launch!");
-			news.setAuthor("Generated automatically");
-			news.setContent("In this day this application was launched for the first time.");
-			newsService.createNews(news);
-
-			log.info("Created.");
-		}
 	}
 
 	public boolean isNativeAdmin(User person) {

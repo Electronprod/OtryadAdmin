@@ -22,8 +22,6 @@ public class DBService {
 	private HumanService humanService;
 	@Autowired
 	private StatsService statsService;
-	@Autowired
-	private NewsService newsService;
 
 	public static String getStringDate() {
 		Calendar calendar = Calendar.getInstance();
