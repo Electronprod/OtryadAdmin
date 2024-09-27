@@ -6,98 +6,245 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Авторизация</title>
 	<style>
-		body {
-			font-family: Arial, sans-serif;
-			background-color: #f5f5f5;
-			margin: 0;
-			padding: 0;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			height: 100vh;
+		@use postcss-preset-env {
+			stage: 0;
 		}
 
-		form {
-			border: 1px solid #ccc;
-			padding: 20px;
-			border-radius: 5px;
-			background-color: #fff;
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-			width: 90%;
-			/* Ширина формы адаптивна */
-			max-width: 400px;
-			/* Максимальная ширина для больших экранов */
+		/* helpers/align.css */
+
+		.align {
+			display: grid;
+			place-items: center;
 		}
 
-		label {
-			display: block;
-			margin-top: 10px;
-			font-size: 1rem;
-			/* Размер шрифта для легкости чтения */
+		/* helpers/grid.css */
+
+		:root {
+			--gridMaxWidth: 24em;
+			--gridWidth: 90%;
 		}
 
-		input {
-			width: 100%;
-			padding: 8px;
-			margin-top: 5px;
-			margin-bottom: 10px;
-			border: 1px solid #ccc;
-			border-radius: 5px;
+		.grid {
+			inline-size: var(--gridWidth);
+			margin-inline: auto;
+			max-inline-size: var(--gridMaxWidth);
+		}
+
+		/* helpers/icon.css */
+
+		.icon {
+			block-size: 1.25em;
+			display: inline-block;
+			inline-size: 1.25em;
+			line-height: 1.25em;
+			margin-right: 0.625em;
+			text-align: center;
+			vertical-align: middle;
+		}
+
+		.icon--info {
+			background-color: #e5e5e5;
+			border-radius: 50%;
+		}
+
+		/* layout/base.css */
+
+		:root {
+			--bodyBackgroundColor: #eaeaea;
+			--bodyColor: #999;
+			--bodyFontFamily: 'Helvetica', 'Arial';
+			--bodyFontFamilyFallback: sans-serif;
+			--bodyFontSize: 0.875rem;
+			--bodyFontWeight: 400;
+			--bodyLineHeight: 1.5;
+		}
+
+		*,
+		*::before,
+		*::after {
+			box-sizing: inherit;
+		}
+
+		html {
 			box-sizing: border-box;
 		}
 
-		input[type="submit"] {
-			background-color: #007bff;
-			color: white;
-			border: none;
-			padding: 10px 20px;
-			border-radius: 5px;
-			cursor: pointer;
-			font-size: 1rem;
-			/* Размер шрифта для кнопки */
+		body {
+			background-color: var(--bodyBackgroundColor);
+			font-family: var(--bodyFontFamily), var(--bodyFontFamilyFallback);
+			font-size: var(--bodyFontSize);
+			font-weight: var(--bodyFontWeight);
+			line-height: var(--bodyLineHeight);
+			margin: 0;
+			min-block-size: 100vh;
 		}
 
-		input[type="submit"]:hover {
-			background-color: #0056b3;
+		/* modules/anchor.css */
+
+		:root {
+			--anchorColor: inherit;
+			--anchorHoverColor: #1dabb8;
+		}
+
+		a {
+			color: var(--anchorColor);
+			text-decoration: none;
+			transition: color 0.3s;
+		}
+
+		a:hover {
+			color: var(--anchorHoverColor);
+		}
+
+		/* modules/form.css */
+
+		fieldset {
+			border: none;
+			margin: 0;
+		}
+
+		input {
+			appearance: none;
+			border: none;
+			font: inherit;
+			margin: 0;
+			outline: none;
+			padding: 0;
+		}
+
+		input[type='submit'] {
+			cursor: pointer;
+		}
+
+		.form input[type='login'],
+		.form input[type='password'] {
+			inline-size: 100%;
+		}
+
+		/* modules/login.css */
+
+		:root {
+			--loginBorderRadius: 0.25em;
+			--loginHeaderBackgroundColor: #282830;
+
+			--loginInputBorderRadius: 0.25em;
+		}
+
+		.login__header {
+			background-color: var(--loginHeaderBackgroundColor);
+			border-top-left-radius: var(--loginBorderRadius);
+			border-top-right-radius: var(--loginBorderRadius);
+			color: #fff;
+			padding: 1.5em;
+			text-align: center;
+			text-transform: uppercase;
+		}
+
+		.login__title {
+			font-size: 1rem;
+			margin: 0;
+		}
+
+		.login__body {
+			background-color: #fff;
+			padding: 1.5em;
+			position: relative;
+		}
+
+		.login__body::before {
+			background-color: #fff;
+			content: '';
+			height: 0.5em;
+			left: 50%;
+			margin-left: -0.25em;
+			margin-top: -0.25em;
+			position: absolute;
+			top: 0;
+			transform: rotate(45deg);
+			width: 0.5em;
+		}
+
+		.login input[type='login'],
+		.login input[type='password'] {
+			border: 0.0625em solid #e5e5e5;
+			padding: 1em 1.25em;
+		}
+
+		.login input[type='login'] {
+			border-top-left-radius: var(--loginInputBorderRadius);
+			border-top-right-radius: var(--loginInputBorderRadius);
+		}
+
+		.login input[type='password'] {
+			border-bottom-left-radius: var(--loginInputBorderRadius);
+			border-bottom-right-radius: var(--loginInputBorderRadius);
+			border-top: 0;
+		}
+
+		.login input[type='submit'] {
+			background-color: #1dabb8;
+			border-radius: var(--loginInputBorderRadius);
+			color: #fff;
+			font-weight: 700;
+			order: 1;
+			padding: 0.75em 1.25em;
+			transition: background-color 0.3s;
+		}
+
+		.login input[type='submit']:focus,
+		.login input[type='submit']:hover {
+			background-color: #198d98;
+		}
+
+		.login__footer {
+			align-items: center;
+			background-color: #fff;
+			border-bottom-left-radius: var(--loginBorderRadius);
+			border-bottom-right-radius: var(--loginBorderRadius);
+			display: flex;
+			justify-content: space-between;
+			padding-bottom: 1.5em;
+			padding-left: 1.5em;
+			padding-right: 1.5em;
+		}
+
+		.login__footer p {
+			margin: 0;
 		}
 
 		.error {
-			color: red;
+			color: #e74c3c;
 			margin-top: 10px;
-		}
-
-		@media (max-width: 600px) {
-			form {
-				padding: 15px;
-				/* Уменьшение отступов для маленьких экранов */
-			}
-
-			input[type="submit"] {
-				padding: 12px;
-				/* Увеличение области нажатия для кнопки */
-			}
+			font-size: 0.9rem;
 		}
 	</style>
 </head>
 
-<body>
+<body class="align">
+	<div class="grid">
+		<form method="post" class="form login" action="/process_login">
+			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			<header class="login__header">
+				<h3 class="login__title">Авторизация</h3>
+			</header>
 
-	<form name="f" method="post" action="/process_login">
-		<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+			<div class="login__body">
+				<div class="form__field">
+					<input type="login" name="username" id="username" placeholder="Логин" required />
+				</div>
+				<div class="form__field">
+					<input type="password" name="password" id="password" placeholder="Пароль" required />
+				</div>
+			</div>
 
-		<label for="username">Введите логин:</label>
-		<input type="text" name="username" id="username" required />
-		<br />
-		<label for="password">Введите пароль:</label>
-		<input type="password" name="password" id="password" required />
-		<br />
-		<input type="submit" value="Войти" />
+			<footer class="login__footer">
+				<input type="submit" value="Войти">
 
-		<div th:if="${param.error}" class="error">
-			Неверный логин или пароль.
-		</div>
-	</form>
-
+				<p class="error" th:if="${param.error}">Неверный логин или пароль.</p>
+			</footer>
+		</form>
+	</div>
 </body>
+
 
 </html>

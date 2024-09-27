@@ -1,0 +1,191 @@
+body {
+	font-family: 'Roboto', sans-serif;
+	background-color: #f4f7fa;
+	margin: 0;
+	padding: 0;
+	line-height: 1.6;
+	/* Улучшенное отображение текста на разных экранах */
+}
+
+#dashboard {
+	display: flex;
+	flex-wrap: wrap;
+	/* Разрешает перенос с flex-direction: row */
+}
+
+#content {
+	flex-grow: 1;
+	padding: 20px;
+	box-sizing: border-box;
+	/* Предотвращает переполнение за границы */
+	width: 100%;
+	/* Изменено для лучшей адаптивности */
+}
+
+.card,
+.card_2 {
+	background-color: #fff;
+	border-radius: 6px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	padding: 20px;
+	margin-bottom: 20px;
+	box-sizing: border-box;
+}
+
+.card h3 {
+	margin-top: 0;
+}
+
+.card_2 {
+	background-color: ghostwhite;
+	border-radius: 2px;
+	padding: 5px;
+	margin-bottom: 5px;
+}
+
+@media (max-width: 768px) {
+	#dashboard {
+		flex-direction: column;
+		/* Вертикальное направление на мобильных устройствах */
+	}
+
+	.card,
+	.card_2 {
+		padding: 15px;
+		/* Увеличиваем внутренние отступы для меньших экранов */
+	}
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+	#content {
+		padding: 15px;
+		/* Немного уменьшаем отступы для более компактного представления */
+	}
+}
+
+@media (min-width: 1025px) {
+	#dashboard {
+		flex-direction: row;
+		/* Горизонтальное направление на больших экранах */
+	}
+
+	#content {
+		padding: 30px;
+	}
+
+	.card,
+	.card_2 {
+		margin-bottom: 25px;
+		/* Предоставляем больше пространства на больших экранах */
+	}
+}
+
+/*Шов между default.css и data.css (старые файлы)*/
+
+input[type="date"] {
+	width: 100%;
+	/* Расширяем до 100% для лучшей адаптивности на меньших экранах */
+	max-width: 250px;
+	/* Ограничиваем максимальную ширину, чтобы не занимать слишком много места */
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+	font-size: 16px;
+	color: #333;
+	background-color: #f9f9f9;
+	transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+form {
+	display: flex;
+	flex-direction: column;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-bottom: 15px;
+}
+
+thead {
+	background-color: #4CAF50;
+	color: white;
+}
+
+thead th,
+tbody td {
+	padding: 10px;
+	text-align: center;
+}
+
+tbody tr:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+tbody tr:hover {
+	background-color: #ddd;
+}
+
+label {
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+select {
+	padding: 5px;
+	margin-bottom: 15px;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+	width: 100%;
+	/* Заполняет всю ширину */
+	max-width: 250px;
+	/* Ограничение максимальной ширины */
+}
+
+button {
+	background-color: #4CAF50;
+	color: white;
+	padding: 10px 15px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 16px;
+	width: auto;
+}
+
+.custom-checkbox {
+	width: 20px;
+	height: 20px;
+	accent-color: #4CAF50;
+}
+
+button:hover {
+	background-color: #45a049;
+}
+
+@media (max-width: 768px) {
+
+	input[type="date"],
+	select,
+	button {
+		max-width: 100%;
+		/* Убираем фиксированную размерность для небольших экранов */
+		font-size: 14px;
+		/* Небольшое уменьшение размера текста для компактности */
+		padding: 8px;
+		/* Уменьшенные отступы */
+	}
+
+	table thead th,
+	table tbody td {
+		padding: 8px;
+		font-size: 14px;
+	}
+
+	button {
+		padding: 10px;
+		width: 100%;
+		/* Разместить кнопку на всю ширину */
+	}
+}

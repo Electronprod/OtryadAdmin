@@ -31,18 +31,9 @@ public class SquadCommanderController {
 	private ReportService statsHelper;
 
 	@GetMapping("")
-	public String overview(Model model) {
-		User user = authHelper.getCurrentUser();
-		Squad squad = dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad();
-		// Session data
-		model.addAttribute("squadname", squad.getSquadName());
-		model.addAttribute("login", user.getLogin());
-		model.addAttribute("commander", squad.getCommanderName());
-		model.addAttribute("userid", user.getId());
-		model.addAttribute("squadid", squad.getId());
-		// News
-		model.addAttribute("newsList", dbservice.getNewsService().getLast5());
-		return "squadcommander/overview";
+	public String overview() {
+		// A placeholder for the future
+		return "forward:/squadcommander/mark";
 	}
 
 	@GetMapping("/humans")
@@ -64,6 +55,7 @@ public class SquadCommanderController {
 				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
 		model.addAttribute("reasons_for_absences_map", optionService.getReasons_for_absences());
 		model.addAttribute("event_types_map", optionService.getEvent_types());
+		model.addAttribute("login", user.getLogin());
 		return "squadcommander/mark";
 	}
 
@@ -102,14 +94,6 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		// Formatting date from 2024-07-24 to 24.07.2024
-//		try {
-//			String[] pieces = date.split("-");
-//			date = pieces[2] + "." + pieces[1] + "." + pieces[0];
-//		} catch (Exception e) {
-//			System.err.println("[/squadcommander/stats/date] date warn: " + e.getMessage());
-//			return "redirect:/squadcommander?server_incorrectreq";
-//		}
 		List<Stats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
 		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model.addAttribute("statss", statsList);
