@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		{ name: 'Главная', url: '/admin' },
 		{ name: 'Пользователи', url: '/admin/usermgr' },
 		{ name: 'Звенья', url: '/admin/squadmgr' },
-		{ name: 'Люди', url: '/admin/humanmgr' }
+		{ name: 'Люди', url: '/admin/humanmgr' },
+		{ name: 'Статистика', url: '/admin/statsmgr' }
 	];
 
 	const navbar = document.getElementById('navbar');

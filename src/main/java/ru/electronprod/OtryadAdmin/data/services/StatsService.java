@@ -1,6 +1,7 @@
 package ru.electronprod.OtryadAdmin.data.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +47,11 @@ public class StatsService {
 		statsRepository.delete(stats);
 	}
 
+	@Transactional
+	public void deleteAll(List<Stats> statsList) {
+		statsRepository.deleteAll(statsList);
+	}
+
 	// Удаление Stats по id
 	@Transactional
 	public void deleteById(int id) {
@@ -71,6 +77,11 @@ public class StatsService {
 	}
 
 	@Transactional(readOnly = true)
+	public List<Stats> findByEvent_id(int id) {
+		return statsRepository.findByEventId(id);
+	}
+
+	@Transactional(readOnly = true)
 	public int countByIsPresent(boolean isPresent) {
 		return statsRepository.countByIsPresent(isPresent);
 	}
@@ -78,5 +89,10 @@ public class StatsService {
 	@Transactional
 	public void saveAll(List<Stats> statsArr) {
 		statsRepository.saveAll(statsArr);
+	}
+
+	@Transactional(readOnly = true)
+	public List<Stats> findAll(Sort by) {
+		return statsRepository.findAll(by);
 	}
 }

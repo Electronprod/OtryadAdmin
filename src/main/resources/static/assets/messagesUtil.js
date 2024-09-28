@@ -5,6 +5,20 @@ if (window.location.href.includes("saved")) {
 		icon: "success"
 	});
 }
+if (window.location.href.includes("deleted")) {
+	Swal.fire({
+		title: "УСПЕХ!",
+		text: "Удалено.",
+		icon: "success"
+	});
+}
+if (window.location.href.includes("edited")) {
+	Swal.fire({
+		title: "УСПЕХ!",
+		text: "Отредактировано.",
+		icon: "success"
+	});
+}
 if (window.location.href.includes("published")) {
 	Swal.fire({
 		title: "УСПЕХ!",

@@ -14,6 +14,9 @@ public interface StatsRepository extends JpaRepository<Stats, Integer> {
 
 	List<Stats> findByDate(String date);
 
+	@Query("SELECT s FROM Stats s WHERE s.event_id = :eventId")
+	List<Stats> findByEventId(@Param("eventId") int eventId);
+
 	List<Stats> findByHuman(Human human);
 
 	@Query("SELECT MAX(e.event_id) FROM Stats e")

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Менеджер статистики</title>
+	<link rel="stylesheet" href="/assets/default_style.css">
+	<link rel="icon" href="/icon.png">
+	<script src="/public_resources/sweetalert2.js"></script>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+	<style type="text/css">
+		input[type="text"],
+		input[type="password"],
+		input[type="date"],
+		input[type="number"] {
+			width: 100%;
+			padding: 10px;
+			margin: 5px 0;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			box-sizing: border-box;
+		}
+
+		.container {
+			display: flex;
+			justify-content: space-between;
+			border: 1px solid #ccc;
+			border-style: none;
+			padding: 10px;
+		}
+
+		.cardc {
+			flex: 1;
+			margin: 5px;
+			padding: 10px;
+			border-radius: 5px;
+			border: 1px solid #ddd;
+			background-color: rgb(249, 250, 251);
+		}
+
+		.red-button {
+			background-color: red;
+			color: white;
+			/* Для лучшей читаемости текста на красном фоне */
+			border: none;
+			/* Убрать рамку, если требуется */
+			padding: 10px 20px;
+			/* Добавить отступы вокруг текста */
+			cursor: pointer;
+			/* Изменить курсор на указатель при наведении */
+		}
+
+		.red-button:hover {
+			background-color: orangered;
+		}
+
+		.blue-button {
+			background-color: royalblue;
+			color: white;
+			/* Для лучшей читаемости текста на красном фоне */
+			border: none;
+			/* Убрать рамку, если требуется */
+			padding: 10px 20px;
+			/* Добавить отступы вокруг текста */
+			cursor: pointer;
+			/* Изменить курсор на указатель при наведении */
+		}
+
+		.blue-button:hover {
+			background-color: blue;
+		}
+	</style>
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="navbar"></div>
+	<div id="dashboard">
+		<div id="content">
+			<div class="card">
+				<h2>Просмотреть таблицу статистики</h2>
+				<button onclick="window.location.href='/admin/statsmgr/table';">Просмотреть
+					таблицу</button>
+			</div>
+			<div class="card">
+				<h2>Редактировать статистику</h2>
+				<div class="container">
+					<div class="cardc">
+						<h4>Изменить дату по ID</h4>
+						<p>
+							Измените значение "дата" для одной записи
+						</p>
+						<form th:action="@{/admin/statsmgr/edit_date_single}" method="post">
+							<input placeholder="Введите ID" name="id" type="number" required />
+							<input name="date" type="date" required />
+							<button class="blue-button" type="submit">Редактировать</button>
+						</form>
+					</div>
+
+					<div class="cardc">
+						<h4>Изменить дату по EventID</h4>
+						<p>
+							Измените значение "дата" для многих записей
+						</p>
+						<form th:action="@{/admin/statsmgr/edit_date}" method="post">
+							<input placeholder="Введите EventID" name="eventid" type="number" required />
+							<input name="date" type="date" required />
+							<button class="blue-button" type="submit">Редактировать</button>
+						</form>
+					</div>
+				</div>
+				<div class="container">
+					<div class="cardc">
+						<h4>Изменить тип по ID</h4>
+						<p>
+							Измените значение "тип" для одной записи
+						</p>
+						<form th:action="@{/admin/statsmgr/edit_type_single}" method="post">
+							<input placeholder="Введите ID" name="id" type="number" required />
+							<select name="statsType" id="statsType" required>
+								<option th:each="entry : ${event_types_map}" th:value="${entry.key}"
+									th:text="${entry.value}">
+								</option>
+							</select>
+							<button class="blue-button" type="submit">Редактировать</button>
+						</form>
+					</div>
+
+					<div class="cardc">
+						<h4>Изменить тип по EventID</h4>
+						<p>
+							Измените значение "тип" для многих записей
+						</p>
+						<form th:action="@{/admin/statsmgr/edit_type}" method="post">
+							<input placeholder="Введите EventID" name="eventid" type="number" required />
+							<select name="statsType" id="statsType" required>
+								<option th:each="entry : ${event_types_map}" th:value="${entry.key}"
+									th:text="${entry.value}">
+								</option>
+							</select>
+							<button class="blue-button" type="submit">Редактировать</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="card">
+				<h2>Удаление</h2>
+				<div class="container">
+					<div class="cardc">
+						<h3>Удалить запись по ID</h3>
+						<p>
+							<b>Процесс необратим! Смотрите, что делаете!</b>
+						</p>
+						<form th:action="@{/admin/statsmgr/delete}" method="get">
+							<input placeholder="Введите ID" name="id" type="number" required />
+							<button class="red-button" type="submit">Удалить</button>
+						</form>
+					</div>
+
+					<div class="cardc">
+						<h3>Удалить записи по EventID</h3>
+						<p>
+							<b>Процесс необратим! Смотрите, что делаете!</b>
+						</p>
+						<form th:action="@{/admin/statsmgr/delete_event}" method="get">
+							<input placeholder="Введите EventID" name="id" type="number" required />
+							<button class="red-button" type="submit">Удалить</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="/admin/navbar.js"></script>
+<script src="/assets/messagesUtil.js"></script>
+
+</html>
