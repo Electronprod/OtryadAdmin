@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
+import ru.electronprod.OtryadAdmin.models.Stats;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.helpers.HumanHelper;
 import ru.electronprod.OtryadAdmin.models.helpers.SquadHelper;
@@ -37,6 +39,8 @@ public class AdminController {
 	private DBService dbservice;
 	@Autowired
 	private AdminService adminService;
+	@Autowired
+	private OptionService optionService;
 
 	/*
 	 * Main page
@@ -340,5 +344,83 @@ public class AdminController {
 		human = HumanHelper.fillDefaultValues(helper, human);
 		dbservice.getHumanService().save(human);
 		return "redirect:/admin/humanmgr?edited";
+	}
+
+	/*
+	 * Stats manager
+	 */
+	@GetMapping("/statsmgr")
+	public String statsManager(Model model) {
+		model.addAttribute("event_types_map", optionService.getEvent_types());
+		return "admin/statsmgr/statsmgr";
+	}
+
+	@GetMapping("/statsmgr/table")
+	public String statsManager_table(Model model) {
+		return "forward:/observer/stats/table";
+	}
+
+	@GetMapping("/statsmgr/delete_event")
+	public String statsManager_delete_byEventID(@RequestParam int id) {
+		List<Stats> stats = dbservice.getStatsService().findByEvent_id(id);
+		if (stats.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		dbservice.getStatsService().deleteAll(stats);
+		return "redirect:/admin/statsmgr?deleted";
+	}
+
+	@GetMapping("/statsmgr/delete")
+	public String statsManager_delete_byID(@RequestParam int id) {
+		Optional<Stats> stats = dbservice.getStatsService().findById(id);
+		if (stats.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		dbservice.getStatsService().delete(stats.get());
+		return "redirect:/admin/statsmgr?deleted";
+	}
+
+	@PostMapping("/statsmgr/edit_type")
+	public String statsManager_edit_type(@RequestParam int eventid, @RequestParam String statsType) {
+		List<Stats> stats = dbservice.getStatsService().findByEvent_id(eventid);
+		if (stats.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		stats.stream().forEach(stat -> stat.setType(statsType));
+		dbservice.getStatsService().saveAll(stats);
+		return "redirect:/admin/statsmgr?edited";
+	}
+
+	@PostMapping("/statsmgr/edit_type_single")
+	public String statsManager_edit_type_single(@RequestParam int id, @RequestParam String statsType) {
+		Optional<Stats> stats = dbservice.getStatsService().findById(id);
+		if (stats.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		stats.get().setType(statsType);
+		dbservice.getStatsService().save(stats.get());
+		return "redirect:/admin/statsmgr?edited";
+	}
+
+	@PostMapping("/statsmgr/edit_date")
+	public String statsManager_edit_date(@RequestParam int eventid, @RequestParam String date) {
+		List<Stats> stats = dbservice.getStatsService().findByEvent_id(eventid);
+		if (stats.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		stats.stream().forEach(stat -> stat.setDate(date.replaceAll("-", ".")));
+		dbservice.getStatsService().saveAll(stats);
+		return "redirect:/admin/statsmgr?edited";
+	}
+
+	@PostMapping("/statsmgr/edit_date_single")
+	public String statsManager_edit_date_single(@RequestParam int id, @RequestParam String date) {
+		Optional<Stats> stats = dbservice.getStatsService().findById(id);
+		if (stats.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		stats.get().setDate(date.replaceAll("-", "."));
+		dbservice.getStatsService().save(stats.get());
+		return "redirect:/admin/statsmgr?edited";
 	}
 }
