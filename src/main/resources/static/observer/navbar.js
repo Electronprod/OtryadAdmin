@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 	const navbar = document.getElementById('navbar');
 
-	// Adding styles dynamically
 	const style = document.createElement('style');
 	style.textContent = `
 #navbar {
@@ -87,6 +86,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 }
     `;
+
+	document.head.appendChild(style);
 
 	document.head.appendChild(style);
 

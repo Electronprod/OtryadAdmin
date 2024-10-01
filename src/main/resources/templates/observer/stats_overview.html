@@ -68,8 +68,8 @@
 				<p>Это ваша панель наблюдателя. Сверху вы можете перейти в другие разделы сайта. Снизу находятся данные
 					о статистике. Приятного пользования!</p>
 				<div th:if="${user_role == 'ROLE_ADMIN'}">
-					<button onclick="window.location.href='/admin'" class="admin-button">Вернуться в панель
-						администратора</button>
+					<a href="/admin" class="admin-button">Вернуться в панель
+						администратора</a>
 				</div>
 			</div>
 			<div class="container">
@@ -123,7 +123,7 @@
 				<p>Посмотрите посещения в выбранную дату.</p>
 				<form id="date-form" action="/observer/stats/date">
 					<label for="date">Дата:</label>
-					<input type="date" id="date" name="date">
+					<input type="date" id="date" name="date" required>
 					<br>
 					<button type="submit">Посмотреть</button>
 				</form>
@@ -132,7 +132,7 @@
 				<h3>Просмотр персональной статистики</h3>
 				<p>Посмотрите статистику для человека. Введите его ФИ в строку ниже и нажмите кнопку "найти"</p>
 				<form th:action="@{/observer/stats/personal}" method="get">
-					<input placeholder="Введите ФИ" name="name" type="text" />
+					<input placeholder="Введите ФИ" name="name" type="text" required />
 					<button type="submit">Найти</button>
 				</form>
 			</div>
@@ -140,13 +140,13 @@
 				<h3>Просмотр персональной таблицы данных</h3>
 				<p>Посмотрите таблицу данных для человека. Введите его ФИ в строку ниже и нажмите кнопку "найти"</p>
 				<form th:action="@{/observer/stats/personal/table}" method="get">
-					<input placeholder="Введите ФИ" name="name" type="text" />
+					<input placeholder="Введите ФИ" name="name" type="text" required />
 					<button type="submit">Найти</button>
 				</form>
 			</div>
 			<div class="card">
 				<h3>Посмотреть всю таблицу посещений</h3>
-				<button onclick="window.location.href='/observer/stats/table'">Перейти</button>
+				<a class="greenbtn" href="/observer/stats/table">Перейти</a>
 			</div>
 		</div>
 	</div>

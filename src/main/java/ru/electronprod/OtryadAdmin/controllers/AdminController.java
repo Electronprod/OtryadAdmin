@@ -352,6 +352,7 @@ public class AdminController {
 	@GetMapping("/statsmgr")
 	public String statsManager(Model model) {
 		model.addAttribute("event_types_map", optionService.getEvent_types());
+		model.addAttribute("reasons_for_absences_map", optionService.getReasons_for_absences());
 		return "admin/statsmgr/statsmgr";
 	}
 
@@ -420,6 +421,29 @@ public class AdminController {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.get().setDate(date.replaceAll("-", "."));
+		dbservice.getStatsService().save(stats.get());
+		return "redirect:/admin/statsmgr?edited";
+	}
+
+	@PostMapping("/statsmgr/edit_reason")
+	public String statsManager_edit_reason(@RequestParam int eventid, @RequestParam String reason) {
+		List<Stats> statsList = dbservice.getStatsService().findByEvent_id(eventid);
+		statsList.removeIf(stats -> stats.isPresent());
+		if (statsList.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		statsList.stream().forEach(stat -> stat.setReason(reason));
+		dbservice.getStatsService().saveAll(statsList);
+		return "redirect:/admin/statsmgr?edited";
+	}
+
+	@PostMapping("/statsmgr/edit_reason_single")
+	public String statsManager_edit_reason_single(@RequestParam int id, @RequestParam String reason) {
+		Optional<Stats> stats = dbservice.getStatsService().findById(id);
+		if (stats.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		stats.get().setReason(reason);
 		dbservice.getStatsService().save(stats.get());
 		return "redirect:/admin/statsmgr?edited";
 	}

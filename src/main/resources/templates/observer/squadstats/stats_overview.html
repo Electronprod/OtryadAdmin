@@ -33,7 +33,7 @@
 				<p>Посмотрите посещения в выбранную дату.</p>
 				<form id="date-form" method="get" onsubmit="return submitForm()">
 					<label for="date">Дата:</label>
-					<input type="date" id="date" name="date">
+					<input type="date" id="date" name="date" required>
 					<br>
 					<button type="submit">Посмотреть</button>
 				</form>
@@ -45,11 +45,8 @@
 	function submitForm() {
 		const form = document.getElementById('date-form');
 		const dateInput = document.getElementById('date').value;
-		// Получаем текущий адрес страницы
 		const currentUrl = window.location.href;
-		// Формируем новый URL
 		const newUrl = `${currentUrl}/date?${dateInput}`;
-		// Изменяем действие формы
 		form.action = newUrl;
 		return true;
 	}
