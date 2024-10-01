@@ -7,6 +7,10 @@ body {
 	/* Улучшенное отображение текста на разных экранах */
 }
 
+a {
+	text-decoration: none;
+}
+
 #dashboard {
 	display: flex;
 	flex-wrap: wrap;
@@ -143,7 +147,8 @@ select {
 	/* Ограничение максимальной ширины */
 }
 
-button {
+button,
+.greenbtn {
 	background-color: #4CAF50;
 	color: white;
 	padding: 10px 15px;
@@ -161,6 +166,10 @@ button {
 }
 
 button:hover {
+	background-color: #45a049;
+}
+
+.greenbtn:hover {
 	background-color: #45a049;
 }
 

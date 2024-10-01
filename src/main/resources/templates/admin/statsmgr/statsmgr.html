@@ -56,7 +56,7 @@
 		}
 
 		.blue-button {
-			background-color: royalblue;
+			background-color: blue;
 			color: white;
 			/* Для лучшей читаемости текста на красном фоне */
 			border: none;
@@ -68,7 +68,7 @@
 		}
 
 		.blue-button:hover {
-			background-color: blue;
+			background-color: royalblue;
 		}
 	</style>
 </head>
@@ -81,8 +81,8 @@
 		<div id="content">
 			<div class="card">
 				<h2>Просмотреть таблицу статистики</h2>
-				<button onclick="window.location.href='/admin/statsmgr/table';">Просмотреть
-					таблицу</button>
+				<a class="greenbtn" href="/admin/statsmgr/table">Просмотреть
+					таблицу</a>
 			</div>
 			<div class="card">
 				<h2>Редактировать статистику</h2>
@@ -137,6 +137,38 @@
 							<input placeholder="Введите EventID" name="eventid" type="number" required />
 							<select name="statsType" id="statsType" required>
 								<option th:each="entry : ${event_types_map}" th:value="${entry.key}"
+									th:text="${entry.value}">
+								</option>
+							</select>
+							<button class="blue-button" type="submit">Редактировать</button>
+						</form>
+					</div>
+				</div>
+				<div class="container">
+					<div class="cardc">
+						<h4>Изменить причину отсутствия по ID</h4>
+						<p>
+							Измените причину отсутствия для одной записи
+						</p>
+						<form th:action="@{/admin/statsmgr/edit_reason_single}" method="post">
+							<input placeholder="Введите ID" name="id" type="number" required />
+							<select name="reason" id="reason" required>
+								<option th:each="entry : ${reasons_for_absences_map}" th:value="${entry.key}"
+									th:text="${entry.value}">
+								</option>
+							</select>
+							<button class="blue-button" type="submit">Редактировать</button>
+						</form>
+					</div>
+					<div class="cardc">
+						<h4>Изменить причины отсутствия по EventID</h4>
+						<p>
+							Измените причину отсутствия для многих записей
+						</p>
+						<form th:action="@{/admin/statsmgr/edit_reason}" method="post">
+							<input placeholder="Введите EventID" name="eventid" type="number" required />
+							<select name="reason" id="reason" required>
+								<option th:each="entry : ${reasons_for_absences_map}" th:value="${entry.key}"
 									th:text="${entry.value}">
 								</option>
 							</select>
