@@ -94,6 +94,12 @@ public class ObserverController {
 		return "observer/squadstats/general_stats";
 	}
 
+	@GetMapping("/stats/all/report")
+	public String SquadStatsReport(Model model) {
+		model.addAttribute("dataMap", statsHelper.squad_generateGlobalReport(dbservice.getStatsService().findAll()));
+		return "observer/squadstats/general_stats";
+	}
+
 	@GetMapping("/stats/squad/{id}/table")
 	public String statsTable(@PathVariable("id") int id, Model model) {
 		Optional<Squad> squad = dbservice.getSquadService().findById(id);
