@@ -12,7 +12,7 @@
 	<table id="userTable">
 		<thead>
 			<tr>
-				<th>ID<br><button onclick="sortTable(0)" class="sortbtn">Сортировать</button></th>
+				<th>№<br><button onclick="sortTable(0)" class="sortbtn">Сортировать</button></th>
 				<th>Фамилия<br><button onclick="sortTable(1)" class="sortbtn">Сортировать</button></th>
 				<th>Имя<br><button onclick="sortTable(2)" class="sortbtn">Сортировать</button></th>
 				<th>Отчество<br><button onclick="sortTable(3)" class="sortbtn">Сортировать</button></th>
@@ -22,11 +22,12 @@
 				<th>Телефон<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
 				<th>Звено<br><button onclick="sortTable(8)" class="sortbtn">Сортировать</button></th>
 				<th>Командир<br><button onclick="sortTable(9)" class="sortbtn">Сортировать</button></th>
+				<th>ID<br><button onclick="sortTable(10)" class="sortbtn">Сортировать</button></th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr th:each="human : ${humans}">
-				<td th:text="${human.id}"></td>
+			<tr th:each="human, iterStat : ${humans}">
+				<td th:text="${iterStat.index + 1}"></td>
 				<td th:text="${human.lastname}"></td>
 				<td th:text="${human.name}"></td>
 				<td th:text="${human.surname}"></td>
@@ -36,6 +37,7 @@
 				<td th:text="${human.phone}"></td>
 				<td th:text="${human.squad.squadName}"></td>
 				<td th:text="${human.squad.commanderName}"></td>
+				<td th:text="${human.id}"></td>
 			</tr>
 		</tbody>
 	</table>
