@@ -5,50 +5,50 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ru.electronprod.OtryadAdmin.data.repositories.StatsRepository;
+import ru.electronprod.OtryadAdmin.data.repositories.SquadStatsRepository;
 import ru.electronprod.OtryadAdmin.models.Human;
-import ru.electronprod.OtryadAdmin.models.Stats;
+import ru.electronprod.OtryadAdmin.models.SquadStats;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class StatsService {
+public class SquadStatsService {
 
 	@Autowired
-	private StatsRepository statsRepository;
+	private SquadStatsRepository statsRepository;
 
 	// Получение всех Stats
 	@Transactional(readOnly = true)
-	public List<Stats> findAll() {
+	public List<SquadStats> findAll() {
 		return statsRepository.findAll();
 	}
 
 	// Получение Stats по id
 	@Transactional(readOnly = true)
-	public Optional<Stats> findById(int id) {
+	public Optional<SquadStats> findById(int id) {
 		return statsRepository.findById(id);
 	}
 
 	@Transactional(readOnly = true)
-	public List<Stats> findByDate(String date) {
+	public List<SquadStats> findByDate(String date) {
 		return statsRepository.findByDate(date);
 	}
 
 	// Сохранение нового или обновлённого Stats
 	@Transactional
-	public Stats save(Stats stats) {
+	public SquadStats save(SquadStats stats) {
 		return statsRepository.save(stats);
 	}
 
 	// Удаление Stats по объекту
 	@Transactional
-	public void delete(Stats stats) {
+	public void delete(SquadStats stats) {
 		statsRepository.delete(stats);
 	}
 
 	@Transactional
-	public void deleteAll(List<Stats> statsList) {
+	public void deleteAll(List<SquadStats> statsList) {
 		statsRepository.deleteAll(statsList);
 	}
 
@@ -67,17 +67,17 @@ public class StatsService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<Stats> findByAuthor(String author) {
+	public List<SquadStats> findByAuthor(String author) {
 		return statsRepository.findByAuthor(author);
 	}
 
 	@Transactional(readOnly = true)
-	public List<Stats> findByHuman(Human human) {
+	public List<SquadStats> findByHuman(Human human) {
 		return statsRepository.findByHuman(human);
 	}
 
 	@Transactional(readOnly = true)
-	public List<Stats> findByEvent_id(int id) {
+	public List<SquadStats> findByEvent_id(int id) {
 		return statsRepository.findByEventId(id);
 	}
 
@@ -87,12 +87,12 @@ public class StatsService {
 	}
 
 	@Transactional
-	public void saveAll(List<Stats> statsArr) {
+	public void saveAll(List<SquadStats> statsArr) {
 		statsRepository.saveAll(statsArr);
 	}
 
 	@Transactional(readOnly = true)
-	public List<Stats> findAll(Sort by) {
+	public List<SquadStats> findAll(Sort by) {
 		return statsRepository.findAll(by);
 	}
 }

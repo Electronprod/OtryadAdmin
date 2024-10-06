@@ -10,7 +10,7 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Stats implements Serializable {
+public class SquadStats implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
@@ -40,7 +40,7 @@ public class Stats implements Serializable {
 	@Column
 	private boolean isPresent;
 
-	public Stats(Human human) {
+	public SquadStats(Human human) {
 		this.human = human;
 	}
 }

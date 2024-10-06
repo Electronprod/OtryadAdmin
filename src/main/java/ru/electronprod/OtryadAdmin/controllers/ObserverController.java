@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
-import ru.electronprod.OtryadAdmin.models.Stats;
+import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.SearchService;
 import ru.electronprod.OtryadAdmin.services.ReportService;
@@ -48,20 +48,20 @@ public class ObserverController {
 		model.addAttribute("squadList", dbservice.getSquadService().findAll());
 		// People view
 		model.addAttribute("people_size", dbservice.getHumanService().getSize());
-		model.addAttribute("people_missed", dbservice.getStatsService().countByIsPresent(false));
-		model.addAttribute("people_attended", dbservice.getStatsService().countByIsPresent(true));
-		model.addAttribute("people_missed_today", dbservice.getStatsService().findByDate(dbservice.getStringDate())
+		model.addAttribute("people_missed", dbservice.getSquadStatsService().countByIsPresent(false));
+		model.addAttribute("people_attended", dbservice.getSquadStatsService().countByIsPresent(true));
+		model.addAttribute("people_missed_today", dbservice.getSquadStatsService().findByDate(dbservice.getStringDate())
 				.stream().filter(stats -> !stats.isPresent()).count());
-		model.addAttribute("people_attended_today", dbservice.getStatsService().findByDate(dbservice.getStringDate())
+		model.addAttribute("people_attended_today", dbservice.getSquadStatsService().findByDate(dbservice.getStringDate())
 				.stream().filter(stats -> stats.isPresent()).count());
-		model.addAttribute("commanders_marked_today", dbservice.getStatsService().findByDate(dbservice.getStringDate())
-				.stream().map(Stats::getAuthor).distinct().count());
+		model.addAttribute("commanders_marked_today", dbservice.getSquadStatsService().findByDate(dbservice.getStringDate())
+				.stream().map(SquadStats::getAuthor).distinct().count());
 		return "observer/stats_overview";
 	}
 
 	@GetMapping("/stats/date")
 	public String statsTable_date(@RequestParam String date, Model model) {
-		List<Stats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
+		List<SquadStats> statsList = dbservice.getSquadStatsService().findByDate(date.replaceAll("-", "."));
 		model.addAttribute("statss", statsList);
 		return "public/statsview_rawtable";
 	}
@@ -77,7 +77,7 @@ public class ObserverController {
 
 	@GetMapping("/stats/squad/{id}/date")
 	public String statsTable_date_squad(@PathVariable("id") int id, @RequestParam String date, Model model) {
-		List<Stats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
+		List<SquadStats> statsList = dbservice.getSquadStatsService().findByDate(date.replaceAll("-", "."));
 		statsList.removeIf(stats -> !stats.getAuthor()
 				.equals(dbservice.getSquadService().findById(id).orElseThrow().getCommander().getLogin()));
 		model.addAttribute("statss", statsList);
@@ -90,13 +90,13 @@ public class ObserverController {
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
 		model.addAttribute("dataMap", statsHelper.squad_generateGlobalReport(
-				dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin())));
+				dbservice.getSquadStatsService().findByAuthor(squad.get().getCommander().getLogin())));
 		return "observer/squadstats/general_stats";
 	}
 
 	@GetMapping("/stats/all/report")
 	public String SquadStatsReport(Model model) {
-		model.addAttribute("dataMap", statsHelper.squad_generateGlobalReport(dbservice.getStatsService().findAll()));
+		model.addAttribute("dataMap", statsHelper.squad_generateGlobalReport(dbservice.getSquadStatsService().findAll()));
 		return "observer/squadstats/general_stats";
 	}
 
@@ -105,13 +105,13 @@ public class ObserverController {
 		Optional<Squad> squad = dbservice.getSquadService().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model.addAttribute("statss", dbservice.getStatsService().findByAuthor(squad.get().getCommander().getLogin()));
+		model.addAttribute("statss", dbservice.getSquadStatsService().findByAuthor(squad.get().getCommander().getLogin()));
 		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/table")
 	public String statsTableAll(Model model) {
-		List<Stats> squads = dbservice.getStatsService().findAll();
+		List<SquadStats> squads = dbservice.getSquadStatsService().findAll();
 		model.addAttribute("statss", squads);
 		return "public/statsview_rawtable";
 	}
@@ -122,7 +122,7 @@ public class ObserverController {
 		if (human == null || human.getStats() == null) {
 			return "redirect:/observer/stats?error_notfound";
 		}
-		List<Stats> s = dbservice.getStatsService().findByHuman(human);
+		List<SquadStats> s = dbservice.getSquadStatsService().findByHuman(human);
 		model = statsHelper.squad_generatePersonalReport(s, model);
 		model.addAttribute("person", human.getName() + " " + human.getLastname());
 		return "observer/personal_stats";
@@ -134,7 +134,7 @@ public class ObserverController {
 		if (human == null || human.getStats() == null) {
 			return "redirect:/observer/stats?error_notfound";
 		}
-		List<Stats> s = dbservice.getStatsService().findByHuman(human);
+		List<SquadStats> s = dbservice.getSquadStatsService().findByHuman(human);
 		model.addAttribute("statss", s);
 		return "public/statsview_rawtable";
 	}

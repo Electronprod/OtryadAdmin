@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.electronprod.OtryadAdmin.data.repositories.HumanRepository;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
-import ru.electronprod.OtryadAdmin.models.Stats;
+import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
 
 import java.util.ArrayList;

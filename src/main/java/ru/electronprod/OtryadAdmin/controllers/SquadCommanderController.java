@@ -94,7 +94,7 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		List<Stats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
+		List<SquadStats> statsList = dbservice.getSquadStatsService().findByDate(date.replaceAll("-", "."));
 		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model.addAttribute("statss", statsList);
 		return "public/statsview_rawtable";
@@ -105,7 +105,7 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		model.addAttribute("statss", dbservice.getStatsService().findByAuthor(user.getLogin()));
+		model.addAttribute("statss", dbservice.getSquadStatsService().findByAuthor(user.getLogin()));
 		return "public/statsview_rawtable";
 	}
 
@@ -115,7 +115,7 @@ public class SquadCommanderController {
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("dataMap",
-				statsHelper.squad_generateGlobalReport(dbservice.getStatsService().findByAuthor(user.getLogin())));
+				statsHelper.squad_generateGlobalReport(dbservice.getSquadStatsService().findByAuthor(user.getLogin())));
 		return "squadcommander/general_stats";
 	}
 
@@ -124,7 +124,7 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		List<Stats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
+		List<SquadStats> statsList = dbservice.getSquadStatsService().findByAuthor(user.getLogin());
 		statsList.removeIf(stats -> stats.getHuman().getId() != id);
 		model.addAttribute("statss", statsList);
 		return "public/statsview_rawtable";
@@ -137,7 +137,7 @@ public class SquadCommanderController {
 			return "redirect:/squadcommander?error_usernotfound";
 		// Getting stats for user's humans
 		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
-		List<Stats> s = human.getStats();
+		List<SquadStats> s = human.getStats();
 		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model = statsHelper.squad_generatePersonalReport(s, model);
 		model.addAttribute("person", human.getName() + " " + human.getLastname());
