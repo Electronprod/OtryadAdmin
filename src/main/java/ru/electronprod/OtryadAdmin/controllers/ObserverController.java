@@ -142,6 +142,7 @@ public class ObserverController {
 	@GetMapping("/data")
 	public String getAllData(Model model) {
 		model.addAttribute("humans", dbservice.getHumanService().findAll());
+		model.addAttribute("user_role", authHelper.getCurrentUser().getRole());
 		return "public/humans_rawtable";
 	}
 }
