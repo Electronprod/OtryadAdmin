@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
-import ru.electronprod.OtryadAdmin.models.Stats;
+import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.helpers.PersonalStatsHelper;
 import ru.electronprod.OtryadAdmin.models.helpers.SquadMarksDataModel;
@@ -30,7 +30,7 @@ public class ReportService {
 	@Autowired
 	private DBService dbservice;
 
-	public Model squad_generatePersonalReport(List<Stats> personalStats, Model model) {
+	public Model squad_generatePersonalReport(List<SquadStats> personalStats, Model model) {
 		Map<String, PersonalStatsHelper> visitsData = new LinkedHashMap<String, PersonalStatsHelper>();
 		int visits_total = 0;
 		int omissions_total = 0;
@@ -39,9 +39,9 @@ public class ReportService {
 			// Getting type name
 			String typeName = optionServ.getEvent_types().get(type).replaceAll("\\s*\\([^()]*\\)\\s*", "");
 			// Getting stats lists
-			List<Stats> typedStats = personalStats.stream().filter(stats -> stats.getType().equals(type)).toList();
-			List<Stats> omissionsList = typedStats.stream().filter(stats -> !stats.isPresent()).toList();
-			List<Stats> visitsList = typedStats.stream().filter(stats -> stats.isPresent()).toList();
+			List<SquadStats> typedStats = personalStats.stream().filter(stats -> stats.getType().equals(type)).toList();
+			List<SquadStats> omissionsList = typedStats.stream().filter(stats -> !stats.isPresent()).toList();
+			List<SquadStats> visitsList = typedStats.stream().filter(stats -> stats.isPresent()).toList();
 			// Adding to total result
 			visits_total = visits_total + visitsList.size();
 			omissions_total = omissions_total + omissionsList.size();
@@ -60,8 +60,8 @@ public class ReportService {
 		}
 
 		// Adding visits data
-		personalStats.sort(Comparator.comparingInt(Stats::getEvent_id).reversed());
-		List<Stats> lastEventsData = personalStats.stream().limit(30).toList();
+		personalStats.sort(Comparator.comparingInt(SquadStats::getEvent_id).reversed());
+		List<SquadStats> lastEventsData = personalStats.stream().limit(30).toList();
 		model.addAttribute("visits_total", visits_total);
 		model.addAttribute("omissions_total", omissions_total);
 		model.addAttribute("visitsData", visitsData);
@@ -70,13 +70,13 @@ public class ReportService {
 		return model;
 	}
 
-	public Map<String, Map<Human, Integer>> squad_generateGlobalReport(List<Stats> allStats) {
+	public Map<String, Map<Human, Integer>> squad_generateGlobalReport(List<SquadStats> allStats) {
 		Map<String, Map<Human, Integer>> result = new LinkedHashMap<String, Map<Human, Integer>>();
 		// For each type
 		for (String type : optionServ.getEvent_types().keySet()) {
-			List<Stats> typedStats = allStats.stream().filter(stats -> stats.getType().equals(type)).toList();
+			List<SquadStats> typedStats = allStats.stream().filter(stats -> stats.getType().equals(type)).toList();
 			Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
-			for (Stats stats : typedStats) {
+			for (SquadStats stats : typedStats) {
 				Human human = stats.getHuman();
 				if (stats.isPresent()) {
 					// Человек пришел
@@ -106,14 +106,14 @@ public class ReportService {
 	public void squad_mark(SquadMarksDataModel detail, String eventType, User user) throws Exception {
 		// TODO eventType check and search
 		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
-		List<Stats> resultArray = new ArrayList<Stats>(); // Result we will add to database
-		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
+		List<SquadStats> resultArray = new ArrayList<SquadStats>(); // Result we will add to database
+		int event_id = dbservice.getSquadStatsService().findMaxEventIDValue() + 1;
 		// People managed by this user
 		List<Human> humans = dbservice.getSquadService().findByUser(user).getHumans();
 		// Those who didn't come
 		details1.forEach((id, reason) -> {
 			Human human1 = humans.stream().filter(human -> human.getId() == id).findFirst().orElseThrow();
-			Stats stats = new Stats(human1);
+			SquadStats stats = new SquadStats(human1);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(DBService.getStringDate());
 			stats.setPresent(false);
@@ -126,7 +126,7 @@ public class ReportService {
 		});
 		// Those who come
 		for (Human human : humans) {
-			Stats stats = new Stats(human);
+			SquadStats stats = new SquadStats(human);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(DBService.getStringDate());
 			stats.setPresent(true);
@@ -137,7 +137,7 @@ public class ReportService {
 			resultArray.add(stats);
 		}
 		// Saving result to database
-		dbservice.getStatsService().saveAll(resultArray);
+		dbservice.getSquadStatsService().saveAll(resultArray);
 		log.info("User " + user.getLogin() + " marked " + resultArray.size() + " people. EventID: " + event_id);
 	}
 }

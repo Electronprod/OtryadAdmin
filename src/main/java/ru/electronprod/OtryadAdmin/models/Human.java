@@ -20,7 +20,7 @@ public class Human implements Serializable {
 	private Squad squad;
 
 	@OneToMany(mappedBy = "human", cascade = CascadeType.REMOVE, orphanRemoval = true)
-	private List<Stats> stats;
+	private List<SquadStats> stats;
 
 	@Column
 	private String name;

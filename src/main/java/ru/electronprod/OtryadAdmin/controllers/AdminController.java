@@ -23,7 +23,7 @@ import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
-import ru.electronprod.OtryadAdmin.models.Stats;
+import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.helpers.HumanHelper;
 import ru.electronprod.OtryadAdmin.models.helpers.SquadHelper;
@@ -363,88 +363,88 @@ public class AdminController {
 
 	@GetMapping("/statsmgr/delete_event")
 	public String statsManager_delete_byEventID(@RequestParam int id) {
-		List<Stats> stats = dbservice.getStatsService().findByEvent_id(id);
+		List<SquadStats> stats = dbservice.getSquadStatsService().findByEvent_id(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
-		dbservice.getStatsService().deleteAll(stats);
+		dbservice.getSquadStatsService().deleteAll(stats);
 		return "redirect:/admin/statsmgr?deleted";
 	}
 
 	@GetMapping("/statsmgr/delete")
 	public String statsManager_delete_byID(@RequestParam int id) {
-		Optional<Stats> stats = dbservice.getStatsService().findById(id);
+		Optional<SquadStats> stats = dbservice.getSquadStatsService().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
-		dbservice.getStatsService().delete(stats.get());
+		dbservice.getSquadStatsService().delete(stats.get());
 		return "redirect:/admin/statsmgr?deleted";
 	}
 
 	@PostMapping("/statsmgr/edit_type")
 	public String statsManager_edit_type(@RequestParam int eventid, @RequestParam String statsType) {
-		List<Stats> stats = dbservice.getStatsService().findByEvent_id(eventid);
+		List<SquadStats> stats = dbservice.getSquadStatsService().findByEvent_id(eventid);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.stream().forEach(stat -> stat.setType(statsType));
-		dbservice.getStatsService().saveAll(stats);
+		dbservice.getSquadStatsService().saveAll(stats);
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_type_single")
 	public String statsManager_edit_type_single(@RequestParam int id, @RequestParam String statsType) {
-		Optional<Stats> stats = dbservice.getStatsService().findById(id);
+		Optional<SquadStats> stats = dbservice.getSquadStatsService().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.get().setType(statsType);
-		dbservice.getStatsService().save(stats.get());
+		dbservice.getSquadStatsService().save(stats.get());
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_date")
 	public String statsManager_edit_date(@RequestParam int eventid, @RequestParam String date) {
-		List<Stats> stats = dbservice.getStatsService().findByEvent_id(eventid);
+		List<SquadStats> stats = dbservice.getSquadStatsService().findByEvent_id(eventid);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.stream().forEach(stat -> stat.setDate(date.replaceAll("-", ".")));
-		dbservice.getStatsService().saveAll(stats);
+		dbservice.getSquadStatsService().saveAll(stats);
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_date_single")
 	public String statsManager_edit_date_single(@RequestParam int id, @RequestParam String date) {
-		Optional<Stats> stats = dbservice.getStatsService().findById(id);
+		Optional<SquadStats> stats = dbservice.getSquadStatsService().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.get().setDate(date.replaceAll("-", "."));
-		dbservice.getStatsService().save(stats.get());
+		dbservice.getSquadStatsService().save(stats.get());
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_reason")
 	public String statsManager_edit_reason(@RequestParam int eventid, @RequestParam String reason) {
-		List<Stats> statsList = dbservice.getStatsService().findByEvent_id(eventid);
+		List<SquadStats> statsList = dbservice.getSquadStatsService().findByEvent_id(eventid);
 		statsList.removeIf(stats -> stats.isPresent());
 		if (statsList.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		statsList.stream().forEach(stat -> stat.setReason(reason));
-		dbservice.getStatsService().saveAll(statsList);
+		dbservice.getSquadStatsService().saveAll(statsList);
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_reason_single")
 	public String statsManager_edit_reason_single(@RequestParam int id, @RequestParam String reason) {
-		Optional<Stats> stats = dbservice.getStatsService().findById(id);
+		Optional<SquadStats> stats = dbservice.getSquadStatsService().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.get().setReason(reason);
-		dbservice.getStatsService().save(stats.get());
+		dbservice.getSquadStatsService().save(stats.get());
 		return "redirect:/admin/statsmgr?edited";
 	}
 }
