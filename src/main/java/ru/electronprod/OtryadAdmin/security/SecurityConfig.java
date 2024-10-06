@@ -27,7 +27,8 @@ public class SecurityConfig {
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		return http
 				.authorizeHttpRequests(auth -> auth.requestMatchers("/auth/login", "/").permitAll()
-						.requestMatchers("/assets/**", "/api/**", "/icon.png", "/public/**", "/public_resources/**")
+						.requestMatchers("/assets/**", "/api/**", "/icon.png", "/service-worker.js", "/offline.html",
+								"/public/**", "/public_resources/**")
 						.permitAll().requestMatchers("/**").authenticated())
 				.formLogin(login -> login.loginPage("/auth/login").loginProcessingUrl("/process_login")
 						.defaultSuccessUrl("/lk", true))
