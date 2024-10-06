@@ -38,19 +38,15 @@ public class SquadCommanderController {
 
 	@GetMapping("/humans")
 	public String humans(Model model) {
-		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
-		model.addAttribute("humans",
-				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
+		model.addAttribute("user_role", authHelper.getCurrentUser().getRole());
+		model.addAttribute("humans", dbservice.getUserService().findById(authHelper.getCurrentUser().getId())
+				.orElseThrow().getSquad().getHumans());
 		return "public/humans_rawtable";
 	}
 
 	@GetMapping("/mark")
 	public String mark(Model model) {
 		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("humanList",
 				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
 		model.addAttribute("reasons_for_absences_map", optionService.getReasons_for_absences());
@@ -103,8 +99,6 @@ public class SquadCommanderController {
 	@GetMapping("/stats/table")
 	public String deleteStats(Model model) {
 		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("statss", dbservice.getSquadStatsService().findByAuthor(user.getLogin()));
 		return "public/statsview_rawtable";
 	}
@@ -112,8 +106,6 @@ public class SquadCommanderController {
 	@GetMapping("/stats/report")
 	public String general_stats(Model model) {
 		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("dataMap",
 				statsHelper.squad_generateGlobalReport(dbservice.getSquadStatsService().findByAuthor(user.getLogin())));
 		return "squadcommander/general_stats";
@@ -122,8 +114,6 @@ public class SquadCommanderController {
 	@GetMapping("/stats/personal/table")
 	public String personal_statsTable(@RequestParam int id, Model model) {
 		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
 		List<SquadStats> statsList = dbservice.getSquadStatsService().findByAuthor(user.getLogin());
 		statsList.removeIf(stats -> stats.getHuman().getId() != id);
 		model.addAttribute("statss", statsList);
@@ -133,8 +123,6 @@ public class SquadCommanderController {
 	@GetMapping("/stats/personal")
 	public String personal_stats(@RequestParam int id, Model model) {
 		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
 		// Getting stats for user's humans
 		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
 		List<SquadStats> s = human.getStats();
@@ -147,8 +135,6 @@ public class SquadCommanderController {
 	@GetMapping("/stats")
 	public String stats_overview(Model model) {
 		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
 		model.addAttribute("humans",
 				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
 		return "squadcommander/stats_overview";
