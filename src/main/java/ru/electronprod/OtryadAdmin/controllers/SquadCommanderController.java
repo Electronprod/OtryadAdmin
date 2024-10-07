@@ -1,7 +1,12 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
 import java.util.*;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -9,10 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
-import ru.electronprod.OtryadAdmin.data.filesystem.AppLanguageRepository;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
-import ru.electronprod.OtryadAdmin.models.helpers.SquadMarksDataModel;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.ReportService;
 
@@ -55,34 +58,27 @@ public class SquadCommanderController {
 		return "squadcommander/mark";
 	}
 
+	@SuppressWarnings("unchecked")
 	@PostMapping("/mark")
-	public String markAbsent(@ModelAttribute SquadMarksDataModel detail, @RequestParam("statsType") String statsType) {
+	public ResponseEntity<String> mark(@RequestBody Map<String, Object> requestBody) {
 		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
+		List<?> uncheckedPeopleList = (List<?>) requestBody.get("uncheckedPeople");
+		JSONArray uncheckedPeopleArray = new JSONArray();
+		uncheckedPeopleArray.addAll(uncheckedPeopleList);
+		JSONObject answer = new JSONObject();
 		try {
-			statsHelper.squad_mark(detail, statsType, user);
-		} catch (Exception e) {
-			log.error("Error marking: " + e.getMessage());
-			return "redirect:/squadcommander/mark?error_unknown";
+			statsHelper.squad_mark(uncheckedPeopleArray, String.valueOf(requestBody.get("statsType")), user);
+			answer.put("result", "success");
+			return ResponseEntity.ok(answer.toJSONString());
+		} catch (ParseException e) {
+			log.warn("Error parsing input JSON for " + user.getLogin() + ". JSONArray: "
+					+ uncheckedPeopleArray.toJSONString());
+			answer.put("result", "error");
+			answer.put("message", "Error parsing input JSON.");
+			answer.put("user", user.getLogin());
+			answer.put("JSONArray", uncheckedPeopleArray.toJSONString());
+			return ResponseEntity.internalServerError().body(answer.toJSONString());
 		}
-		return "redirect:/squadcommander/mark?sent";
-	}
-
-	@GetMapping("/mark_allhere")
-	public String markAbsent(@RequestParam("statsType") String statsType) {
-		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
-		try {
-			SquadMarksDataModel s = new SquadMarksDataModel();
-			s.setDetails(new HashMap<Integer, String>());
-			statsHelper.squad_mark(s, statsType, user);
-		} catch (Exception e) {
-			log.error("Error marking: " + e.getMessage());
-			return "redirect:/squadcommander/mark?error_unknown";
-		}
-		return "redirect:/squadcommander/mark?sent";
 	}
 
 	@GetMapping("/stats/date")
@@ -90,7 +86,7 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		List<SquadStats> statsList = dbservice.getSquadStatsService().findByDate(date.replaceAll("-", "."));
+		List<SquadStats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
 		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model.addAttribute("statss", statsList);
 		return "public/statsview_rawtable";
@@ -99,7 +95,7 @@ public class SquadCommanderController {
 	@GetMapping("/stats/table")
 	public String deleteStats(Model model) {
 		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss", dbservice.getSquadStatsService().findByAuthor(user.getLogin()));
+		model.addAttribute("statss", dbservice.getStatsService().findByAuthor(user.getLogin()));
 		return "public/statsview_rawtable";
 	}
 
@@ -107,14 +103,14 @@ public class SquadCommanderController {
 	public String general_stats(Model model) {
 		User user = authHelper.getCurrentUser();
 		model.addAttribute("dataMap",
-				statsHelper.squad_generateGlobalReport(dbservice.getSquadStatsService().findByAuthor(user.getLogin())));
+				statsHelper.squad_generateGlobalReport(dbservice.getStatsService().findByAuthor(user.getLogin())));
 		return "squadcommander/general_stats";
 	}
 
 	@GetMapping("/stats/personal/table")
 	public String personal_statsTable(@RequestParam int id, Model model) {
 		User user = authHelper.getCurrentUser();
-		List<SquadStats> statsList = dbservice.getSquadStatsService().findByAuthor(user.getLogin());
+		List<SquadStats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
 		statsList.removeIf(stats -> stats.getHuman().getId() != id);
 		model.addAttribute("statss", statsList);
 		return "public/statsview_rawtable";

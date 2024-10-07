@@ -24,14 +24,19 @@
 			</div>
 			<div class="card">
 				<h3><b>КАК ПРАВИЛЬНО ОТМЕТИТЬ???</b></h3>
-				<p>В форме ниже отметьте ребят, которые <strong>ОТСУТСТВОВАЛИ</strong> на событии. Выберите тип
-					статистики в селекторе
-					под таблицей и нажмите "Отправить".<br><strong>Отправленные данные изменить нельзя!</strong></p>
+				<p>В форме ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии. Выберите событие
+					в селекторе
+					над таблицей и нажмите "Отправить".<br><strong>Отправленные данные изменить нельзя!</strong></p>
 			</div>
 			<div class="card">
-				<h3>Отметьте отсутствующих ребят:</h3>
+				<h3>Отметьте ПРИСУТСТВОВАВШИХ ребят:</h3>
 				<form th:action="@{/squadcommander/mark}" method="post" id="markForm">
-					<table>
+					<label>Выберите событие:</label>
+					<select name="statsType" id="statsType" onchange="handleSelectChange(this)">
+						<option th:each="entry : ${event_types_map}" th:value="${entry.key}" th:text="${entry.value}">
+						</option>
+					</select>
+					<table id="markTable">
 						<thead>
 							<tr>
 								<th>Выбрать</th>
@@ -50,7 +55,7 @@
 								<td th:text="${human.lastname}">Фамилия</td>
 								<td>
 									<select class="details-input" th:name="'details[' + ${human.id} + ']'"
-										th:disabled="disabled" th:id="'details-' + ${iterStat.index}">
+										th:id="'details-' + ${iterStat.index}">
 										<option th:each="entry : ${reasons_for_absences_map}" th:value="${entry.key}"
 											th:text="${entry.value}">
 										</option>
@@ -59,31 +64,11 @@
 							</tr>
 						</tbody>
 					</table>
-					<label>Выберите тип статистики:</label>
-					<select name="statsType" id="statsType">
-						<option th:each="entry : ${event_types_map}" th:value="${entry.key}" th:text="${entry.value}">
-						</option>
-					</select>
-					<button type="submit">Отправить</button>
+					<button type="button" onclick="submitData()">Отправить</button>
 				</form>
 			</div>
 			<script>
-				document.addEventListener('DOMContentLoaded', function () {
-					const checkboxes = document.querySelectorAll('.custom-checkbox');
-
-					checkboxes.forEach(checkbox => {
-						checkbox.addEventListener('change', function () {
-							const index = this.id.split('-')[1];
-							const selectInput = document.getElementById('details-' + index);
-
-							if (selectInput) {
-								selectInput.disabled = !this.checked;
-							}
-						});
-					});
-				});
-				document.querySelector('#markForm').addEventListener('submit', function (e) {
-					e.preventDefault();
+				function submitData() {
 					Swal.fire({
 						title: 'Вы уверены?',
 						text: "Вы точно выбрали всех ребят? \n Вы выбрали тот тип статистики? Выбран тип статистики: " + getSelectedText(),
@@ -95,33 +80,111 @@
 						cancelButtonText: 'Отмена'
 					}).then((result) => {
 						if (result.isConfirmed) {
-							if (!isAnyCheckboxChecked()) {
-								event.preventDefault();
-								var selectElement = document.getElementById('statsType');
-								var selectedValue = selectElement.value;
-								window.location.href = '/squadcommander/mark_allhere?statsType=' + selectedValue;
-							} else {
-								e.target.submit();
-							}
+							sendData();
 						}
 					});
-				});
-
-				function isAnyCheckboxChecked() {
-					const checkboxes = document.querySelectorAll('.custom-checkbox');
-					for (let checkbox of checkboxes) {
-						if (checkbox.checked) {
-							return true;
-						}
-					}
-					return false;
 				}
+
+				function sendData() {
+					const uncheckedPeople = [];
+					// Проходим по всем чекбоксам
+					const checkboxes = document.querySelectorAll('.custom-checkbox');
+					checkboxes.forEach(checkbox => {
+						if (!checkbox.checked) {
+							const row = checkbox.closest('tr');
+							const reasonSelect = row.querySelector('.details-input');
+							uncheckedPeople.push(JSON.stringify(
+								{
+									id: checkbox.value,
+									reason: reasonSelect.value // Получаем значение причины
+								}
+							));
+						}
+					});
+					var selectElement = document.getElementById('statsType');
+					const bodyData = {
+						uncheckedPeople: uncheckedPeople,
+						statsType: selectElement.value
+					};
+					var csrfToken = document.querySelector('input[name="_csrf"]').value;
+					// Отправляем данные на сервер
+					fetch('/squadcommander/mark', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'X-CSRF-TOKEN': csrfToken,
+						},
+						body: JSON.stringify(bodyData),
+					})
+						.then(response => response.json())
+						.then(data => {
+							console.log('mark success:', data);
+							Swal.fire({
+								title: "Успех!",
+								text: "Ребята отмечены",
+								icon: "success"
+							});
+						})
+						.catch((error) => {
+							console.error('mark error:', error);
+							Swal.fire({
+								title: "Провал!",
+								text: "Ошибка при выставлении отметок\n" + error,
+								icon: "error"
+							});
+						});
+				}
+
 				function getSelectedText() {
 					var selectElement = document.getElementById('statsType');
 					var selectedIndex = selectElement.selectedIndex;
 					var selectedText = selectElement.options[selectedIndex].text;
 					return selectedText;
 				}
+				function handleSelectChange(selectElement) {
+					const selectedValue = selectElement.value;
+					if (selectedValue != 'general') {
+						hideColumn(3);
+					} else {
+						showColumn(3);
+					}
+				}
+				function hideColumn(columnIndex) {
+					console.log('Hiding column');
+					const table = document.getElementById('markTable');
+					const rows = table.rows;
+					for (let i = 0; i < rows.length; i++) {
+						const cells = rows[i].cells;
+						if (cells.length > columnIndex) {
+							cells[columnIndex].style.display = 'none';
+						}
+					}
+				}
+				function showColumn(columnIndex) {
+					console.log('Showing column');
+					const table = document.getElementById('markTable');
+					const rows = table.rows;
+					for (let i = 0; i < rows.length; i++) {
+						const cells = rows[i].cells;
+						if (cells.length > columnIndex) {
+							cells[columnIndex].style.display = '';
+						}
+					}
+				}
+				document.addEventListener('DOMContentLoaded', function () {
+					const checkboxes = document.querySelectorAll('.custom-checkbox');
+
+					checkboxes.forEach(checkbox => {
+						checkbox.addEventListener('change', function () {
+							const index = this.id.split('-')[1];
+							const selectInput = document.getElementById('details-' + index);
+
+							if (selectInput) {
+								selectInput.disabled = this.checked;
+							}
+						});
+					});
+				});
 			</script>
 			<script src="/assets/messagesUtil.js"></script>
 			<script src="/squadcommander/navbar.js"></script>
