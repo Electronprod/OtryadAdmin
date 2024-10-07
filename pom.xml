@@ -77,16 +77,6 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.telegram</groupId>
-			<artifactId>telegrambots-springboot-longpolling-starter</artifactId>
-			<version>7.9.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.telegram</groupId>
-			<artifactId>telegrambots-client</artifactId>
-			<version>7.9.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>

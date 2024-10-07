@@ -8,19 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.electronprod.OtryadAdmin.data.filesystem.FileOptions;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
-import ru.electronprod.OtryadAdmin.models.helpers.PersonalStatsHelper;
-import ru.electronprod.OtryadAdmin.models.helpers.SquadMarksDataModel;
+import ru.electronprod.OtryadAdmin.models.dto.PersonalStatsHelper;
 
 @Slf4j
 @Service
@@ -103,27 +107,29 @@ public class ReportService {
 	}
 
 	@Transactional
-	public void squad_mark(SquadMarksDataModel detail, String eventType, User user) throws Exception {
-		// TODO eventType check and search
-		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
-		List<SquadStats> resultArray = new ArrayList<SquadStats>(); // Result we will add to database
-		int event_id = dbservice.getSquadStatsService().findMaxEventIDValue() + 1;
+	public int squad_mark(JSONArray markedArr, String eventType, User user) throws ParseException {
+		List<SquadStats> resultArray = new ArrayList<SquadStats>();
+		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
 		// People managed by this user
 		List<Human> humans = dbservice.getSquadService().findByUser(user).getHumans();
 		// Those who didn't come
-		details1.forEach((id, reason) -> {
-			Human human1 = humans.stream().filter(human -> human.getId() == id).findFirst().orElseThrow();
+		for (Object o : markedArr) {
+			JSONObject data = (JSONObject) FileOptions.ParseJsThrought(String.valueOf(o));
+			// Finding human to add stats record
+			Human human1 = humans.stream()
+					.filter(human -> human.getId() == Integer.parseInt(String.valueOf(data.get("id")))).findFirst()
+					.orElseThrow();
 			SquadStats stats = new SquadStats(human1);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(DBService.getStringDate());
 			stats.setPresent(false);
-			stats.setReason(reason);
+			stats.setReason(String.valueOf(data.get("reason")));
 			stats.setType(eventType);
 			stats.setUser_role(user.getRole());
 			stats.setEvent_id(event_id);
 			resultArray.add(stats);
 			humans.remove(human1);
-		});
+		}
 		// Those who come
 		for (Human human : humans) {
 			SquadStats stats = new SquadStats(human);
@@ -136,8 +142,46 @@ public class ReportService {
 			stats.setEvent_id(event_id);
 			resultArray.add(stats);
 		}
-		// Saving result to database
-		dbservice.getSquadStatsService().saveAll(resultArray);
+		dbservice.getStatsService().saveAll(resultArray);
 		log.info("User " + user.getLogin() + " marked " + resultArray.size() + " people. EventID: " + event_id);
+		return event_id;
 	}
+//	@Transactional
+//	public void squad_mark(MarkDTO detail, String eventType, User user) throws Exception {
+//		// TODO eventType check and search
+//		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
+//		List<SquadStats> resultArray = new ArrayList<SquadStats>(); // Result we will add to database
+//		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
+//		// People managed by this user
+//		List<Human> humans = dbservice.getSquadService().findByUser(user).getHumans();
+//		// Those who didn't come
+//		details1.forEach((id, reason) -> {
+//			Human human1 = humans.stream().filter(human -> human.getId() == id).findFirst().orElseThrow();
+//			SquadStats stats = new SquadStats(human1);
+//			stats.setAuthor(user.getLogin());
+//			stats.setDate(DBService.getStringDate());
+//			stats.setPresent(true);
+//			stats.setReason("error:present");
+//			stats.setType(eventType);
+//			stats.setUser_role(user.getRole());
+//			stats.setEvent_id(event_id);
+//			resultArray.add(stats);
+//			humans.remove(human1);
+//		});
+//		// Those who come
+//		for (Human human : humans) {
+//			SquadStats stats = new SquadStats(human);
+//			stats.setAuthor(user.getLogin());
+//			stats.setDate(DBService.getStringDate());
+//			stats.setPresent(false);
+//			stats.setReason(reason);
+//			stats.setType(eventType);
+//			stats.setUser_role(user.getRole());
+//			stats.setEvent_id(event_id);
+//			resultArray.add(stats);
+//		}
+//		// Saving result to database
+//		dbservice.getStatsService().saveAll(resultArray);
+//		log.info("User " + user.getLogin() + " marked " + resultArray.size() + " people. EventID: " + event_id);
+//	}
 }

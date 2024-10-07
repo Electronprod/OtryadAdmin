@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class SquadStatsService {
+public class StatsService {
 
 	@Autowired
 	private SquadStatsRepository statsRepository;

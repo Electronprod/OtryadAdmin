@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.models.helpers;
+package ru.electronprod.OtryadAdmin.models.dto;
 
 import lombok.Data;
 

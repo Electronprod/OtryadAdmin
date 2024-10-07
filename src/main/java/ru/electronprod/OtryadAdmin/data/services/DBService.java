@@ -23,7 +23,7 @@ public class DBService {
 	@Getter
 	private HumanService humanService;
 	@Autowired
-	private SquadStatsService statsService;
+	private StatsService statsService;
 
 	public static String getStringDate() {
 		Calendar calendar = Calendar.getInstance();
@@ -31,7 +31,7 @@ public class DBService {
 		return dateFormat.format(calendar.getTime());
 	}
 
-	public SquadStatsService getSquadStatsService() {
+	public StatsService getStatsService() {
 		return statsService;
 	}
 }
