@@ -39,9 +39,9 @@ public class ReportService {
 		int visits_total = 0;
 		int omissions_total = 0;
 		// For each type
-		for (String type : optionServ.getEvent_types().keySet()) {
+		for (String type : optionServ.convertEventTypeDTOs().keySet()) {
 			// Getting type name
-			String typeName = optionServ.getEvent_types().get(type).replaceAll("\\s*\\([^()]*\\)\\s*", "");
+			String typeName = optionServ.convertEventTypeDTOs().get(type).replaceAll("\\s*\\([^()]*\\)\\s*", "");
 			// Getting stats lists
 			List<SquadStats> typedStats = personalStats.stream().filter(stats -> stats.getType().equals(type)).toList();
 			List<SquadStats> omissionsList = typedStats.stream().filter(stats -> !stats.isPresent()).toList();
@@ -77,7 +77,7 @@ public class ReportService {
 	public Map<String, Map<Human, Integer>> squad_generateGlobalReport(List<SquadStats> allStats) {
 		Map<String, Map<Human, Integer>> result = new LinkedHashMap<String, Map<Human, Integer>>();
 		// For each type
-		for (String type : optionServ.getEvent_types().keySet()) {
+		for (String type : optionServ.convertEventTypeDTOs().keySet()) {
 			List<SquadStats> typedStats = allStats.stream().filter(stats -> stats.getType().equals(type)).toList();
 			Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
 			for (SquadStats stats : typedStats) {
@@ -101,7 +101,7 @@ public class ReportService {
 					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
 							LinkedHashMap::new));
 			// Adding to result
-			result.put(optionServ.getEvent_types().get(type), sortedMap);
+			result.put(optionServ.convertEventTypeDTOs().get(type), sortedMap);
 		}
 		return result;
 	}

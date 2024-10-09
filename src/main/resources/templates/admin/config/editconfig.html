@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Редактирование конфигурации</title>
+	<link rel="stylesheet" href="/assets/default_style.css">
+	<link rel="icon" href="/icon.png">
+	<script src="/public_resources/sweetalert2.js"></script>
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="navbar"></div>
+	<div id="dashboard">
+		<div id="content">
+			<div class="card">
+				<h3>Добро пожаловать!</h3>
+				<p>Это ваша панель администратора. Здесь вы можете управлять вашим сайтом. Если вы хотите помотреть
+					статистику, перейдите в панель наблюдателя, нажав на кнопку ниже.</p>
+				<a class="greenbtn" href="/observer">Перейти в панель наблюдателя</a>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="/admin/navbar.js"></script>
+
+</html>

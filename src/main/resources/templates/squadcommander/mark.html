@@ -8,7 +8,6 @@
 	<link rel="stylesheet" href="/assets/default_style.css">
 	<link rel="icon" href="/icon.png">
 	<script src="/public_resources/sweetalert2.js"></script>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
 </head>
 
 <body>
@@ -33,8 +32,10 @@
 				<form th:action="@{/squadcommander/mark}" method="post" id="markForm">
 					<label>Выберите событие:</label>
 					<select name="statsType" id="statsType" onchange="handleSelectChange(this)">
-						<option th:each="entry : ${event_types_map}" th:value="${entry.key}" th:text="${entry.value}">
+						<option th:each="entry : ${event_types_map}" th:value="${entry.getEvent()}"
+							th:text="${entry.getName()}">
 						</option>
+						<option id="unknownevent" value="unknown-event">Другое событие...</option>
 					</select>
 					<table id="markTable">
 						<thead>
@@ -68,6 +69,29 @@
 				</form>
 			</div>
 			<script>
+				Swal.fire({
+					title: "Внимание! Обновление!",
+					html: "Теперь нужно отмечать <b>ПРИСУТСТВУЮЩИХ</b>.\nПричины отсутствия нужно проставлять только для некоторых событий.",
+					icon: "warning"
+				});
+
+				async function fetchData(url) {
+					try {
+						const response = await fetch(url);
+						if (!response.ok) {
+							throw new Error(`Ошибка HTTP: ${response.status}`);
+						}
+						return await response.json();
+					} catch (error) {
+						console.error('Ошибка при получении данных:', error);
+						Swal.fire({
+							title: "Ошибка!",
+							text: "Ошибка при получении информации. Пожалуйста, перезагрузите страницу. \nОшибка: " + error,
+							icon: "error"
+						});
+						return "";
+					}
+				}
 				function submitData() {
 					Swal.fire({
 						title: 'Вы уверены?',
@@ -141,9 +165,17 @@
 					var selectedText = selectElement.options[selectedIndex].text;
 					return selectedText;
 				}
-				function handleSelectChange(selectElement) {
+				let eventTypesWithReasons = "";
+				async function handleSelectChange(selectElement) {
 					const selectedValue = selectElement.value;
-					if (selectedValue != 'general') {
+					if (selectElement == document.getElementById('unknownevent')) {
+						console.log("Creating custom event...");
+						return;
+					}
+					if (eventTypesWithReasons === "") {
+						eventTypesWithReasons = await fetchData("/api/get_event_types_with_reasons");
+					}
+					if (!eventTypesWithReasons.some(event => event.event === selectedValue)) {
 						hideColumn(3);
 					} else {
 						showColumn(3);
