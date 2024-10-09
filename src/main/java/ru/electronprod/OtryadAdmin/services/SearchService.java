@@ -54,7 +54,7 @@ public class SearchService {
 	public String findMostSimilarEvent(String event) {
 		String mostSimilar = "";
 		int maxLCSLength = 0;
-		for (String val : optionServ.getEvent_types().values()) {
+		for (String val : optionServ.convertEventTypeDTOs().values()) {
 			int lcsLength = findLCSLength(event, val);
 			if (lcsLength > maxLCSLength) {
 				maxLCSLength = lcsLength;

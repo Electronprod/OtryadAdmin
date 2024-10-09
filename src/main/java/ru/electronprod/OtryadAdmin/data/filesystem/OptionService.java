@@ -7,26 +7,29 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import ru.electronprod.OtryadAdmin.models.dto.EventTypeDTO;
 
 @Slf4j
 @Repository
 public class OptionService implements InitializingBean {
 	@Getter
-	private Map<String, String> event_types = new LinkedHashMap<String, String>();
+	private static List<EventTypeDTO> event_types = new ArrayList<EventTypeDTO>();
 	@Getter
-	private Map<String, String> reasons_for_absences = new LinkedHashMap<String, String>();
+	private static Map<String, String> reasons_for_absences = new LinkedHashMap<String, String>();
 	@Getter
-	private Map<String, String> replacements = new LinkedHashMap<String, String>();
+	private static Map<String, String> replacements = new LinkedHashMap<String, String>();
 
 	@Override
 	public void afterPropertiesSet() {
-		File config = new File("data_config.txt");
+		File config = new File("settings.txt");
 		if (FileOptions.loadFile(config) || FileOptions.getFileLines(config.getPath()).isEmpty()) {
 			try {
 				writeDefaults(config);
@@ -36,65 +39,108 @@ public class OptionService implements InitializingBean {
 			}
 		}
 		// Loading data from file
-		List<String> data = FileOptions.getFileLines(config.getPath());
-		String lastType = "-1";
-		for (String line : data) {
-			if (line.startsWith("!")) {
-				lastType = line;
-				continue;
-			}
-			if (lastType.equalsIgnoreCase("!event_types")) {
-				if (!line.contains(":")) {
-					log.warn("Can't load line: " + line);
-				}
-				event_types.put(line.split(":")[0], line.split(":")[1]);
-			} else if (lastType.equalsIgnoreCase("!reasons_for_absences")) {
-				if (!line.contains(":")) {
-					log.warn("Can't load line: " + line);
-				}
-				reasons_for_absences.put(line.split(":")[0], line.split(":")[1]);
-			} else if (lastType.equalsIgnoreCase("!replacements")) {
-				if (!line.contains(":")) {
-					log.warn("Can't load line: " + line);
-				}
-				replacements.put(line.split(":")[0], line.split(":")[1]);
-			} else {
-				log.error("Error parsing config! Operation was stopped. Caused by line: " + line);
-				return;
-			}
+		try {
+			loadData(config);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			System.exit(1);
 		}
-		log.warn("Loaded data from file.");
 	}
 
-	private void writeDefaults(File config) throws IOException {
-		List<String> data = new ArrayList<String>();
-		data.add("!event_types");
-		data.add("general:Посещение общего сбора");
-		data.add("duty:Дежурство (вызвался{ась} дежурить в кабинете)");
-		data.add("walk:Прогулка (гулял{а} со звеном)");
-		data.add("other1:Другое #1 (используйте эту категорию по своему усмотрению)");
-		data.add("other2:Другое #2 (используйте эту категорию по своему усмотрению)");
+	private static void loadData(File config) throws ParseException {
+		JSONObject data = (JSONObject) FileOptions.ParseJsThrought(FileOptions.getFileLine(config));
+		// Adding event types
+		JSONArray eventtypes = (JSONArray) data.get("event_types");
+		for (Object o : eventtypes) {
+			JSONObject obj = (JSONObject) o;
+			event_types.add(new EventTypeDTO(String.valueOf(obj.get("event")), String.valueOf(obj.get("name")),
+					Boolean.parseBoolean(String.valueOf(obj.get("canSetReason")))));
+		}
+		// Adding reasons for absences
+		JSONArray reasons = (JSONArray) data.get("reasons_for_absences");
+		for (Object o : reasons) {
+			JSONObject obj = (JSONObject) o;
+			reasons_for_absences.put(String.valueOf(obj.get("reason")), String.valueOf(obj.get("name")));
+		}
+		// Adding replacements
+		JSONArray repls = (JSONArray) data.get("replacements");
+		for (Object o : repls) {
+			JSONObject obj = (JSONObject) o;
+			replacements.put(String.valueOf(obj.get("from")), String.valueOf(obj.get("to")));
+		}
+		log.info("Loaded data from file.");
+	}
 
-		data.add("!reasons_for_absences");
-		data.add("ill:Заболел(а)");
-		data.add("away:Уехал(а)");
-		data.add("study:Учеба");
-		data.add("respect:Уважительная причина");
-		data.add("disrespect:Неуважительная причина");
+	@SuppressWarnings("unchecked")
+	private static void writeDefaults(File config) throws IOException {
+		JSONObject data = new JSONObject();
+		// Adding event types
+		JSONArray eventtypes = new JSONArray();
+		eventtypes.add(generateEvent("general", "Посещение общего сбора", true));
+		eventtypes.add(generateEvent("duty", "Дежурство (вызвался дежурить в кабинете)", false));
+		eventtypes.add(generateEvent("walk", "Прогулка (гулял со звеном)", false));
+		data.put("event_types", eventtypes);
+		// Adding reasons for absences
+		JSONArray reasons = new JSONArray();
+		reasons.add(generateReason("ill", "Заболел(а)"));
+		reasons.add(generateReason("away", "Уехал(а)"));
+		reasons.add(generateReason("study", "Учеба"));
+		reasons.add(generateReason("respect", "Уважительная причина"));
+		reasons.add(generateReason("disrespect", "Неуважительная причина"));
+		data.put("reasons_for_absences", reasons);
+		// Adding replacements
+		JSONArray repls = new JSONArray();
+		repls.add(generateReplacement("error:present", "N/A"));
+		repls.add(generateReplacement("true", "+"));
+		repls.add(generateReplacement("false", "-"));
+		data.put("replacements", repls);
+		FileOptions.writeFile(data.toJSONString(), config);
+		log.info("Wrote defaults to " + config.getName());
+	}
 
-		data.add("!replacements");
-		data.add("true:+");
-		data.add("false:-");
-		FileOptions.writeLinesToFile(data, config.getPath());
-		log.warn("Created and wrote defaults to file.");
+	@SuppressWarnings("unchecked")
+	private static JSONObject generateEvent(String event, String name, boolean mark) {
+		JSONObject o = new JSONObject();
+		o.put("event", event);
+		o.put("name", name);
+		o.put("canSetReason", mark);
+		return o;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static JSONObject generateReason(String reason, String name) {
+		JSONObject o = new JSONObject();
+		o.put("reason", reason);
+		o.put("name", name);
+		return o;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static JSONObject generateReplacement(String from, String to) {
+		JSONObject o = new JSONObject();
+		o.put("from", from);
+		o.put("to", to);
+		return o;
 	}
 
 	public static String getKeyByValue(Map<String, String> map, String value) {
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			if (entry.getValue().equals(value)) {
-				return entry.getKey(); // Возвращаем найденный ключ
+				return entry.getKey();
 			}
 		}
-		return null; // Если ключ не найден
+		return null;
+	}
+
+	public static Map<String, String> convertEventTypeDTOs() {
+		return convertEventTypeDTOs(event_types);
+	}
+
+	public static Map<String, String> convertEventTypeDTOs(List<EventTypeDTO> list) {
+		Map<String, String> result = new LinkedHashMap<String, String>();
+		list.forEach(obj -> {
+			result.put(obj.getEvent(), obj.getName());
+		});
+		return result;
 	}
 }
