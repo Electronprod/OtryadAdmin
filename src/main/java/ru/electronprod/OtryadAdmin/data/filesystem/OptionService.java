@@ -91,6 +91,7 @@ public class OptionService implements InitializingBean {
 		// Adding replacements
 		JSONArray repls = new JSONArray();
 		repls.add(generateReplacement("error:present", "N/A"));
+		repls.add(generateReplacement("error:unsupported_event", "N/S"));
 		repls.add(generateReplacement("true", "+"));
 		repls.add(generateReplacement("false", "-"));
 		data.put("replacements", repls);

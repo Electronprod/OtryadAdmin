@@ -31,11 +31,11 @@
 				<h3>Отметьте ПРИСУТСТВОВАВШИХ ребят:</h3>
 				<form th:action="@{/squadcommander/mark}" method="post" id="markForm">
 					<label>Выберите событие:</label>
-					<select name="statsType" id="statsType" onchange="handleSelectChange(this)">
+					<select name="statsType" id="statsType" onchange="handleSelectChange(this)" required>
 						<option th:each="entry : ${event_types_map}" th:value="${entry.getEvent()}"
 							th:text="${entry.getName()}">
 						</option>
-						<option id="unknownevent" value="unknown-event">Другое событие...</option>
+						<option value="unknown-event">Другое событие...</option>
 					</select>
 					<table id="markTable">
 						<thead>
@@ -168,8 +168,32 @@
 				let eventTypesWithReasons = "";
 				async function handleSelectChange(selectElement) {
 					const selectedValue = selectElement.value;
-					if (selectElement == document.getElementById('unknownevent')) {
+					if (selectElement.value == "unknown-event") {
 						console.log("Creating custom event...");
+						Swal.fire({
+							title: 'Введите название события',
+							text: "Так, чтобы можно было понять, что это.",
+							input: 'text',
+							showCancelButton: true,
+							confirmButtonText: 'Сохранить',
+						}).then((result) => {
+							if (result.value) {
+								console.log('User entered: ', result.value);
+								var main = document.getElementById('statsType');
+								const option = document.createElement('option');
+								option.value = result.value;
+								option.text = result.value;
+								selectElement.add(option);
+								selectElement.value = result.value;
+								selectElement.disabled = true;
+								Swal.fire({
+									title: "Готово!",
+									text: "Событие указано. Если вы хотите выбрать другое, перезагрузите страницу.",
+									icon: "success"
+								});
+							}
+						});
+						showColumn(3);
 						return;
 					}
 					if (eventTypesWithReasons === "") {
