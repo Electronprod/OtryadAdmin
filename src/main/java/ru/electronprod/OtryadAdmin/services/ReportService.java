@@ -24,6 +24,7 @@ import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.models.dto.EventTypeDTO;
 import ru.electronprod.OtryadAdmin.models.dto.PersonalStatsHelper;
 
 @Slf4j
@@ -39,9 +40,9 @@ public class ReportService {
 		int visits_total = 0;
 		int omissions_total = 0;
 		// For each type
-		for (String type : optionServ.convertEventTypeDTOs().keySet()) {
+		for (String type : OptionService.convertEventTypeDTOs().keySet()) {
 			// Getting type name
-			String typeName = optionServ.convertEventTypeDTOs().get(type).replaceAll("\\s*\\([^()]*\\)\\s*", "");
+			String typeName = OptionService.convertEventTypeDTOs().get(type).replaceAll("\\s*\\([^()]*\\)\\s*", "");
 			// Getting stats lists
 			List<SquadStats> typedStats = personalStats.stream().filter(stats -> stats.getType().equals(type)).toList();
 			List<SquadStats> omissionsList = typedStats.stream().filter(stats -> !stats.isPresent()).toList();
@@ -58,9 +59,9 @@ public class ReportService {
 
 		Map<String, Long> reasons_for_absences = new LinkedHashMap<String, Long>();
 		// For each absence reason
-		for (String reason : optionServ.getReasons_for_absences().keySet()) {
+		for (String reason : OptionService.getReasons_for_absences().keySet()) {
 			long reasonCount = personalStats.stream().filter(stats -> stats.getReason().equals(reason)).count();
-			reasons_for_absences.put(optionServ.getReasons_for_absences().get(reason), reasonCount);
+			reasons_for_absences.put(OptionService.getReasons_for_absences().get(reason), reasonCount);
 		}
 
 		// Adding visits data
@@ -77,7 +78,7 @@ public class ReportService {
 	public Map<String, Map<Human, Integer>> squad_generateGlobalReport(List<SquadStats> allStats) {
 		Map<String, Map<Human, Integer>> result = new LinkedHashMap<String, Map<Human, Integer>>();
 		// For each type
-		for (String type : optionServ.convertEventTypeDTOs().keySet()) {
+		for (String type : OptionService.convertEventTypeDTOs().keySet()) {
 			List<SquadStats> typedStats = allStats.stream().filter(stats -> stats.getType().equals(type)).toList();
 			Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
 			for (SquadStats stats : typedStats) {
@@ -101,7 +102,7 @@ public class ReportService {
 					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
 							LinkedHashMap::new));
 			// Adding to result
-			result.put(optionServ.convertEventTypeDTOs().get(type), sortedMap);
+			result.put(OptionService.convertEventTypeDTOs().get(type), sortedMap);
 		}
 		return result;
 	}
@@ -109,9 +110,14 @@ public class ReportService {
 	@Transactional
 	public int squad_mark(JSONArray markedArr, String eventType, User user) throws ParseException {
 		List<SquadStats> resultArray = new ArrayList<SquadStats>();
+		Map<String, String> availableEventsForReasons = OptionService.convertEventTypeDTOs(
+				OptionService.getEvent_types().stream().filter(dto -> dto.isCanSetReason() == true).toList());
 		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
 		// People managed by this user
 		List<Human> humans = dbservice.getSquadService().findByUser(user).getHumans();
+		boolean shouldSaveReason = availableEventsForReasons.containsKey(eventType);
+		if (shouldSaveReason == false)
+			shouldSaveReason = !OptionService.convertEventTypeDTOs().containsKey(eventType);
 		// Those who didn't come
 		for (Object o : markedArr) {
 			JSONObject data = (JSONObject) FileOptions.ParseJsThrought(String.valueOf(o));
@@ -123,7 +129,11 @@ public class ReportService {
 			stats.setAuthor(user.getLogin());
 			stats.setDate(DBService.getStringDate());
 			stats.setPresent(false);
-			stats.setReason(String.valueOf(data.get("reason")));
+			if (shouldSaveReason) {
+				stats.setReason(String.valueOf(data.get("reason")));
+			} else {
+				stats.setReason("error:unsupported_event");
+			}
 			stats.setType(eventType);
 			stats.setUser_role(user.getRole());
 			stats.setEvent_id(event_id);
