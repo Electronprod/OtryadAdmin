@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.electronprod.OtryadAdmin.data.filesystem.FileOptions;
 import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
@@ -94,14 +96,14 @@ public class AdminController {
 		return "admin/usermgr/usermgr_edit";
 	}
 
-	@GetMapping("/usermgr/settelegram")
-	public String userManager_setTelegram(@RequestParam() int id, @RequestParam() String telegram) {
+	@GetMapping("/usermgr/setrole")
+	public String userManager_setRole(@RequestParam() int id, @RequestParam() String role) {
 		Optional<User> user = dbservice.getUserService().findById(id);
 		if (user.isEmpty()) {
 			return "redirect:/admin/usermgr?error";
 		}
 		User usr = user.get();
-		usr.setTelegram(telegram);
+		usr.setRole(role);
 		dbservice.getUserService().save(usr);
 		return "redirect:/admin/usermgr?saved";
 	}
@@ -445,5 +447,82 @@ public class AdminController {
 		stats.get().setReason(reason);
 		dbservice.getStatsService().save(stats.get());
 		return "redirect:/admin/statsmgr?edited";
+	}
+
+	@GetMapping("/config")
+	public String config(Model model) {
+		model.addAttribute("raw_config", FileOptions.getFileLine(OptionService.getConfig()));
+		model.addAttribute("eventtypes", OptionService.getEvent_types());
+		model.addAttribute("reasons", OptionService.getReasons_for_absences());
+		model.addAttribute("replacements", OptionService.getReplacements());
+		return "admin/config/config";
+	}
+
+	@PostMapping("/config/addevent")
+	public String config_addevent(@RequestParam String name, @RequestParam String event,
+			@RequestParam String canSetReason) {
+		try {
+			OptionService.addData("event_types",
+					OptionService.generateEvent(event, name, Boolean.parseBoolean(canSetReason)));
+			return "redirect:/admin/config?saved";
+		} catch (ParseException e) {
+			log.error("Error adding event. ", e);
+			return "redirect:/admin/config?error_unknown";
+		}
+	}
+
+	@PostMapping("/config/delevent")
+	public String config_delevent(@RequestParam String event) {
+		try {
+			OptionService.removeEvent(event);
+			return "redirect:/admin/config?deleted";
+		} catch (Exception e) {
+			log.error("Error removing event. ", e);
+			return "redirect:/admin/config?error_unknown";
+		}
+	}
+
+	@PostMapping("/config/addreason")
+	public String config_addreason(@RequestParam String name, @RequestParam String reason) {
+		try {
+			OptionService.addData("reasons_for_absences", OptionService.generateReason(reason, name));
+			return "redirect:/admin/config?saved";
+		} catch (ParseException e) {
+			log.error("Error adding reason. ", e);
+			return "redirect:/admin/config?error_unknown";
+		}
+	}
+
+	@PostMapping("/config/delreason")
+	public String config_delreason(@RequestParam String reason) {
+		try {
+			OptionService.removeReason(reason);
+			return "redirect:/admin/config?deleted";
+		} catch (Exception e) {
+			log.error("Error removing reason. ", e);
+			return "redirect:/admin/config?error_unknown";
+		}
+	}
+
+	@PostMapping("/config/addreplacement")
+	public String config_addreplacement(@RequestParam String from, @RequestParam String to) {
+		try {
+			OptionService.addData("replacements", OptionService.generateReplacement(from, to));
+			return "redirect:/admin/config?saved";
+		} catch (ParseException e) {
+			log.error("Error adding replacement. ", e);
+			return "redirect:/admin/config?error_unknown";
+		}
+	}
+
+	@PostMapping("/config/delreplacement")
+	public String config_delreplacement(@RequestParam String from) {
+		try {
+			OptionService.removeReplacement(from);
+			return "redirect:/admin/config?deleted";
+		} catch (Exception e) {
+			log.error("Error removing replacement. ", e);
+			return "redirect:/admin/config?error_unknown";
+		}
 	}
 }

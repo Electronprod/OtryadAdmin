@@ -31,8 +31,6 @@ import ru.electronprod.OtryadAdmin.models.dto.PersonalStatsHelper;
 @Service
 public class ReportService {
 	@Autowired
-	private OptionService optionServ;
-	@Autowired
 	private DBService dbservice;
 
 	public Model squad_generatePersonalReport(List<SquadStats> personalStats, Model model) {

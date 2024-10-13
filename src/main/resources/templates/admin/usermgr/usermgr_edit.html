@@ -5,8 +5,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Редактировать пользователя</title>
-	<link rel="stylesheet" href="/observer/default.css">
-	<link rel="stylesheet" href="/observer/data.css">
+	<link rel="stylesheet" href="/assets/default_style.css">
 	<link rel="icon" href="/icon.png">
 	<script src="/public_resources/sweetalert2.js"></script>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
@@ -47,9 +46,9 @@
 				</form>
 			</div>
 			<div class="card">
-				<h3>Изменить телеграм</h3>
-				<form method="GET" action="/admin/usermgr/settelegram">
-					<input type="text" name="telegram" placeholder="Новый telegram">
+				<h3>Изменить роль</h3>
+				<form method="GET" action="/admin/usermgr/setrole">
+					<input type="text" name="role" placeholder="Новая роль">
 					<input type="hidden" name="id" th:value="${id}">
 					<button type="submit">Изменить</button>
 				</form>

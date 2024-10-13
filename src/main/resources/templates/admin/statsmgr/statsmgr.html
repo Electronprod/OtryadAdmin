@@ -120,8 +120,8 @@
 						<form th:action="@{/admin/statsmgr/edit_type_single}" method="post">
 							<input placeholder="Введите ID" name="id" type="number" required />
 							<select name="statsType" id="statsType" required>
-								<option th:each="entry : ${event_types_map}" th:value="${entry.key}"
-									th:text="${entry.value}">
+								<option th:each="entry : ${event_types_map}" th:value="${entry.getEvent()}"
+									th:text="${entry.getName()}">
 								</option>
 							</select>
 							<button class="blue-button" type="submit">Редактировать</button>
@@ -136,8 +136,8 @@
 						<form th:action="@{/admin/statsmgr/edit_type}" method="post">
 							<input placeholder="Введите EventID" name="eventid" type="number" required />
 							<select name="statsType" id="statsType" required>
-								<option th:each="entry : ${event_types_map}" th:value="${entry.key}"
-									th:text="${entry.value}">
+								<option th:each="entry : ${event_types_map}" th:value="${entry.getEvent()}"
+									th:text="${entry.getName()}">
 								</option>
 							</select>
 							<button class="blue-button" type="submit">Редактировать</button>
