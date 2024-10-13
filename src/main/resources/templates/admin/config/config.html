@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Редактирование конфигурации</title>
+	<link rel="stylesheet" href="/assets/default_style.css">
+	<link rel="icon" href="/icon.png">
+	<script src="/public_resources/sweetalert2.js"></script>
+	<style>
+		input[type="text"],
+		input[type="password"],
+		input[type="date"],
+		input[type="number"] {
+			width: 100%;
+			padding: 10px;
+			margin: 5px 0;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			box-sizing: border-box;
+		}
+
+		.container {
+			width: 100%;
+			/* Устанавливаем div на всю ширину родительского элемента */
+			height: 100%;
+			/* Устанавливаем div на всю высоту родительского элемента */
+			display: flex;
+			/* Используем flexbox для выравнивания */
+			justify-content: center;
+			/* По горизонтали (опционально) */
+			align-items: center;
+			/* По вертикали (опционально) */
+			padding: 10px;
+			/* Внутренние отступы # могут быть скорректированы по необходимости */
+			box-sizing: border-box;
+			/* Включаем отступы в общие размеры элемента */
+		}
+
+		textarea {
+			width: 100%;
+			/* Устанавливаем textarea на всю ширину div */
+			height: 100%;
+			/* Устанавливаем textarea на всю высоту div */
+			resize: none;
+			/* Убираем возможность изменения размеров вручную */
+			padding: 10px;
+			/* Внутренние отступы внутри textarea */
+			border-radius: 5px;
+			/* Скругляем углы */
+			border: 1px solid #ccc;
+			/* Цвет и стиль границы */
+			font-family: Arial, sans-serif;
+			/* Устанавливаем шрифт */
+			font-size: 14px;
+			/* Размер шрифта */
+			box-sizing: border-box;
+			/* Включаем отступы в общие размеры элемента */
+		}
+
+		/* Дополнительный hover-стиль для textarea */
+		textarea:hover {
+			border-color: #888;
+			/* Изменяем цвет границы при наведении курсора */
+		}
+
+		/* Стиль для фокусированного состояния textarea */
+		textarea:focus {
+			outline: none;
+			/* Убираем стандартную обводку */
+			border-color: #555;
+			/* Цвет границы при фокусе */
+		}
+
+		.cardc {
+			flex: 1;
+			margin: 5px;
+			padding: 10px;
+			border-radius: 5px;
+			border: 1px solid #ddd;
+			background-color: rgb(249, 250, 251);
+		}
+
+		.container {
+			display: flex;
+			justify-content: space-between;
+			border: 1px solid #ccc;
+			border-style: none;
+			padding: 10px;
+		}
+
+		.red-button {
+			background-color: red;
+			color: white;
+			/* Для лучшей читаемости текста на красном фоне */
+			border: none;
+			/* Убрать рамку, если требуется */
+			padding: 10px 20px;
+			/* Добавить отступы вокруг текста */
+			cursor: pointer;
+			/* Изменить курсор на указатель при наведении */
+		}
+
+		.red-button:hover {
+			background-color: orangered;
+		}
+
+		.blue-button {
+			background-color: blue;
+			color: white;
+			/* Для лучшей читаемости текста на красном фоне */
+			border: none;
+			/* Убрать рамку, если требуется */
+			padding: 10px 20px;
+			/* Добавить отступы вокруг текста */
+			cursor: pointer;
+			/* Изменить курсор на указатель при наведении */
+		}
+
+		.blue-button:hover {
+			background-color: royalblue;
+		}
+	</style>
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="navbar"></div>
+	<div id="dashboard">
+		<div id="content">
+			<div class="card">
+				<div class="container">
+					<div class="cardc">
+						<h3>Добавить событие</h3>
+						<form th:action="@{/admin/config/addevent}" method="post">
+							<input placeholder="Название события" name="name" type="text" required />
+							<input placeholder="Строковый идентификатор события" name="event" type="text" required />
+							<label for="canSetReason">Показывать выбор причин пропуска?</label>
+							<select name="canSetReason">
+								<option value="false">Нет</option>
+								<option value="true">Да</option>
+							</select>
+							<button type="submit">Добавить</button>
+						</form>
+					</div>
+					<div class="cardc">
+						<h3>Удалить событие</h3>
+						<form th:action="@{/admin/config/delevent}" method="post">
+							<select name="event" required>
+								<option th:each="entry : ${eventtypes}" th:value="${entry.getEvent()}"
+									th:text="${entry.getName()}">
+								</option>
+							</select>
+							<button class="red-button" type="submit">Удалить</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="card">
+				<div class="container">
+					<div class="cardc">
+						<h3>Добавить причину отсутствия</h3>
+						<form th:action="@{/admin/config/addreason}" method="post">
+							<input placeholder="Причина" name="name" type="text" required />
+							<input placeholder="Строковый идентификатор причины" name="reason" type="text" required />
+							<button type="submit">Добавить</button>
+						</form>
+					</div>
+					<div class="cardc">
+						<h3>Удалить причину отсутствия</h3>
+						<form th:action="@{/admin/config/delreason}" method="post">
+							<select name="reason" required>
+								<option th:each="entry : ${reasons}" th:value="${entry.key}" th:text="${entry.value}">
+								</option>
+							</select>
+							<button class="red-button" type="submit">Удалить</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="card">
+				<div class="container">
+					<div class="cardc">
+						<h3>Добавить замену</h3>
+						<form th:action="@{/admin/config/addreplacement}" method="post">
+							<input placeholder="Что заменить?" name="from" type="text" required />
+							<input placeholder="На что заменить?" name="to" type="text" required />
+							<button type="submit">Добавить</button>
+						</form>
+					</div>
+					<div class="cardc">
+						<h3>Удалить замену</h3>
+						<form th:action="@{/admin/config/delreplacement}" method="post">
+							<select name="from" required>
+								<option th:each="entry : ${replacements}" th:value="${entry.key}"
+									th:text="${entry.key} +' >>> '+ ${entry.value}">
+								</option>
+							</select>
+							<button class="red-button" type="submit">Удалить</button>
+						</form>
+					</div>
+				</div>
+			</div>
+			<div class="card">
+				<h3>Конфигурация в сыром виде</h3>
+				<div style="height: 500px;">
+					<div class="container">
+						<textarea disabled id="rawConfig" th:text="${raw_config}"></textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="/assets/messagesUtil.js"></script>
+<script src="/admin/navbar.js"></script>
+<script>
+	function formatArea() {
+		const area = document.getElementById('rawConfig');
+		area.value = JSON.stringify(JSON.parse(area.value), null, 4);
+	}
+	window.addEventListener('load', formatArea);
+</script>
+
+</html>

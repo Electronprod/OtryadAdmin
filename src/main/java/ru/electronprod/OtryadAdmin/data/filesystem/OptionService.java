@@ -26,10 +26,11 @@ public class OptionService implements InitializingBean {
 	private static Map<String, String> reasons_for_absences = new LinkedHashMap<String, String>();
 	@Getter
 	private static Map<String, String> replacements = new LinkedHashMap<String, String>();
+	@Getter
+	private static File config = new File("settings.txt");
 
 	@Override
 	public void afterPropertiesSet() {
-		File config = new File("settings.txt");
 		if (FileOptions.loadFile(config) || FileOptions.getFileLines(config.getPath()).isEmpty()) {
 			try {
 				writeDefaults(config);
@@ -48,6 +49,9 @@ public class OptionService implements InitializingBean {
 	}
 
 	private static void loadData(File config) throws ParseException {
+		event_types.clear();
+		replacements.clear();
+		reasons_for_absences.clear();
 		JSONObject data = (JSONObject) FileOptions.ParseJsThrought(FileOptions.getFileLine(config));
 		// Adding event types
 		JSONArray eventtypes = (JSONArray) data.get("event_types");
@@ -68,7 +72,7 @@ public class OptionService implements InitializingBean {
 			JSONObject obj = (JSONObject) o;
 			replacements.put(String.valueOf(obj.get("from")), String.valueOf(obj.get("to")));
 		}
-		log.info("Loaded data from file.");
+		log.info("(Re) Loaded data from " + config.getName());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -100,7 +104,53 @@ public class OptionService implements InitializingBean {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static JSONObject generateEvent(String event, String name, boolean mark) {
+	public static void addData(String section, JSONObject toWrite) throws ParseException {
+		JSONObject main = (JSONObject) FileOptions.ParseJsThrought(FileOptions.getFileLine(config));
+		JSONArray sect = (JSONArray) main.get(section);
+		sect.add(toWrite);
+		FileOptions.writeFile(main.toJSONString(), config);
+		loadData(config);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void removeEvent(String event) throws Exception {
+		JSONObject main = (JSONObject) FileOptions.ParseJsThrought(FileOptions.getFileLine(config));
+		JSONArray sect = (JSONArray) main.get("event_types");
+		if (!sect.removeIf(o -> String.valueOf(JSONObject(o).get("event")).equals(event))) {
+			throw new Exception("Can't find event to remove: " + event);
+		}
+		FileOptions.writeFile(main.toJSONString(), config);
+		loadData(config);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void removeReason(String reason) throws Exception {
+		JSONObject main = (JSONObject) FileOptions.ParseJsThrought(FileOptions.getFileLine(config));
+		JSONArray sect = (JSONArray) main.get("reasons_for_absences");
+		if (!sect.removeIf(o -> String.valueOf(JSONObject(o).get("reason")).equals(reason))) {
+			throw new Exception("Can't find reason to remove: " + reason);
+		}
+		FileOptions.writeFile(main.toJSONString(), config);
+		loadData(config);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void removeReplacement(String replacement) throws Exception {
+		JSONObject main = (JSONObject) FileOptions.ParseJsThrought(FileOptions.getFileLine(config));
+		JSONArray sect = (JSONArray) main.get("replacements");
+		if (!sect.removeIf(o -> String.valueOf(JSONObject(o).get("from")).equals(replacement))) {
+			throw new Exception("Can't find replacement to remove: " + replacement);
+		}
+		FileOptions.writeFile(main.toJSONString(), config);
+		loadData(config);
+	}
+
+	private static JSONObject JSONObject(Object o) {
+		return (JSONObject) o;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static JSONObject generateEvent(String event, String name, boolean mark) {
 		JSONObject o = new JSONObject();
 		o.put("event", event);
 		o.put("name", name);
@@ -109,7 +159,7 @@ public class OptionService implements InitializingBean {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static JSONObject generateReason(String reason, String name) {
+	public static JSONObject generateReason(String reason, String name) {
 		JSONObject o = new JSONObject();
 		o.put("reason", reason);
 		o.put("name", name);
@@ -117,7 +167,7 @@ public class OptionService implements InitializingBean {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static JSONObject generateReplacement(String from, String to) {
+	public static JSONObject generateReplacement(String from, String to) {
 		JSONObject o = new JSONObject();
 		o.put("from", from);
 		o.put("to", to);
