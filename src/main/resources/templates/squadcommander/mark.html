@@ -41,8 +41,8 @@
 						<thead>
 							<tr>
 								<th>Выбрать</th>
-								<th>Имя</th>
 								<th>Фамилия</th>
+								<th>Имя</th>
 								<th>Причина</th>
 							</tr>
 						</thead>
@@ -52,8 +52,8 @@
 									<input class="custom-checkbox" type="checkbox" name="selectedIds"
 										th:value="${human.id}" th:id="'checkbox-' + ${iterStat.index}" />
 								</td>
-								<td th:text="${human.name}">Имя</td>
 								<td th:text="${human.lastname}">Фамилия</td>
+								<td th:text="${human.name}">Имя</td>
 								<td>
 									<select class="details-input" th:name="'details[' + ${human.id} + ']'"
 										th:id="'details-' + ${iterStat.index}">
@@ -71,7 +71,7 @@
 			<script>
 				Swal.fire({
 					title: "Внимание! Обновление!",
-					html: "Теперь нужно отмечать <b>ПРИСУТСТВУЮЩИХ</b>.\nПричины отсутствия нужно проставлять только для некоторых событий.",
+					html: "Теперь нужно отмечать <b>ПРИСУТСТВУЮЩИХ</b>.\nОстальным указывайте причину отстутствия.",
 					icon: "warning"
 				});
 

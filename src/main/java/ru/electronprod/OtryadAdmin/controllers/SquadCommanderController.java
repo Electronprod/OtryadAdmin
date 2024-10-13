@@ -13,7 +13,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
+import ru.electronprod.OtryadAdmin.data.filesystem.SettingsService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
@@ -28,8 +28,6 @@ public class SquadCommanderController {
 	private DBService dbservice;
 	@Autowired
 	private AuthHelper authHelper;
-	@Autowired
-	private OptionService optionService;
 	@Autowired
 	private ReportService statsHelper;
 
@@ -52,8 +50,8 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		model.addAttribute("humanList",
 				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
-		model.addAttribute("reasons_for_absences_map", optionService.getReasons_for_absences());
-		model.addAttribute("event_types_map", optionService.getEvent_types());
+		model.addAttribute("reasons_for_absences_map", SettingsService.getReasons_for_absences());
+		model.addAttribute("event_types_map", SettingsService.getEvent_types());
 		model.addAttribute("login", user.getLogin());
 		return "squadcommander/mark";
 	}

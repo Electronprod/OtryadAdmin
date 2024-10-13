@@ -19,7 +19,7 @@ import ru.electronprod.OtryadAdmin.models.dto.EventTypeDTO;
 
 @Slf4j
 @Repository
-public class OptionService implements InitializingBean {
+public class SettingsService implements InitializingBean {
 	@Getter
 	private static List<EventTypeDTO> event_types = new ArrayList<EventTypeDTO>();
 	@Getter

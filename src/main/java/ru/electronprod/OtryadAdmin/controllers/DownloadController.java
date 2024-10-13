@@ -28,7 +28,8 @@ public class DownloadController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return ResponseEntity.badRequest().build();
-		if (user.getRole().equals("ROLE_OBSERVER") || user.getRole().equals("ROLE_OBSERVER")) {
+		if (user.getRole().equals("ROLE_OBSERVER") || user.getRole().equals("ROLE_ADMIN")
+				|| user.getRole().equals("ROLE_COMMANDER")) {
 			String sheetName = dbservice.getStringDate() + "-allhumans.xlsx";
 			return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + sheetName)
 					.contentType(MediaType.APPLICATION_OCTET_STREAM)

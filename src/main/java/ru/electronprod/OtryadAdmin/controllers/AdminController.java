@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.filesystem.FileOptions;
-import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
+import ru.electronprod.OtryadAdmin.data.filesystem.SettingsService;
 import ru.electronprod.OtryadAdmin.data.services.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
@@ -40,8 +40,6 @@ public class AdminController {
 	private DBService dbservice;
 	@Autowired
 	private AdminService adminService;
-	@Autowired
-	private OptionService optionService;
 
 	/*
 	 * Main page
@@ -352,8 +350,8 @@ public class AdminController {
 	 */
 	@GetMapping("/statsmgr")
 	public String statsManager(Model model) {
-		model.addAttribute("event_types_map", optionService.getEvent_types());
-		model.addAttribute("reasons_for_absences_map", optionService.getReasons_for_absences());
+		model.addAttribute("event_types_map", SettingsService.getEvent_types());
+		model.addAttribute("reasons_for_absences_map", SettingsService.getReasons_for_absences());
 		return "admin/statsmgr/statsmgr";
 	}
 
@@ -451,10 +449,10 @@ public class AdminController {
 
 	@GetMapping("/config")
 	public String config(Model model) {
-		model.addAttribute("raw_config", FileOptions.getFileLine(OptionService.getConfig()));
-		model.addAttribute("eventtypes", OptionService.getEvent_types());
-		model.addAttribute("reasons", OptionService.getReasons_for_absences());
-		model.addAttribute("replacements", OptionService.getReplacements());
+		model.addAttribute("raw_config", FileOptions.getFileLine(SettingsService.getConfig()));
+		model.addAttribute("eventtypes", SettingsService.getEvent_types());
+		model.addAttribute("reasons", SettingsService.getReasons_for_absences());
+		model.addAttribute("replacements", SettingsService.getReplacements());
 		return "admin/config/config";
 	}
 
@@ -462,8 +460,8 @@ public class AdminController {
 	public String config_addevent(@RequestParam String name, @RequestParam String event,
 			@RequestParam String canSetReason) {
 		try {
-			OptionService.addData("event_types",
-					OptionService.generateEvent(event, name, Boolean.parseBoolean(canSetReason)));
+			SettingsService.addData("event_types",
+					SettingsService.generateEvent(event, name, Boolean.parseBoolean(canSetReason)));
 			return "redirect:/admin/config?saved";
 		} catch (ParseException e) {
 			log.error("Error adding event. ", e);
@@ -474,7 +472,7 @@ public class AdminController {
 	@PostMapping("/config/delevent")
 	public String config_delevent(@RequestParam String event) {
 		try {
-			OptionService.removeEvent(event);
+			SettingsService.removeEvent(event);
 			return "redirect:/admin/config?deleted";
 		} catch (Exception e) {
 			log.error("Error removing event. ", e);
@@ -485,7 +483,7 @@ public class AdminController {
 	@PostMapping("/config/addreason")
 	public String config_addreason(@RequestParam String name, @RequestParam String reason) {
 		try {
-			OptionService.addData("reasons_for_absences", OptionService.generateReason(reason, name));
+			SettingsService.addData("reasons_for_absences", SettingsService.generateReason(reason, name));
 			return "redirect:/admin/config?saved";
 		} catch (ParseException e) {
 			log.error("Error adding reason. ", e);
@@ -496,7 +494,7 @@ public class AdminController {
 	@PostMapping("/config/delreason")
 	public String config_delreason(@RequestParam String reason) {
 		try {
-			OptionService.removeReason(reason);
+			SettingsService.removeReason(reason);
 			return "redirect:/admin/config?deleted";
 		} catch (Exception e) {
 			log.error("Error removing reason. ", e);
@@ -507,7 +505,7 @@ public class AdminController {
 	@PostMapping("/config/addreplacement")
 	public String config_addreplacement(@RequestParam String from, @RequestParam String to) {
 		try {
-			OptionService.addData("replacements", OptionService.generateReplacement(from, to));
+			SettingsService.addData("replacements", SettingsService.generateReplacement(from, to));
 			return "redirect:/admin/config?saved";
 		} catch (ParseException e) {
 			log.error("Error adding replacement. ", e);
@@ -518,7 +516,7 @@ public class AdminController {
 	@PostMapping("/config/delreplacement")
 	public String config_delreplacement(@RequestParam String from) {
 		try {
-			OptionService.removeReplacement(from);
+			SettingsService.removeReplacement(from);
 			return "redirect:/admin/config?deleted";
 		} catch (Exception e) {
 			log.error("Error removing replacement. ", e);
