@@ -6,13 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
+import ru.electronprod.OtryadAdmin.data.filesystem.SettingsService;
 import ru.electronprod.OtryadAdmin.models.Human;
 
 @Service
 public class SearchService {
 	@Autowired
-	private OptionService optionServ;
+	private SettingsService optionServ;
 
 	/**
 	 * @author OpenAI ChatGPT 3.5

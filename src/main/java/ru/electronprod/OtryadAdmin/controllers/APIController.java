@@ -9,13 +9,13 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.electronprod.OtryadAdmin.data.filesystem.OptionService;
+import ru.electronprod.OtryadAdmin.data.filesystem.SettingsService;
 import ru.electronprod.OtryadAdmin.models.dto.EventTypeDTO;
 
 @RestController
 public class APIController {
 	@Autowired
-	OptionService optionServ;
+	SettingsService optionServ;
 
 	@GetMapping("/api/get_event_types_with_reasons")
 	public String getEventTypesForReasons() {
