@@ -105,7 +105,7 @@ public class ReportService {
 		return result;
 	}
 
-	public int commander_mark(JSONArray ids, String eventName, User user) {
+	public int commander_mark(JSONArray ids, String eventName, String date, User user) {
 		List<SquadStats> resultArray = new ArrayList<SquadStats>();
 		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
 		List<Human> humans = dbservice.getHumanService().findAll();
@@ -114,7 +114,7 @@ public class ReportService {
 			Human human1 = humans.stream().filter(human -> human.getId() == human_id).findFirst().orElseThrow();
 			SquadStats stats = new SquadStats(human1);
 			stats.setAuthor(user.getLogin());
-			stats.setDate(DBService.getStringDate());
+			stats.setDate(date.replaceAll("-", "."));
 			stats.setPresent(true);
 			stats.setReason("error:present");
 			stats.setType(eventName);

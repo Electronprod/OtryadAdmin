@@ -46,6 +46,8 @@
 				<form th:action="@{/commander/mark}" method="post" id="markForm">
 					<label>Введите название события:</label>
 					<input id="statsType" type="text" required />
+					<label>Выберите дату:</label>
+					<input id="dateField" type="date" required />
 					<table id="markTable">
 						<thead>
 							<tr>
@@ -69,6 +71,7 @@
 				</form>
 			</div>
 			<script>
+				document.getElementById("dateField").valueAsDate = new Date()
 				async function fetchData(url) {
 					try {
 						const response = await fetch(url);
@@ -126,6 +129,7 @@
 					}
 					const bodyData = {
 						checkedPeople: uncheckedPeople,
+						date: document.getElementById("dateField").value,
 						eventName: selectElement.value
 					};
 					var csrfToken = document.querySelector('input[name="_csrf"]').value;
