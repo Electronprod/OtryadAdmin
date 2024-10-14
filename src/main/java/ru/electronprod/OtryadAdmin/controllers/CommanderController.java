@@ -43,7 +43,7 @@ public class CommanderController {
 
 	@GetMapping("/humans")
 	public String getAllData(Model model) {
-		model.addAttribute("humans", dbservice.getHumanService().findAll());
+		model.addAttribute("humans", dbservice.getHumanService().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
 		model.addAttribute("user_role", authHelper.getCurrentUser().getRole());
 		return "public/humans_rawtable";
 	}
@@ -64,7 +64,8 @@ public class CommanderController {
 		JSONArray checkedPeopleArray = new JSONArray();
 		checkedPeopleArray.addAll(uncheckedPeopleList);
 		JSONObject answer = new JSONObject();
-		int id = statsHelper.commander_mark(checkedPeopleArray, String.valueOf(requestBody.get("eventName")), user);
+		int id = statsHelper.commander_mark(checkedPeopleArray, String.valueOf(requestBody.get("eventName")),
+				String.valueOf(requestBody.get("date")), user);
 		answer.put("result", "success");
 		answer.put("event_id", id);
 		return ResponseEntity.ok(answer.toJSONString());
