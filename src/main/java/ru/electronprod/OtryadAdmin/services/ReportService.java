@@ -33,6 +33,10 @@ public class ReportService {
 	@Autowired
 	private DBService dbservice;
 
+	public void squad_getGlobalReport(List<SquadStats> squadStats, Model model) {
+
+	}
+
 	public Model squad_generatePersonalReport(List<SquadStats> personalStats, Model model) {
 		Map<String, PersonalStatsHelper> visitsData = new LinkedHashMap<String, PersonalStatsHelper>();
 		int visits_total = 0;
@@ -178,42 +182,4 @@ public class ReportService {
 				+ event_id);
 		return event_id;
 	}
-//	@Transactional
-//	public void squad_mark(MarkDTO detail, String eventType, User user) throws Exception {
-//		// TODO eventType check and search
-//		Map<Integer, String> details1 = detail.getDetails(); // human ID + Reason
-//		List<SquadStats> resultArray = new ArrayList<SquadStats>(); // Result we will add to database
-//		int event_id = dbservice.getStatsService().findMaxEventIDValue() + 1;
-//		// People managed by this user
-//		List<Human> humans = dbservice.getSquadService().findByUser(user).getHumans();
-//		// Those who didn't come
-//		details1.forEach((id, reason) -> {
-//			Human human1 = humans.stream().filter(human -> human.getId() == id).findFirst().orElseThrow();
-//			SquadStats stats = new SquadStats(human1);
-//			stats.setAuthor(user.getLogin());
-//			stats.setDate(DBService.getStringDate());
-//			stats.setPresent(true);
-//			stats.setReason("error:present");
-//			stats.setType(eventType);
-//			stats.setUser_role(user.getRole());
-//			stats.setEvent_id(event_id);
-//			resultArray.add(stats);
-//			humans.remove(human1);
-//		});
-//		// Those who come
-//		for (Human human : humans) {
-//			SquadStats stats = new SquadStats(human);
-//			stats.setAuthor(user.getLogin());
-//			stats.setDate(DBService.getStringDate());
-//			stats.setPresent(false);
-//			stats.setReason(reason);
-//			stats.setType(eventType);
-//			stats.setUser_role(user.getRole());
-//			stats.setEvent_id(event_id);
-//			resultArray.add(stats);
-//		}
-//		// Saving result to database
-//		dbservice.getStatsService().saveAll(resultArray);
-//		log.info("User " + user.getLogin() + " marked " + resultArray.size() + " people. EventID: " + event_id);
-//	}
 }
