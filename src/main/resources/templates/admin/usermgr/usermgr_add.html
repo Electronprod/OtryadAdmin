@@ -6,7 +6,6 @@
 	<title>Добавить пользователя</title>
 	<link rel="stylesheet" href="/assets/formpage.css">
 	<link rel="icon" href="/icon.png">
-	<script src="/public_resources/sweetalert2.js"></script>
 </head>
 
 <body>
@@ -14,21 +13,20 @@
 	<form action="#" th:action="@{/admin/usermgr/add}" th:object="${user}" method="post">
 		<h1>Добавить пользователя</h1>
 		<label>Логин:</label>
-		<input type="text" th:field="*{login}"><br>
+		<input required type="text" th:field="*{login}"><br>
 
 		<label>Пароль:</label>
-		<input type="password" th:field="*{password}"><br>
+		<input required type="password" th:field="*{password}"><br>
 
 		<label>Роль:</label>
-		<input type="text" th:field="*{role}"><br>
+		<input required type="text" th:field="*{role}"><br>
 
 		<label>Telegram:</label>
-		<input placeholder="Пишите null, если нет" type="text" th:field="*{telegram}"><br>
+		<input required placeholder="Пишите null, если нет" type="text" th:field="*{telegram}"><br>
 
 		<button type="submit">Создать</button>
 	</form>
 	<button type="button" onclick="window.location.href = '/admin/usermgr'">Отмена</button>
 </body>
-<script src="/assets/formcheck.js"></script>
 
 </html>

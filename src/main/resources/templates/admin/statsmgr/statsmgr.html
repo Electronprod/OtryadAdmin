@@ -7,6 +7,7 @@
 	<title>Менеджер статистики</title>
 	<link rel="stylesheet" href="/assets/default_style.css">
 	<link rel="icon" href="/icon.png">
+	<script defer src="/assets/navbar.js"></script>
 	<script src="/public_resources/sweetalert2.js"></script>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
 	<style type="text/css">
@@ -76,7 +77,6 @@
 <body>
 	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
@@ -206,7 +206,6 @@
 		</div>
 	</div>
 </body>
-<script src="/admin/navbar.js"></script>
 <script src="/assets/messagesUtil.js"></script>
 
 </html>

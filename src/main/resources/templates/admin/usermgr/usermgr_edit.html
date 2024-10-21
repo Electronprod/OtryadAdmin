@@ -7,7 +7,6 @@
 	<title>Редактировать пользователя</title>
 	<link rel="stylesheet" href="/assets/default_style.css">
 	<link rel="icon" href="/icon.png">
-	<script src="/public_resources/sweetalert2.js"></script>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
 	<style type="text/css">
 		input[type="text"],
@@ -32,7 +31,7 @@
 			<div class="card">
 				<h3>Изменить логин</h3>
 				<form method="GET" action="/admin/usermgr/setlogin">
-					<input type="text" name="login" placeholder="Новый логин">
+					<input required type="text" name="login" placeholder="Новый логин">
 					<input type="hidden" name="id" th:value="${id}">
 					<button type="submit">Изменить</button>
 				</form>
@@ -40,7 +39,7 @@
 			<div class="card">
 				<h3>Изменить пароль</h3>
 				<form method="GET" action="/admin/usermgr/setpassword">
-					<input type="text" name="password" placeholder="Новый пароль">
+					<input required type="text" name="password" placeholder="Новый пароль">
 					<input type="hidden" name="id" th:value="${id}">
 					<button type="submit">Изменить</button>
 				</form>
@@ -48,7 +47,7 @@
 			<div class="card">
 				<h3>Изменить роль</h3>
 				<form method="GET" action="/admin/usermgr/setrole">
-					<input type="text" name="role" placeholder="Новая роль">
+					<input required type="text" name="role" placeholder="Новая роль">
 					<input type="hidden" name="id" th:value="${id}">
 					<button type="submit">Изменить</button>
 				</form>

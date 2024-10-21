@@ -5,7 +5,6 @@
 	<meta charset="UTF-8">
 	<title>Редактировать человека</title>
 	<link rel="stylesheet" href="/assets/formpage.css">
-	<script src="/public_resources/sweetalert2.js"></script>
 	<link rel="icon" href="/icon.png">
 </head>
 
@@ -13,27 +12,26 @@
 	<div id="navbar"></div>
 	<form th:object="${humanHelper}" th:action="@{/admin/humanmgr/edit}" method="post">
 		<h1>Редактировать человека:</h1>
-		<input type="hidden" th:field="*{id}" />
+		<input required type="hidden" th:field="*{id}" />
 		<label for="name">Имя</label>
-		<input placeholder="Name" name="name" type="text" th:field="*{name}" />
+		<input required placeholder="Name" name="name" type="text" th:field="*{name}" />
 		<label for="lastname">Фамилия</label>
-		<input placeholder="Lastname" name="lastname" type="text" th:field="*{lastname}" />
+		<input required placeholder="Lastname" name="lastname" type="text" th:field="*{lastname}" />
 		<label for="surname">Отчество</label>
-		<input placeholder="Surname" name="surname" type="text" th:field="*{surname}" />
+		<input required placeholder="Surname" name="surname" type="text" th:field="*{surname}" />
 		<label for="birthday">День рождения</label>
-		<input placeholder="birthday" name="birthday" type="text" th:field="*{birthday}" />
+		<input required placeholder="birthday" name="birthday" type="text" th:field="*{birthday}" />
 		<label for="school">Школа</label>
-		<input placeholder="school" name="school" type="text" th:field="*{school}" />
+		<input required placeholder="school" name="school" type="text" th:field="*{school}" />
 		<label for="classnum">Класс</label>
-		<input placeholder="class number" name="classnum" type="number" th:field="*{classnum}" />
+		<input required placeholder="class number" name="classnum" type="number" th:field="*{classnum}" />
 		<label for="phone">Телефон</label>
-		<input placeholder="Phone" name="phone" type="text" th:field="*{phone}" />
+		<input required placeholder="Phone" name="phone" type="text" th:field="*{phone}" />
 		<label for="squad">Звено(Лишний раз не трогать! Будут проблемы со статистикой!)</label>
-		<input placeholder="squad" name="squad" type="text" th:field="*{squad_id}" />
+		<input required placeholder="squad" name="squad" type="text" th:field="*{squad_id}" />
 		<button type="submit">Обновить</button>
 	</form>
 	<button type="button" onclick="window.location.href = '/admin/humanmgr'">Отмена</button>
 </body>
-<script src="/assets/formcheck.js"></script>
 
 </html>

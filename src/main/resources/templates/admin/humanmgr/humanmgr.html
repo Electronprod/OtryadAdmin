@@ -5,6 +5,7 @@
 	<meta charset="UTF-8">
 	<title>Список отряда</title>
 	<link rel="stylesheet" href="/assets/tablemgr.css">
+	<script defer src="/assets/navbar.js"></script>
 	<script src="/public_resources/sweetalert2.js"></script>
 	<link rel="icon" href="/icon.png">
 </head>
@@ -12,7 +13,6 @@
 <body>
 	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-	<div id="navbar"></div>
 	<table id="userTable">
 		<thead>
 			<tr>
@@ -52,13 +52,12 @@
 	</div>
 </body>
 <script src="/assets/mgr.js"></script>
-<script src="/admin/navbar.js"></script>
 <script>
 	function deleteAll() {
 		Swal.fire({
-		  title: "Опасная фунция!",
-		  text: "Вручную введите url в браузере для удаления: /admin/humanmgr/deleteall",
-		  icon: "info"
+			title: "Опасная фунция!",
+			text: "Вручную введите url в браузере для удаления: /admin/humanmgr/deleteall",
+			icon: "info"
 		});
 	}
 
