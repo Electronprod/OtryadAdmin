@@ -5,6 +5,7 @@ import lombok.NonNull;
 import ru.electronprod.OtryadAdmin.models.Human;
 
 @Data
+@Deprecated(forRemoval = true)
 public class HumanHelper {
 	private int stats_id;
 	private int squad_id;

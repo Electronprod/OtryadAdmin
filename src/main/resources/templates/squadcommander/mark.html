@@ -69,12 +69,6 @@
 				</form>
 			</div>
 			<script>
-				Swal.fire({
-					title: "Внимание! Обновление!",
-					html: "Теперь нужно отмечать <b>ПРИСУТСТВУЮЩИХ</b>.\nОстальным указывайте причину отстутствия.",
-					icon: "warning"
-				});
-
 				async function fetchData(url) {
 					try {
 						const response = await fetch(url);

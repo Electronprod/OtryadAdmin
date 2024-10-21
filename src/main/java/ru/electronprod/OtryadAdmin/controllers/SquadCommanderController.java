@@ -13,11 +13,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.electronprod.OtryadAdmin.data.filesystem.SettingsService;
-import ru.electronprod.OtryadAdmin.data.services.DBService;
+import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
+import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
-import ru.electronprod.OtryadAdmin.services.ReportService;
+import ru.electronprod.OtryadAdmin.services.StatsWorker;
 
 @Slf4j
 @Controller
@@ -29,7 +29,7 @@ public class SquadCommanderController {
 	@Autowired
 	private AuthHelper authHelper;
 	@Autowired
-	private ReportService statsHelper;
+	private StatsWorker statsHelper;
 
 	@GetMapping("")
 	public String overview() {
@@ -40,7 +40,7 @@ public class SquadCommanderController {
 	@GetMapping("/humans")
 	public String humans(Model model) {
 		model.addAttribute("user_role", authHelper.getCurrentUser().getRole());
-		model.addAttribute("humans", dbservice.getUserService().findById(authHelper.getCurrentUser().getId())
+		model.addAttribute("humans", dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId())
 				.orElseThrow().getSquad().getHumans());
 		return "public/humans_rawtable";
 	}
@@ -49,9 +49,9 @@ public class SquadCommanderController {
 	public String mark(Model model) {
 		User user = authHelper.getCurrentUser();
 		model.addAttribute("humanList",
-				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
-		model.addAttribute("reasons_for_absences_map", SettingsService.getReasons_for_absences());
-		model.addAttribute("event_types_map", SettingsService.getEvent_types());
+				dbservice.getUserRepository().findById(user.getId()).orElseThrow().getSquad().getHumans());
+		model.addAttribute("reasons_for_absences_map", SettingsRepository.getReasons_for_absences());
+		model.addAttribute("event_types_map", SettingsRepository.getEvent_types());
 		model.addAttribute("login", user.getLogin());
 		return "squadcommander/mark";
 	}
@@ -84,7 +84,7 @@ public class SquadCommanderController {
 		User user = authHelper.getCurrentUser();
 		if (user == null)
 			return "redirect:/squadcommander?error_usernotfound";
-		List<SquadStats> statsList = dbservice.getStatsService().findByDate(date.replaceAll("-", "."));
+		List<SquadStats> statsList = dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."));
 		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
 		model.addAttribute("statss", statsList);
 		return "public/statsview_rawtable";
@@ -93,7 +93,7 @@ public class SquadCommanderController {
 	@GetMapping("/stats/table")
 	public String deleteStats(Model model) {
 		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss", dbservice.getStatsService().findByAuthor(user.getLogin()));
+		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(user.getLogin()));
 		return "public/statsview_rawtable";
 	}
 
@@ -101,14 +101,14 @@ public class SquadCommanderController {
 	public String general_stats(Model model) {
 		User user = authHelper.getCurrentUser();
 		model.addAttribute("dataMap",
-				statsHelper.squad_generateGlobalReport(dbservice.getStatsService().findByAuthor(user.getLogin())));
+				statsHelper.squad_getEventsReport(dbservice.getStatsRepository().findByAuthor(user.getLogin())));
 		return "squadcommander/general_stats";
 	}
 
 	@GetMapping("/stats/personal/table")
 	public String personal_statsTable(@RequestParam int id, Model model) {
 		User user = authHelper.getCurrentUser();
-		List<SquadStats> statsList = dbservice.getStatsService().findByAuthor(user.getLogin());
+		List<SquadStats> statsList = dbservice.getStatsRepository().findByAuthor(user.getLogin());
 		statsList.removeIf(stats -> stats.getHuman().getId() != id);
 		model.addAttribute("statss", statsList);
 		return "public/statsview_rawtable";
@@ -117,11 +117,12 @@ public class SquadCommanderController {
 	@GetMapping("/stats/personal")
 	public String personal_stats(@RequestParam int id, Model model) {
 		User user = authHelper.getCurrentUser();
-		// Getting stats for user's humans
-		Human human = dbservice.getHumanService().findById(id).orElse(new Human());
+		// Getting stats for human
+		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
 		List<SquadStats> s = human.getStats();
+		// Removing records from other commanders
 		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
-		model = statsHelper.squad_generatePersonalReport(s, model);
+		statsHelper.getMainPersonalReportModel(s, model);
 		model.addAttribute("person", human.getName() + " " + human.getLastname());
 		return "squadcommander/personal_stats";
 	}
@@ -130,7 +131,7 @@ public class SquadCommanderController {
 	public String stats_overview(Model model) {
 		User user = authHelper.getCurrentUser();
 		model.addAttribute("humans",
-				dbservice.getUserService().findById(user.getId()).orElseThrow().getSquad().getHumans());
+				dbservice.getUserRepository().findById(user.getId()).orElseThrow().getSquad().getHumans());
 		return "squadcommander/stats_overview";
 	}
 }

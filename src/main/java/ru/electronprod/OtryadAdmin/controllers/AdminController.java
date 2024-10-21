@@ -20,16 +20,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.electronprod.OtryadAdmin.data.filesystem.FileOptions;
-import ru.electronprod.OtryadAdmin.data.filesystem.SettingsService;
-import ru.electronprod.OtryadAdmin.data.services.DBService;
+import ru.electronprod.OtryadAdmin.data.DBService;
+import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.dto.HumanHelper;
 import ru.electronprod.OtryadAdmin.models.dto.SquadHelper;
+import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.AdminService;
+import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
 @Slf4j
 @Controller
@@ -37,9 +38,11 @@ import ru.electronprod.OtryadAdmin.services.AdminService;
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class AdminController {
 	@Autowired
+	private AdminService adminService;
+	@Autowired
 	private DBService dbservice;
 	@Autowired
-	private AdminService adminService;
+	private AuthHelper auth;
 
 	/*
 	 * Main page
@@ -69,7 +72,7 @@ public class AdminController {
 	 */
 	@GetMapping("/usermgr")
 	public String usermgr(Model model) {
-		model.addAttribute("users", dbservice.getUserService().findAll());
+		model.addAttribute("users", dbservice.getUserRepository().findAll());
 		return "admin/usermgr/usermgr";
 	}
 
@@ -84,7 +87,7 @@ public class AdminController {
 		if (user.getTelegram().equalsIgnoreCase("null")) {
 			user.setTelegram(null);
 		}
-		dbservice.getUserService().register(user);
+		auth.register(user);
 		return "redirect:/admin/usermgr?saved";
 	}
 
@@ -96,50 +99,50 @@ public class AdminController {
 
 	@GetMapping("/usermgr/setrole")
 	public String userManager_setRole(@RequestParam() int id, @RequestParam() String role) {
-		Optional<User> user = dbservice.getUserService().findById(id);
+		Optional<User> user = dbservice.getUserRepository().findById(id);
 		if (user.isEmpty()) {
 			return "redirect:/admin/usermgr?error";
 		}
 		User usr = user.get();
 		usr.setRole(role);
-		dbservice.getUserService().save(usr);
+		dbservice.getUserRepository().save(usr);
 		return "redirect:/admin/usermgr?saved";
 	}
 
 	@GetMapping("/usermgr/setlogin")
 	public String userManager_setLogin(@RequestParam() int id, @RequestParam() String login) {
-		Optional<User> user = dbservice.getUserService().findById(id);
+		Optional<User> user = dbservice.getUserRepository().findById(id);
 		if (user.isEmpty()) {
 			return "redirect:/admin/usermgr?error";
 		}
 		User usr = user.get();
 		usr.setLogin(login);
-		dbservice.getUserService().save(usr);
+		dbservice.getUserRepository().save(usr);
 		return "redirect:/admin/usermgr?saved";
 	}
 
 	@GetMapping("/usermgr/setpassword")
 	public String userManager_setPassword(@RequestParam() int id, @RequestParam() String password) {
-		Optional<User> user = dbservice.getUserService().findById(id);
+		Optional<User> user = dbservice.getUserRepository().findById(id);
 		if (user.isEmpty()) {
 			return "redirect:/admin/usermgr?error";
 		}
 		User usr = user.get();
 		usr.setPassword(password);
-		dbservice.getUserService().register(usr);
+		auth.register(usr);
 		return "redirect:/admin/usermgr?saved";
 	}
 
 	@GetMapping("/usermgr/delete")
 	public String userManager_delete(@RequestParam() int id) {
-		Optional<User> user = dbservice.getUserService().findById(id);
+		Optional<User> user = dbservice.getUserRepository().findById(id);
 		if (user.isEmpty()) {
 			return "redirect:/admin/usermgr?error";
 		}
 		if (adminService.isNativeAdmin(user.get())) {
 			return "redirect:/admin/usermgr?error_protected";
 		}
-		dbservice.getUserService().deleteById(id);
+		dbservice.getUserRepository().deleteById(id);
 		return "redirect:/admin/usermgr?deleted";
 	}
 
@@ -148,14 +151,14 @@ public class AdminController {
 	 */
 	@GetMapping("/squadmgr")
 	public String squadManager(Model model) {
-		model.addAttribute("squads", dbservice.getSquadService().findAll());
+		model.addAttribute("squads", dbservice.getSquadRepository().findAll());
 		return "admin/squadmgr/squadmgr";
 	}
 
 	// id - from usermgr
 	@GetMapping("/squadmgr/add")
 	public String squadManager_add(@RequestParam() int id, Model model) {
-		Optional<User> usr = dbservice.getUserService().findById(id);
+		Optional<User> usr = dbservice.getUserRepository().findById(id);
 		if (usr.isEmpty() || !usr.get().getRole().equals("ROLE_SQUADCOMMANDER")) {
 			return "redirect:/admin/squadmgr?error";
 		}
@@ -174,14 +177,14 @@ public class AdminController {
 		Squad squad = new Squad();
 		squad.setSquadName(squadHelper.getSquadName());
 		squad.setCommanderName(squadHelper.getCommanderName());
-		squad.setCommander(dbservice.getUserService().findById(squadHelper.getCommander_id()).orElseThrow());
-		dbservice.getSquadService().save(squad);
+		squad.setCommander(dbservice.getUserRepository().findById(squadHelper.getCommander_id()).orElseThrow());
+		dbservice.getSquadRepository().save(squad);
 		return "redirect:/admin/squadmgr?saved";
 	}
 
 	@GetMapping("/squadmgr/edit")
 	public String squadManager_edit(@RequestParam() int id, Model model) {
-		Optional<Squad> squad = dbservice.getSquadService().findById(id);
+		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/admin/squadmgr?error";
 		SquadHelper squadHelper = new SquadHelper();
@@ -195,10 +198,10 @@ public class AdminController {
 
 	@PostMapping("/squadmgr/edit")
 	public String squadManager_edit(@ModelAttribute("squad") SquadHelper squadHelper) {
-		Squad squad = dbservice.getSquadService().findById(squadHelper.getId()).orElseThrow();
+		Squad squad = dbservice.getSquadRepository().findById(squadHelper.getId()).orElseThrow();
 		squad.setCommanderName(squadHelper.getCommanderName());
 		squad.setSquadName(squadHelper.getSquadName());
-		Optional<User> usr = dbservice.getUserService().findById(squadHelper.getCommander_id());
+		Optional<User> usr = dbservice.getUserRepository().findById(squadHelper.getCommander_id());
 		if (usr.isEmpty() || !usr.get().getRole().equals("ROLE_SQUADCOMMANDER")) {
 			return "redirect:/admin/squadmgr?error";
 		}
@@ -206,16 +209,16 @@ public class AdminController {
 			return "redirect:/admin/squadmgr?error";
 		}
 		squad.setCommander(usr.get());
-		dbservice.getSquadService().save(squad);
+		dbservice.getSquadRepository().save(squad);
 		return "redirect:/admin/squadmgr?edited";
 	}
 
 	@GetMapping("/squadmgr/delete")
 	public String squadManager_delete(@RequestParam() int id) {
-		if (dbservice.getSquadService().findById(id).isEmpty()) {
+		if (dbservice.getSquadRepository().findById(id).isEmpty()) {
 			return "redirect:/admin/squadmgr?error";
 		}
-		dbservice.getSquadService().deleteById(id);
+		dbservice.getSquadRepository().deleteById(id);
 		return "redirect:/admin/squadmgr?deleted";
 	}
 
@@ -224,7 +227,7 @@ public class AdminController {
 	 */
 	@GetMapping("/humanmgr")
 	public String humanManager(Model model) {
-		List<Human> humans = dbservice.getHumanService().findAll(Sort.by(Sort.Direction.ASC, "lastname"));
+		List<Human> humans = dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname"));
 		model.addAttribute("humans", humans);
 		return "admin/humanmgr/humanmgr";
 	}
@@ -233,7 +236,7 @@ public class AdminController {
 	@GetMapping("/humanmgr/add")
 	public String humanManager_add(@RequestParam() int id, Model model) {
 		// Checking squad existence
-		if (dbservice.getSquadService().findById(id).isEmpty())
+		if (dbservice.getSquadRepository().findById(id).isEmpty())
 			return "redirect:/admin/humanmgr?errorsquad";
 
 		HumanHelper helper = new HumanHelper();
@@ -244,7 +247,7 @@ public class AdminController {
 
 	@PostMapping("/humanmgr/add")
 	public String humanManager_addAction(@ModelAttribute("humanHelper") HumanHelper helper) {
-		Optional<Squad> squad = dbservice.getSquadService().findById(helper.getSquad_id());
+		Optional<Squad> squad = dbservice.getSquadRepository().findById(helper.getSquad_id());
 		// Checking existence
 		if (squad.isEmpty())
 			return "redirect:/admin/humanmgr?errorsquad";
@@ -253,7 +256,7 @@ public class AdminController {
 		Human human = HumanHelper.fillDefaultValues(helper);
 		human.setSquad(squad.orElseThrow());
 		// Saving to DB
-		dbservice.getHumanService().save(human);
+		dbservice.getHumanRepository().save(human);
 		return "redirect:/admin/humanmgr?saved";
 	}
 
@@ -266,7 +269,7 @@ public class AdminController {
 				try {
 					String[] data = line.split(";");
 					Human result = new Human();
-					Squad squad = dbservice.getSquadService().findById(Integer.parseInt(data[0])).orElseThrow();
+					Squad squad = dbservice.getSquadRepository().findById(Integer.parseInt(data[0])).orElseThrow();
 					result.setSquad(squad);
 					result.setLastname(data[1]);
 					result.setName(data[2]);
@@ -281,7 +284,7 @@ public class AdminController {
 					return "redirect:/admin/humanmgr?error&" + e.getMessage() + "&line" + line;
 				}
 			}
-			dbservice.getHumanService().saveAll(records);
+			dbservice.getHumanRepository().saveAll(records);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "redirect:/admin/humanmgr?error&" + e.getMessage();
@@ -291,22 +294,22 @@ public class AdminController {
 
 	@GetMapping("/humanmgr/delete")
 	public String humanManager_delete(@RequestParam() int id) {
-		if (dbservice.getHumanService().findById(id).isEmpty()) {
+		if (dbservice.getHumanRepository().findById(id).isEmpty()) {
 			return "redirect:/admin/humanmgr?error_notfound";
 		}
-		dbservice.getHumanService().deleteById(id);
+		dbservice.getHumanRepository().deleteById(id);
 		return "redirect:/admin/humanmgr?deleted";
 	}
 
 	@GetMapping("/humanmgr/deleteall")
 	public String humanManager_deleteAll() {
-		dbservice.getHumanService().deleteAll();
+		dbservice.getHumanRepository().deleteAll();
 		return "redirect:/admin/humanmgr?deleted";
 	}
 
 	@GetMapping("/humanmgr/edit")
 	public String humanManager_edit(@RequestParam int id, Model model) {
-		Optional<Human> human = dbservice.getHumanService().findById(id);
+		Optional<Human> human = dbservice.getHumanRepository().findById(id);
 		// Checking existence (Human)
 		if (human.isEmpty())
 			return "redirect:/admin/humanmgr?error_notfound";
@@ -318,7 +321,7 @@ public class AdminController {
 
 	@PostMapping("/humanmgr/edit")
 	public String humanManager_editAction(@ModelAttribute("humanHelper") HumanHelper helper) {
-		Optional<Human> human1 = dbservice.getHumanService().findById(helper.getId());
+		Optional<Human> human1 = dbservice.getHumanRepository().findById(helper.getId());
 		// Checking existence (Human)
 		if (human1.isEmpty())
 			return "redirect:/admin/humanmgr?error_notfound";
@@ -326,22 +329,22 @@ public class AdminController {
 		// If Squad changed
 		if (human.getSquad().getId() != helper.getSquad_id()) {
 			// Checking existence (new Squad)
-			Optional<Squad> squad = dbservice.getSquadService().findById(helper.getSquad_id());
+			Optional<Squad> squad = dbservice.getSquadRepository().findById(helper.getSquad_id());
 			if (squad.isEmpty())
 				return "redirect:/admin/humanmgr?errorsquad";
 			// Deleting human from old squad
-			Squad oldsquad = dbservice.getSquadService().findById(human.getSquad().getId()).orElseThrow();
+			Squad oldsquad = dbservice.getSquadRepository().findById(human.getSquad().getId()).orElseThrow();
 			oldsquad.getHumans().remove(human);
-			dbservice.getSquadService().save(oldsquad);
+			dbservice.getSquadRepository().save(oldsquad);
 			// Adding to new squad
 			Squad newSquad = squad.get();
 			human.setSquad(newSquad);
 			newSquad.getHumans().add(human);
-			dbservice.getSquadService().save(newSquad);
+			dbservice.getSquadRepository().save(newSquad);
 		}
 		// Updating default values
 		human = HumanHelper.fillDefaultValues(helper, human);
-		dbservice.getHumanService().save(human);
+		dbservice.getHumanRepository().save(human);
 		return "redirect:/admin/humanmgr?edited";
 	}
 
@@ -350,8 +353,8 @@ public class AdminController {
 	 */
 	@GetMapping("/statsmgr")
 	public String statsManager(Model model) {
-		model.addAttribute("event_types_map", SettingsService.getEvent_types());
-		model.addAttribute("reasons_for_absences_map", SettingsService.getReasons_for_absences());
+		model.addAttribute("event_types_map", SettingsRepository.getEvent_types());
+		model.addAttribute("reasons_for_absences_map", SettingsRepository.getReasons_for_absences());
 		return "admin/statsmgr/statsmgr";
 	}
 
@@ -362,97 +365,97 @@ public class AdminController {
 
 	@GetMapping("/statsmgr/delete_event")
 	public String statsManager_delete_byEventID(@RequestParam int id) {
-		List<SquadStats> stats = dbservice.getStatsService().findByEvent_id(id);
+		List<SquadStats> stats = dbservice.getStatsRepository().findByEventId(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
-		dbservice.getStatsService().deleteAll(stats);
+		dbservice.getStatsRepository().deleteAll(stats);
 		return "redirect:/admin/statsmgr?deleted";
 	}
 
 	@GetMapping("/statsmgr/delete")
 	public String statsManager_delete_byID(@RequestParam int id) {
-		Optional<SquadStats> stats = dbservice.getStatsService().findById(id);
+		Optional<SquadStats> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
-		dbservice.getStatsService().delete(stats.get());
+		dbservice.getStatsRepository().delete(stats.get());
 		return "redirect:/admin/statsmgr?deleted";
 	}
 
 	@PostMapping("/statsmgr/edit_type")
 	public String statsManager_edit_type(@RequestParam int eventid, @RequestParam String statsType) {
-		List<SquadStats> stats = dbservice.getStatsService().findByEvent_id(eventid);
+		List<SquadStats> stats = dbservice.getStatsRepository().findByEventId(eventid);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.stream().forEach(stat -> stat.setType(statsType));
-		dbservice.getStatsService().saveAll(stats);
+		dbservice.getStatsRepository().saveAll(stats);
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_type_single")
 	public String statsManager_edit_type_single(@RequestParam int id, @RequestParam String statsType) {
-		Optional<SquadStats> stats = dbservice.getStatsService().findById(id);
+		Optional<SquadStats> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.get().setType(statsType);
-		dbservice.getStatsService().save(stats.get());
+		dbservice.getStatsRepository().save(stats.get());
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_date")
 	public String statsManager_edit_date(@RequestParam int eventid, @RequestParam String date) {
-		List<SquadStats> stats = dbservice.getStatsService().findByEvent_id(eventid);
+		List<SquadStats> stats = dbservice.getStatsRepository().findByEventId(eventid);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.stream().forEach(stat -> stat.setDate(date.replaceAll("-", ".")));
-		dbservice.getStatsService().saveAll(stats);
+		dbservice.getStatsRepository().saveAll(stats);
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_date_single")
 	public String statsManager_edit_date_single(@RequestParam int id, @RequestParam String date) {
-		Optional<SquadStats> stats = dbservice.getStatsService().findById(id);
+		Optional<SquadStats> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.get().setDate(date.replaceAll("-", "."));
-		dbservice.getStatsService().save(stats.get());
+		dbservice.getStatsRepository().save(stats.get());
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_reason")
 	public String statsManager_edit_reason(@RequestParam int eventid, @RequestParam String reason) {
-		List<SquadStats> statsList = dbservice.getStatsService().findByEvent_id(eventid);
+		List<SquadStats> statsList = dbservice.getStatsRepository().findByEventId(eventid);
 		statsList.removeIf(stats -> stats.isPresent());
 		if (statsList.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		statsList.stream().forEach(stat -> stat.setReason(reason));
-		dbservice.getStatsService().saveAll(statsList);
+		dbservice.getStatsRepository().saveAll(statsList);
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@PostMapping("/statsmgr/edit_reason_single")
 	public String statsManager_edit_reason_single(@RequestParam int id, @RequestParam String reason) {
-		Optional<SquadStats> stats = dbservice.getStatsService().findById(id);
+		Optional<SquadStats> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
 		stats.get().setReason(reason);
-		dbservice.getStatsService().save(stats.get());
+		dbservice.getStatsRepository().save(stats.get());
 		return "redirect:/admin/statsmgr?edited";
 	}
 
 	@GetMapping("/config")
 	public String config(Model model) {
-		model.addAttribute("raw_config", FileOptions.getFileLine(SettingsService.getConfig()));
-		model.addAttribute("eventtypes", SettingsService.getEvent_types());
-		model.addAttribute("reasons", SettingsService.getReasons_for_absences());
-		model.addAttribute("replacements", SettingsService.getReplacements());
+		model.addAttribute("raw_config", FileOptions.getFileLine(SettingsRepository.getConfig()));
+		model.addAttribute("eventtypes", SettingsRepository.getEvent_types());
+		model.addAttribute("reasons", SettingsRepository.getReasons_for_absences());
+		model.addAttribute("replacements", SettingsRepository.getReplacements());
 		return "admin/config/config";
 	}
 
@@ -460,8 +463,8 @@ public class AdminController {
 	public String config_addevent(@RequestParam String name, @RequestParam String event,
 			@RequestParam String canSetReason) {
 		try {
-			SettingsService.addData("event_types",
-					SettingsService.generateEvent(event, name, Boolean.parseBoolean(canSetReason)));
+			SettingsRepository.addData("event_types",
+					SettingsRepository.generateEvent(event, name, Boolean.parseBoolean(canSetReason)));
 			return "redirect:/admin/config?saved";
 		} catch (ParseException e) {
 			log.error("Error adding event. ", e);
@@ -472,7 +475,7 @@ public class AdminController {
 	@PostMapping("/config/delevent")
 	public String config_delevent(@RequestParam String event) {
 		try {
-			SettingsService.removeEvent(event);
+			SettingsRepository.removeEvent(event);
 			return "redirect:/admin/config?deleted";
 		} catch (Exception e) {
 			log.error("Error removing event. ", e);
@@ -483,7 +486,7 @@ public class AdminController {
 	@PostMapping("/config/addreason")
 	public String config_addreason(@RequestParam String name, @RequestParam String reason) {
 		try {
-			SettingsService.addData("reasons_for_absences", SettingsService.generateReason(reason, name));
+			SettingsRepository.addData("reasons_for_absences", SettingsRepository.generateReason(reason, name));
 			return "redirect:/admin/config?saved";
 		} catch (ParseException e) {
 			log.error("Error adding reason. ", e);
@@ -494,7 +497,7 @@ public class AdminController {
 	@PostMapping("/config/delreason")
 	public String config_delreason(@RequestParam String reason) {
 		try {
-			SettingsService.removeReason(reason);
+			SettingsRepository.removeReason(reason);
 			return "redirect:/admin/config?deleted";
 		} catch (Exception e) {
 			log.error("Error removing reason. ", e);
@@ -505,7 +508,7 @@ public class AdminController {
 	@PostMapping("/config/addreplacement")
 	public String config_addreplacement(@RequestParam String from, @RequestParam String to) {
 		try {
-			SettingsService.addData("replacements", SettingsService.generateReplacement(from, to));
+			SettingsRepository.addData("replacements", SettingsRepository.generateReplacement(from, to));
 			return "redirect:/admin/config?saved";
 		} catch (ParseException e) {
 			log.error("Error adding replacement. ", e);
@@ -516,7 +519,7 @@ public class AdminController {
 	@PostMapping("/config/delreplacement")
 	public String config_delreplacement(@RequestParam String from) {
 		try {
-			SettingsService.removeReplacement(from);
+			SettingsRepository.removeReplacement(from);
 			return "redirect:/admin/config?deleted";
 		} catch (Exception e) {
 			log.error("Error removing replacement. ", e);

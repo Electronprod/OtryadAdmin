@@ -1,37 +1,31 @@
-package ru.electronprod.OtryadAdmin.data.services;
+package ru.electronprod.OtryadAdmin.data;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import lombok.Getter;
-import ru.electronprod.OtryadAdmin.models.User;
 
 @Service
 public class DBService {
-	@Autowired
 	@Getter
-	private UserService userService;
 	@Autowired
+	private HumanRepository humanRepository;
 	@Getter
-	private SquadService squadService;
 	@Autowired
+	private SquadRepository squadRepository;
 	@Getter
-	private HumanService humanService;
 	@Autowired
-	private StatsService statsService;
+	private SquadStatsRepository statsRepository;
+	@Getter
+	@Autowired
+	private UserRepository userRepository;
 
 	public static String getStringDate() {
 		Calendar calendar = Calendar.getInstance();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
 		return dateFormat.format(calendar.getTime());
-	}
-
-	public StatsService getStatsService() {
-		return statsService;
 	}
 }
