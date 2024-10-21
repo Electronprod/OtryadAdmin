@@ -43,4 +43,8 @@ public class SquadStats implements Serializable {
 	public SquadStats(Human human) {
 		this.human = human;
 	}
+
+	public String getType() {
+		return this.type;
+	}
 }

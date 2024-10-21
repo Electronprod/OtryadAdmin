@@ -20,8 +20,8 @@
 			<div class="card">
 				<h3>Пропуски и посещения</h3>
 				<h4>Суммарная статистика:</h4>
-				<p>Посещено <strong th:text="${visits_total}"></strong> событий<br>Пропущено <strong
-						th:text="${omissions_total}"></strong> событий</p>
+				<p>Посещено <strong th:text="${attendance.getFirst()}"></strong> событий<br>Пропущено <strong
+						th:text="${attendance.getSecond()}"></strong> событий</p>
 				<h4>Статистика по событиям:</h4>
 				<table>
 					<thead>
@@ -32,10 +32,10 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="data : ${visitsData}">
+						<tr th:each="data : ${eventsData}">
 							<td th:text="${data.key}">Событие</td>
-							<td th:text="${data.value.visits}">Посещений</td>
-							<td th:text="${data.value.omissions}">Пропусков</td>
+							<td th:text="${data.value.getFirst()}">Посещений</td>
+							<td th:text="${data.value.getSecond()}">Пропусков</td>
 						</tr>
 					</tbody>
 				</table>
@@ -50,9 +50,9 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="data : ${reasons_for_absences}">
+						<tr th:each="data : ${reasons_data}">
 							<td th:text="${data.key}">-</td>
-							<td th:text="${data.value}">-1</td>
+							<td th:text="${data.value}">-</td>
 						</tr>
 					</tbody>
 				</table>
@@ -70,18 +70,16 @@
 							<th>Событие</th>
 							<th>Посещено</th>
 							<th>Причина пропуска</th>
-							<th>Event ID</th>
-							<th>ID</th>
+							<th>EventID</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="stats : ${lastEventsData}">
+						<tr th:each="stats : ${lastRecords}">
 							<td th:text="${stats.date}">-</td>
 							<td th:text="${stats.type}">-</td>
 							<td th:text="${stats.isPresent}">-</td>
 							<td th:text="${stats.reason}">-</td>
 							<td th:text="${stats.event_id}">-</td>
-							<td th:text="${stats.id}">-</td>
 						</tr>
 					</tbody>
 				</table>

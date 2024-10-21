@@ -1,4 +1,4 @@
-package ru.electronprod.OtryadAdmin.data.repositories;
+package ru.electronprod.OtryadAdmin.data;
 
 import org.springframework.stereotype.Repository;
 

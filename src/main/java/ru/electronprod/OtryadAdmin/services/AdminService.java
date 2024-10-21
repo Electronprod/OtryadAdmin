@@ -10,9 +10,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.electronprod.OtryadAdmin.data.services.UserService;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.security.AuthHelper;
 
+/**
+ * Manages the native admin account and provides information about the system
+ */
 @Slf4j
 @Service
 public class AdminService implements InitializingBean {
@@ -23,25 +26,31 @@ public class AdminService implements InitializingBean {
 	private String admin_password;
 
 	@Autowired
-	private UserService userService;
+	private AuthHelper auth;
 
 	/**
 	 * Checks the existence of admin account
 	 */
 	@Override
 	public void afterPropertiesSet() {
-		if (userService.exists(admin_login) == false) {
+		if (auth.exists(admin_login) == false) {
 			log.info("Administrator profile not found, creating a new one...");
 			User user = new User();
 			user.setRole("ROLE_ADMIN");
 			user.setLogin(admin_login);
 			user.setPassword(admin_password);
-			userService.register(user);
+			auth.register(user);
 		}
 
 		log.info("Admin registered. Use authorization data from application.properties file.");
 	}
 
+	/**
+	 * Checks if this is the native administrator
+	 * 
+	 * @param person - User to check
+	 * @return true - native, false - not
+	 */
 	public boolean isNativeAdmin(User person) {
 		if (person.getLogin().equals(admin_login) && person.getRole().equals("ROLE_ADMIN")) {
 			return true;
