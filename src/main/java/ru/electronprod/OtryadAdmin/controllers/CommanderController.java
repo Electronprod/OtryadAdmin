@@ -29,7 +29,7 @@ import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 @Slf4j
 @Controller
 @RequestMapping("/commander")
-@PreAuthorize("hasAuthority('ROLE_COMMANDER') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_OBSERVER')")
+@PreAuthorize("hasAuthority('ROLE_COMMANDER')")
 public class CommanderController {
 	@Autowired
 	private StatsWorker statsWorker;
