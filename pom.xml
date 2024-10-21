@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>ru.electronprod</groupId>
 	<artifactId>OtryadAdmin</artifactId>
-	<version>1.3</version>
+	<version>1.4</version>
 	<name>OtryadAdmin</name>
 	<description>Statistics application</description>
 	<url />
