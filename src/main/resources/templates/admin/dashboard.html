@@ -9,6 +9,20 @@
 	<link rel="icon" href="/icon.png">
 	<script defer src="/assets/navbar.js"></script>
 	<script src="/public_resources/sweetalert2.js"></script>
+	<style>
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			margin: 25px 0;
+		}
+
+		th,
+		td {
+			padding: 12px;
+			border: 1px solid #ddd;
+			text-align: left;
+		}
+	</style>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
 </head>
 
@@ -23,7 +37,7 @@
 					статистику, перейдите в панель наблюдателя, нажав на кнопку ниже. Также вы можете отметить ребят,
 					перейдя в панель командира.</p>
 				<a class="greenbtn" href="/observer">Перейти в панель наблюдателя</a>
-				<a class="greenbtn" href="/commander">Перейти в панель командира</a>
+				<button onclick="showWhoMarked()">Предоставить очет об отметках</button>
 			</div>
 			<div class="card">
 				<h3>Ресурсы системы</h3>
@@ -42,5 +56,7 @@
 		</div>
 	</div>
 </body>
+<script src="/assets/api_visualizer.js">
+</script>
 
 </html>
