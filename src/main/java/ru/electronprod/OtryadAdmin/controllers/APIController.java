@@ -3,6 +3,8 @@ package ru.electronprod.OtryadAdmin.controllers;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +69,7 @@ public class APIController {
 	}
 
 	@SuppressWarnings("unchecked")
-	@GetMapping("/api/observer/whomarked")
+	@GetMapping("/api/observer/marks")
 	@PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_OBSERVER')")
 	public String whomarked(@RequestParam(required = false) String date, Model model) {
 		if (date == null || date.isEmpty())
@@ -83,6 +85,12 @@ public class APIController {
 				o.put("name", user.getSquad().getCommanderName());
 			o.put("role", user.getRole());
 			o.put("id", user.getId());
+			JSONArray events = new JSONArray();
+			List<String> eventsArr = statsArr.stream().filter(stats -> stats.getAuthor().equals(user.getLogin()))
+					.map(SquadStats::getType).distinct().toList();
+			o.put("events_count", eventsArr.size());
+			events.addAll(eventsArr);
+			o.put("events", events);
 			answer.add(o);
 		});
 		return answer.toJSONString();
