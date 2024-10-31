@@ -7,52 +7,6 @@
 	<title>Статистика</title>
 	<link rel="stylesheet" href="/assets/default_style.css">
 	<script defer src="/assets/navbar.js"></script>
-	<style type="text/css">
-		input[type="text"],
-		input[type="password"],
-		input[type="date"],
-		input[type="number"] {
-			width: 100%;
-			padding: 10px;
-			margin: 5px 0;
-			border: 1px solid #ccc;
-			border-radius: 5px;
-			box-sizing: border-box;
-		}
-
-		.container {
-			display: flex;
-			justify-content: space-between;
-			border: 1px solid #ccc;
-			border-style: none;
-			padding: 10px;
-		}
-
-		.cardc {
-			flex: 1;
-			margin: 5px;
-			padding: 10px;
-			border-radius: 5px;
-			border: 1px solid #ddd;
-			background-color: rgb(249, 250, 251);
-		}
-
-		.admin-button {
-			background-color: red;
-			color: white;
-			/* Для лучшей читаемости текста на красном фоне */
-			border: none;
-			/* Убрать рамку, если требуется */
-			padding: 10px 20px;
-			/* Добавить отступы вокруг текста */
-			cursor: pointer;
-			/* Изменить курсор на указатель при наведении */
-		}
-
-		.admin-button:hover {
-			background-color: orangered;
-		}
-	</style>
 	<link rel="icon" href="/icon.png">
 	<script src="/public_resources/sweetalert2.js"></script>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
@@ -73,13 +27,14 @@
 						администратора</a>
 				</div>
 			</div>
-			<div class="container">
+			<div class="cardc-container">
 				<div class="cardc">
 					<h3>Общая статистика</h3>
 					<p>
 						<b>Всего ребят:</b> <span th:text="${people_size}"></span><br>
 						<b>Количество пропусков:</b> <span th:text="${people_missed}"></span><br>
 						<b>Количество посещений:</b> <span th:text="${people_attended}"></span>
+						<a href="/observer/stats/table">Подробнее...</a>
 					</p>
 				</div>
 
@@ -89,7 +44,7 @@
 						<b>Количество пропусков:</b> <span th:text="${people_missed_today}"></span><br>
 						<b>Количество посещений:</b> <span th:text="${people_attended_today}"></span><br>
 						<b>Сегодня ребят отметили:</b> <span th:text="${commanders_marked_today}"></span>
-						командиров.
+						командиров. <a href="#" onclick="showWhoMarked()">Подробнее...</a>
 					</p>
 				</div>
 			</div>
@@ -146,13 +101,75 @@
 					<button type="submit">Найти</button>
 				</form>
 			</div>
-			<div class="card">
-				<h3>Посмотреть всю статистику</h3>
-				<a class="greenbtn" href="/observer/stats/table">В виде таблицы</a>
-			</div>
 		</div>
 	</div>
 </body>
 <script src="/assets/messagesUtil.js"></script>
+<script>
+	function showWhoMarked() {
+		Swal.fire({
+			title: 'Введите дату',
+			input: 'date',
+			inputLabel: 'Выберите дату',
+			inputValue: new Date().toISOString().split('T')[0],
+			showCancelButton: true,
+			inputValidator: (value) => {
+				if (!value) {
+					return 'Вы должны ввести дату!'
+				}
+			}
+		}).then((result) => {
+			if (result.isConfirmed) {
+				const date = result.value;
+				const url = `/api/observer/marks?date=${date}`;
+				fetch(url)
+					.then(response => response.json())
+					.then(data => {
+						let content = `
+	                            <table>
+	                                <thead>
+	                                    <tr>
+	                                        <th>Роль</th>
+	                                        <th>Логин</th>
+	                                        <th>События</th>
+	                                    </tr>
+	                                </thead>
+	                                <tbody>
+	                        `;
+						data.forEach(item => {
+							content += `
+	                                <tr>
+	                                    <td>${item.role}</td>
+	                                    <td>${item.login}</td>
+	                                    <td>${item.events.join(", ")}</td>
+	                                </tr>
+	                            `;
+						});
+						content += `
+	                                </tbody>
+	                            </table>
+	                        `;
+						Swal.fire({
+							title: 'Отметки за ' + date,
+							html: content,
+							width: 800,
+							padding: '1em',
+							background: '#fff',
+							showCloseButton: true,
+							icon: 'info'
+						});
+					})
+					.catch(error => {
+						console.log(error);
+						Swal.fire({
+							title: 'Ошибка',
+							text: 'Не удалось получить данные',
+							icon: 'error'
+						});
+					});
+			}
+		});
+	}
+</script>
 
 </html>

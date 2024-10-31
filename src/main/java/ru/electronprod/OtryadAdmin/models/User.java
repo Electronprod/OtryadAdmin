@@ -24,6 +24,8 @@ public class User {
 	private String role;
 	@Column(name = "telegram")
 	private String telegram;
+	@Column(name = "vkID")
+	private String vkID;
 	@OneToOne(mappedBy = "commander", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private Squad squad;
 }

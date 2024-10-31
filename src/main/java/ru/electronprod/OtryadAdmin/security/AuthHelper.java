@@ -34,9 +34,9 @@ public class AuthHelper {
 	 * @param person
 	 */
 	@Transactional
-	public void register(User person) {
+	public boolean register(User person) {
 		person.setPassword(passwordEncoder.encode(person.getPassword()));
-		userRepository.save(person);
+		return userRepository.save(person) != null;
 	}
 
 	/**

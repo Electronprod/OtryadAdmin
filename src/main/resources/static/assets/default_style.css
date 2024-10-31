@@ -198,3 +198,48 @@ button:hover {
 		/* Разместить кнопку на всю ширину */
 	}
 }
+
+input[type="text"],
+input[type="password"],
+input[type="date"],
+input[type="number"] {
+	width: 100%;
+	padding: 10px;
+	margin: 5px 0;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	box-sizing: border-box;
+}
+
+.cardc-container {
+	display: flex;
+	justify-content: space-between;
+	border: 1px solid #ccc;
+	border-style: none;
+	padding: 10px;
+}
+
+.cardc {
+	flex: 1;
+	margin: 5px;
+	padding: 10px;
+	border-radius: 5px;
+	border: 1px solid #ddd;
+	background-color: rgb(249, 250, 251);
+}
+
+.admin-button {
+	background-color: red;
+	color: white;
+	/* Для лучшей читаемости текста на красном фоне */
+	border: none;
+	/* Убрать рамку, если требуется */
+	padding: 10px 20px;
+	/* Добавить отступы вокруг текста */
+	cursor: pointer;
+	/* Изменить курсор на указатель при наведении */
+}
+
+.admin-button:hover {
+	background-color: orangered;
+}

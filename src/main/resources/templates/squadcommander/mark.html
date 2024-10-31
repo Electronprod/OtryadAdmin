@@ -41,7 +41,8 @@
 					<table id="markTable">
 						<thead>
 							<tr>
-								<th>Выбрать</th>
+								<th><input style="accent-color: orange;" class="custom-checkbox" type="checkbox"
+										id="selectAll" /> </th>
 								<th>Фамилия</th>
 								<th>Имя</th>
 								<th>Причина</th>
@@ -70,6 +71,17 @@
 				</form>
 			</div>
 			<script>
+				document.getElementById('selectAll').addEventListener('change', function () {
+					const checkboxes = document.querySelectorAll('input[name="selectedIds"]');
+					checkboxes.forEach((checkbox) => {
+						checkbox.checked = this.checked;
+						const index = checkbox.id.split('-')[1];
+						const selectInput = document.getElementById('details-' + index);
+						if (selectInput) {
+							selectInput.disabled = checkbox.checked;
+						}
+					});
+				});
 				async function fetchData(url) {
 					try {
 						const response = await fetch(url);

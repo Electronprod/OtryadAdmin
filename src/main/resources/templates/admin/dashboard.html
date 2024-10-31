@@ -8,21 +8,6 @@
 	<link rel="stylesheet" href="/assets/default_style.css">
 	<link rel="icon" href="/icon.png">
 	<script defer src="/assets/navbar.js"></script>
-	<script src="/public_resources/sweetalert2.js"></script>
-	<style>
-		table {
-			width: 100%;
-			border-collapse: collapse;
-			margin: 25px 0;
-		}
-
-		th,
-		td {
-			padding: 12px;
-			border: 1px solid #ddd;
-			text-align: left;
-		}
-	</style>
 	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
 </head>
 
@@ -34,10 +19,13 @@
 			<div class="card">
 				<h3>Добро пожаловать!</h3>
 				<p>Это ваша панель администратора. Здесь вы можете управлять вашим сайтом. Если вы хотите помотреть
-					статистику, перейдите в панель наблюдателя, нажав на кнопку ниже. Также вы можете отметить ребят,
-					перейдя в панель командира.</p>
+					статистику, перейдите в панель наблюдателя, нажав на кнопку ниже.</p>
 				<a class="greenbtn" href="/observer">Перейти в панель наблюдателя</a>
-				<button onclick="showWhoMarked()">Предоставить очет об отметках</button>
+			</div>
+			<div class="card">
+				<h3>Редактор конфигурации приложения</h3>
+				<p>Отредактируйте конфигурацию приложения.</p>
+				<a class="greenbtn" href="/admin/config">Перейти в редактор</a>
 			</div>
 			<div class="card">
 				<h3>Ресурсы системы</h3>
@@ -48,15 +36,9 @@
 				<b>Жесткий диск (СВОБОДНО/ДОСТУПНО/ВСЕГО):</b> <span th:text="${disk}"></span>
 				</p>
 			</div>
-			<div class="card">
-				<h3>Редактор конфигурации приложения</h3>
-				<p>Отредактируйте конфигурацию приложения.</p>
-				<a class="greenbtn" href="/admin/config">Перейти в редактор</a>
-			</div>
 		</div>
 	</div>
 </body>
-<script src="/assets/api_visualizer.js">
 </script>
 
 </html>

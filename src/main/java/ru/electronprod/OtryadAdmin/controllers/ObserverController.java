@@ -3,6 +3,7 @@ package ru.electronprod.OtryadAdmin.controllers;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.*;
 import org.springframework.ui.Model;
@@ -104,8 +105,8 @@ public class ObserverController {
 
 	@GetMapping("/stats/table")
 	public String statsTableAll(Model model) {
-		List<SquadStats> squads = dbservice.getStatsRepository().findAll();
-		model.addAttribute("statss", squads);
+		List<SquadStats> stats = dbservice.getStatsRepository().findAll(Sort.by(Sort.Direction.DESC, "id"));
+		model.addAttribute("statss", stats);
 		return "public/statsview_rawtable";
 	}
 
@@ -134,7 +135,7 @@ public class ObserverController {
 
 	@GetMapping("/data")
 	public String getAllData(Model model) {
-		model.addAttribute("humans", dbservice.getHumanRepository().findAll());
+		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
 		return "public/humans_rawtable";
 	}
 }

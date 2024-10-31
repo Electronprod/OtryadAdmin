@@ -87,17 +87,30 @@ public class StatsWorker {
 		 * Generating events attendance sheet
 		 */
 		// Getting all events from List
-		List<String> allEvents = personalStats.stream().map(SquadStats::getType).collect(Collectors.toList());
+		List<String> squadEvents = personalStats.stream()
+				.filter(stats -> stats.getUser_role().equals("ROLE_SQUADCOMMANDER")).map(SquadStats::getType)
+				.collect(Collectors.toList());
+		List<String> commanderEvents = personalStats.stream()
+				.filter(stats -> stats.getUser_role().equals("ROLE_COMMANDER")).map(SquadStats::getType)
+				.collect(Collectors.toList());
 		// There should always be the same order
-		Collections.sort(allEvents);
-		Map<String, Pair<Long, Long>> eventsData = new LinkedHashMap<String, Pair<Long, Long>>();
-		// For each event type...
-		allEvents.forEach(event -> {
+		Collections.sort(squadEvents);
+		Collections.sort(commanderEvents);
+		Map<String, Pair<Long, Long>> squadData = new LinkedHashMap<String, Pair<Long, Long>>();
+		Map<String, Long> commanderData = new LinkedHashMap<String, Long>();
+		// For each squad event type...
+		squadEvents.forEach(event -> {
 			// Adding stats data about this event
-			eventsData.put(event, Pair.of(present.stream().filter(stats -> stats.getType().equals(event)).count(),
+			squadData.put(event, Pair.of(present.stream().filter(stats -> stats.getType().equals(event)).count(),
 					notPresent.stream().filter(stats -> stats.getType().equals(event)).count()));
 		});
-		model.addAttribute("eventsData", eventsData);
+		model.addAttribute("squadData", squadData);
+		// For each commander event type...
+		commanderEvents.forEach(event -> {
+			// Adding stats data about this event
+			commanderData.put(event, present.stream().filter(stats -> stats.getType().equals(event)).count());
+		});
+		model.addAttribute("commanderData", commanderData);
 		/*
 		 * Generating table of reasons for absences
 		 */
