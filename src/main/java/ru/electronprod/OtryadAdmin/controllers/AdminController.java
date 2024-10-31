@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.*;
 import org.springframework.ui.Model;
@@ -73,52 +75,63 @@ public class AdminController {
 	@GetMapping("/usermgr")
 	public String usermgr(Model model) {
 		model.addAttribute("users", dbservice.getUserRepository().findAll());
-		return "admin/usermgr/usermgr";
-	}
-
-	@GetMapping("/usermgr/add")
-	public String userManager_add(Model model) {
-		model.addAttribute("user", new User());
-		return "admin/usermgr/usermgr_add";
+		return "admin/usermgr";
 	}
 
 	@PostMapping("/usermgr/add")
-	public String userManager_addAction(@ModelAttribute("user") User user) {
-		if (user.getTelegram().equalsIgnoreCase("null")) {
-			user.setTelegram(null);
-		}
-		auth.register(user);
-		return "redirect:/admin/usermgr?saved";
+	public ResponseEntity<String> userManager_addAction(@RequestParam String login, @RequestParam String password,
+			@RequestParam String role, @RequestParam(required = false) String telegram,
+			@RequestParam(required = false) String vkid) {
+		if (dbservice.getUserRepository().findByLogin(login).isPresent())
+			return ResponseEntity.status(409).body("{\"result\": \"fail\"}");
+		User user = new User();
+		user.setLogin(login);
+		user.setPassword(password);
+		user.setRole(role);
+		user.setTelegram(telegram);
+		user.setVkID(vkid);
+		if (auth.register(user))
+			return ResponseEntity.accepted().body("{\"result\": \"success\"}");
+		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
 	}
 
+	@SuppressWarnings("unchecked")
 	@GetMapping("/usermgr/edit")
-	public String userManager_edit(@RequestParam() int id, Model model) {
-		model.addAttribute("id", id);
-		return "admin/usermgr/usermgr_edit";
+	public ResponseEntity<String> userManager_edit(@RequestParam int id) {
+		Optional<User> user1 = dbservice.getUserRepository().findById(id);
+		if (user1.isEmpty())
+			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+		User user = user1.get();
+		JSONObject data = new JSONObject();
+		data.put("login", user.getLogin());
+		data.put("role", user.getRole());
+		data.put("telegram", user.getTelegram());
+		data.put("vkid", user.getVkID());
+		return ResponseEntity.ok(data.toJSONString());
 	}
 
-	@GetMapping("/usermgr/setrole")
-	public String userManager_setRole(@RequestParam() int id, @RequestParam() String role) {
-		Optional<User> user = dbservice.getUserRepository().findById(id);
-		if (user.isEmpty()) {
-			return "redirect:/admin/usermgr?error";
+	@PostMapping("/usermgr/edit")
+	public ResponseEntity<String> userManager_editAction(@RequestParam String login, @RequestParam String password,
+			@RequestParam String role, @RequestParam(required = false) String telegram,
+			@RequestParam(required = false) String vkid, int id) {
+		Optional<User> user1 = dbservice.getUserRepository().findById(id);
+		if (user1.isEmpty())
+			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+		User user = user1.get();
+		user.setLogin(login);
+		user.setRole(role);
+		user.setTelegram(telegram);
+		user.setVkID(vkid);
+		boolean result = false;
+		if (password.equals("not_changed")) {
+			result = dbservice.getUserRepository().save(user) != null;
+		} else {
+			user.setPassword(password);
+			result = auth.register(user);
 		}
-		User usr = user.get();
-		usr.setRole(role);
-		dbservice.getUserRepository().save(usr);
-		return "redirect:/admin/usermgr?saved";
-	}
-
-	@GetMapping("/usermgr/setlogin")
-	public String userManager_setLogin(@RequestParam() int id, @RequestParam() String login) {
-		Optional<User> user = dbservice.getUserRepository().findById(id);
-		if (user.isEmpty()) {
-			return "redirect:/admin/usermgr?error";
-		}
-		User usr = user.get();
-		usr.setLogin(login);
-		dbservice.getUserRepository().save(usr);
-		return "redirect:/admin/usermgr?saved";
+		if (result)
+			return ResponseEntity.accepted().body("{\"result\": \"success\"}");
+		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
 	}
 
 	@GetMapping("/usermgr/setpassword")
@@ -133,17 +146,24 @@ public class AdminController {
 		return "redirect:/admin/usermgr?saved";
 	}
 
-	@GetMapping("/usermgr/delete")
-	public String userManager_delete(@RequestParam() int id) {
+	@SuppressWarnings("unchecked")
+	@PostMapping("/usermgr/delete")
+	public ResponseEntity<String> userManager_delete(@RequestParam() int id) {
 		Optional<User> user = dbservice.getUserRepository().findById(id);
+		JSONObject answer = new JSONObject();
 		if (user.isEmpty()) {
-			return "redirect:/admin/usermgr?error";
+			answer.put("success", false);
+			answer.put("message", "User not found");
+			return ResponseEntity.badRequest().body(answer.toJSONString());
 		}
 		if (adminService.isNativeAdmin(user.get())) {
-			return "redirect:/admin/usermgr?error_protected";
+			answer.put("success", false);
+			answer.put("message", "Unremovable user");
+			return ResponseEntity.unprocessableEntity().body(answer.toJSONString());
 		}
 		dbservice.getUserRepository().deleteById(id);
-		return "redirect:/admin/usermgr?deleted";
+		answer.put("success", true);
+		return ResponseEntity.accepted().body(answer.toJSONString());
 	}
 
 	/*
@@ -152,74 +172,65 @@ public class AdminController {
 	@GetMapping("/squadmgr")
 	public String squadManager(Model model) {
 		model.addAttribute("squads", dbservice.getSquadRepository().findAll());
-		return "admin/squadmgr/squadmgr";
-	}
-
-	// id - from usermgr
-	@GetMapping("/squadmgr/add")
-	public String squadManager_add(@RequestParam() int id, Model model) {
-		Optional<User> usr = dbservice.getUserRepository().findById(id);
-		if (usr.isEmpty() || !usr.get().getRole().equals("ROLE_SQUADCOMMANDER")) {
-			return "redirect:/admin/squadmgr?error";
-		}
-		if (usr.get().getSquad() != null) {
-			return "redirect:/admin/squadmgr?error_hasvalue";
-		}
-		SquadHelper squadHelper = new SquadHelper();
-		squadHelper.setCommander_id(id);
-		squadHelper.setCommanderName(usr.get().getLogin());
-		model.addAttribute("squadHelper", squadHelper);
-		return "admin/squadmgr/squadmgr_add";
+		model.addAttribute("users", dbservice.getUserRepository().findAllByRole("ROLE_SQUADCOMMANDER").stream()
+				.filter(user -> user.getSquad() == null).toList());
+		return "admin/squadmgr";
 	}
 
 	@PostMapping("/squadmgr/add")
-	public String squadManager_addAction(@ModelAttribute("squadHelper") SquadHelper squadHelper) {
+	public ResponseEntity<String> squadManager_addAction(@RequestParam String user, @RequestParam String commandername,
+			@RequestParam String name) {
+		Optional<User> commander = dbservice.getUserRepository().findById(Integer.parseInt(user));
+		if (commander.isPresent())
+			ResponseEntity.status(409).body("{\"result\": \"fail\"}");
 		Squad squad = new Squad();
-		squad.setSquadName(squadHelper.getSquadName());
-		squad.setCommanderName(squadHelper.getCommanderName());
-		squad.setCommander(dbservice.getUserRepository().findById(squadHelper.getCommander_id()).orElseThrow());
-		dbservice.getSquadRepository().save(squad);
-		return "redirect:/admin/squadmgr?saved";
+		squad.setSquadName(name);
+		squad.setCommanderName(commandername);
+		squad.setCommander(commander.get());
+		boolean result = dbservice.getSquadRepository().save(squad) != null;
+		if (result)
+			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
+		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
 	}
 
+	@SuppressWarnings("unchecked")
 	@GetMapping("/squadmgr/edit")
-	public String squadManager_edit(@RequestParam() int id, Model model) {
-		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
-		if (squad.isEmpty())
-			return "redirect:/admin/squadmgr?error";
-		SquadHelper squadHelper = new SquadHelper();
-		squadHelper.setCommanderName(squad.get().getCommanderName());
-		squadHelper.setCommander_id(squad.get().getCommander().getId());
-		squadHelper.setSquadName(squad.get().getSquadName());
-		squadHelper.setId(id);
-		model.addAttribute("squadHelper", squadHelper);
-		return "admin/squadmgr/squadmgr_edit";
+	public ResponseEntity<String> squadManager_edit(@RequestParam int id) {
+		Optional<Squad> squad1 = dbservice.getSquadRepository().findById(id);
+		if (squad1.isEmpty())
+			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+		Squad squad = squad1.get();
+		JSONObject data = new JSONObject();
+		data.put("name", squad.getSquadName());
+		data.put("commandername", squad.getCommanderName());
+		data.put("commander", squad.getCommander().getId());
+		return ResponseEntity.ok(data.toJSONString());
 	}
 
 	@PostMapping("/squadmgr/edit")
-	public String squadManager_edit(@ModelAttribute("squad") SquadHelper squadHelper) {
-		Squad squad = dbservice.getSquadRepository().findById(squadHelper.getId()).orElseThrow();
-		squad.setCommanderName(squadHelper.getCommanderName());
-		squad.setSquadName(squadHelper.getSquadName());
-		Optional<User> usr = dbservice.getUserRepository().findById(squadHelper.getCommander_id());
-		if (usr.isEmpty() || !usr.get().getRole().equals("ROLE_SQUADCOMMANDER")) {
-			return "redirect:/admin/squadmgr?error";
-		}
-		if (usr.get().getSquad() == null) {
-			return "redirect:/admin/squadmgr?error";
-		}
-		squad.setCommander(usr.get());
-		dbservice.getSquadRepository().save(squad);
-		return "redirect:/admin/squadmgr?edited";
+	public ResponseEntity<String> squadManager_editAction(@RequestParam int id, @RequestParam String commandername,
+			@RequestParam String name, @RequestParam int user) {
+		Optional<Squad> squad1 = dbservice.getSquadRepository().findById(id);
+		Optional<User> commander = dbservice.getUserRepository().findById(user);
+		if (squad1.isEmpty() || commander.isEmpty())
+			ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+		Squad squad = squad1.get();
+		squad.setSquadName(name);
+		squad.setCommanderName(commandername);
+		squad.setCommander(commander.get());
+		boolean result = dbservice.getSquadRepository().save(squad) != null;
+		if (result)
+			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
+		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
 	}
 
-	@GetMapping("/squadmgr/delete")
-	public String squadManager_delete(@RequestParam() int id) {
+	@PostMapping("/squadmgr/delete")
+	public ResponseEntity<String> squadManager_delete(@RequestParam() int id) {
 		if (dbservice.getSquadRepository().findById(id).isEmpty()) {
-			return "redirect:/admin/squadmgr?error";
+			return ResponseEntity.badRequest().body("{\"result\": \"fail\"}");
 		}
 		dbservice.getSquadRepository().deleteById(id);
-		return "redirect:/admin/squadmgr?deleted";
+		return ResponseEntity.accepted().body("{\"result\": \"success\"}");
 	}
 
 	/*
@@ -229,35 +240,8 @@ public class AdminController {
 	public String humanManager(Model model) {
 		List<Human> humans = dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname"));
 		model.addAttribute("humans", humans);
-		return "admin/humanmgr/humanmgr";
-	}
-
-	// id - squad_id
-	@GetMapping("/humanmgr/add")
-	public String humanManager_add(@RequestParam() int id, Model model) {
-		// Checking squad existence
-		if (dbservice.getSquadRepository().findById(id).isEmpty())
-			return "redirect:/admin/humanmgr?errorsquad";
-
-		HumanHelper helper = new HumanHelper();
-		helper.setSquad_id(id);
-		model.addAttribute("humanHelper", helper);
-		return "admin/humanmgr/humanmgr_add";
-	}
-
-	@PostMapping("/humanmgr/add")
-	public String humanManager_addAction(@ModelAttribute("humanHelper") HumanHelper helper) {
-		Optional<Squad> squad = dbservice.getSquadRepository().findById(helper.getSquad_id());
-		// Checking existence
-		if (squad.isEmpty())
-			return "redirect:/admin/humanmgr?errorsquad";
-
-		// Generating human object
-		Human human = HumanHelper.fillDefaultValues(helper);
-		human.setSquad(squad.orElseThrow());
-		// Saving to DB
-		dbservice.getHumanRepository().save(human);
-		return "redirect:/admin/humanmgr?saved";
+		model.addAttribute("squads", dbservice.getSquadRepository().findAll());
+		return "admin/humanmgr";
 	}
 
 	@PostMapping("/humanmgr/addlist")
@@ -292,60 +276,103 @@ public class AdminController {
 		return "redirect:/admin/humanmgr?saved";
 	}
 
-	@GetMapping("/humanmgr/delete")
-	public String humanManager_delete(@RequestParam() int id) {
+	@PostMapping("/humanmgr/add")
+	public ResponseEntity<String> humanmgr_addUser(@RequestParam String name, @RequestParam String lastname,
+			@RequestParam String surname, @RequestParam String birthday, @RequestParam String school,
+			@RequestParam String classnum, @RequestParam String phone, @RequestParam int squad) {
+		Optional<Squad> squadO = dbservice.getSquadRepository().findById(squad);
+		if (squadO.isEmpty())
+			return ResponseEntity.badRequest().body("{\"result\": \"fail\"}");
+		Human human = new Human();
+		human.setName(name);
+		human.setLastname(lastname);
+		human.setSurname(surname);
+		human.setBirthday(birthday);
+		human.setSchool(school);
+		human.setClassnum(classnum);
+		human.setPhone(phone);
+		human.setSquad(squadO.get());
+		boolean result = dbservice.getHumanRepository().save(human) != null;
+		if (result)
+			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
+		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
+	}
+
+	@GetMapping("/humanmgr/fullinfo")
+	public String humanmgr_fullInfo(@RequestParam(required = false) String id, Model model) {
+		try {
+			if (id != null) {
+				List<Human> humans = new ArrayList<Human>();
+				humans.add(dbservice.getHumanRepository().findById(Integer.parseInt(id)).orElseThrow());
+				model.addAttribute("humans", humans);
+				return "public/humans_rawtable";
+			} else {
+				return "forward:/observer/data";
+			}
+		} catch (Exception e) {
+			return "redirect:/admin/humanmgr";
+		}
+	}
+
+	@PostMapping("/humanmgr/delete")
+	public ResponseEntity<String> humanManager_delete(@RequestParam() int id) {
 		if (dbservice.getHumanRepository().findById(id).isEmpty()) {
-			return "redirect:/admin/humanmgr?error_notfound";
+			return ResponseEntity.badRequest().body("{\"result\": \"fail\"}");
 		}
 		dbservice.getHumanRepository().deleteById(id);
-		return "redirect:/admin/humanmgr?deleted";
+		return ResponseEntity.accepted().body("{\"result\": \"success\"}");
 	}
 
-	@GetMapping("/humanmgr/deleteall")
+	@PostMapping("/humanmgr/deleteall")
 	public String humanManager_deleteAll() {
 		dbservice.getHumanRepository().deleteAll();
-		return "redirect:/admin/humanmgr?deleted";
+		return "redirect:/admin/humanmgr?deleted_all";
 	}
 
+	@SuppressWarnings("unchecked")
 	@GetMapping("/humanmgr/edit")
-	public String humanManager_edit(@RequestParam int id, Model model) {
-		Optional<Human> human = dbservice.getHumanRepository().findById(id);
-		// Checking existence (Human)
-		if (human.isEmpty())
-			return "redirect:/admin/humanmgr?error_notfound";
-		HumanHelper helper = HumanHelper.fillDefaultValues(human.get());
-		helper.setSquad_id(human.get().getSquad().getId());
-		model.addAttribute("humanHelper", helper);
-		return "admin/humanmgr/humanmgr_edit";
+	public ResponseEntity<String> humanManager_edit(@RequestParam int id) {
+		Optional<Human> human1 = dbservice.getHumanRepository().findById(id);
+		if (human1.isEmpty())
+			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+		Human human = human1.get();
+		JSONObject data = new JSONObject();
+		data.put("name", human.getName());
+		data.put("lastname", human.getLastname());
+		data.put("surname", human.getSurname());
+		data.put("birthday", human.getBirthday());
+		data.put("school", human.getSchool());
+		data.put("classnum", human.getClassnum());
+		data.put("phone", human.getPhone());
+		data.put("squad", human.getSquad().getId());
+		return ResponseEntity.ok(data.toJSONString());
 	}
 
 	@PostMapping("/humanmgr/edit")
-	public String humanManager_editAction(@ModelAttribute("humanHelper") HumanHelper helper) {
-		Optional<Human> human1 = dbservice.getHumanRepository().findById(helper.getId());
-		// Checking existence (Human)
-		if (human1.isEmpty())
-			return "redirect:/admin/humanmgr?error_notfound";
-		Human human = human1.get();
-		// If Squad changed
-		if (human.getSquad().getId() != helper.getSquad_id()) {
-			// Checking existence (new Squad)
-			Optional<Squad> squad = dbservice.getSquadRepository().findById(helper.getSquad_id());
-			if (squad.isEmpty())
-				return "redirect:/admin/humanmgr?errorsquad";
-			// Deleting human from old squad
-			Squad oldsquad = dbservice.getSquadRepository().findById(human.getSquad().getId()).orElseThrow();
-			oldsquad.getHumans().remove(human);
-			dbservice.getSquadRepository().save(oldsquad);
-			// Adding to new squad
-			Squad newSquad = squad.get();
-			human.setSquad(newSquad);
-			newSquad.getHumans().add(human);
-			dbservice.getSquadRepository().save(newSquad);
+	public ResponseEntity<String> humanmgr_editUser(@RequestParam int id, @RequestParam String name,
+			@RequestParam String lastname, @RequestParam String surname, @RequestParam String birthday,
+			@RequestParam String school, @RequestParam String classnum, @RequestParam String phone,
+			@RequestParam int squad) {
+		Optional<Human> h = dbservice.getHumanRepository().findById(id);
+		if (h.isEmpty()) {
+			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
 		}
-		// Updating default values
-		human = HumanHelper.fillDefaultValues(helper, human);
-		dbservice.getHumanRepository().save(human);
-		return "redirect:/admin/humanmgr?edited";
+		Optional<Squad> squadO = dbservice.getSquadRepository().findById(squad);
+		if (squadO.isEmpty())
+			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+		Human human = h.get();
+		human.setName(name);
+		human.setLastname(lastname);
+		human.setSurname(surname);
+		human.setBirthday(birthday);
+		human.setSchool(school);
+		human.setClassnum(classnum);
+		human.setPhone(phone);
+		human.setSquad(squadO.get());
+		boolean result = dbservice.getHumanRepository().save(human) != null;
+		if (result)
+			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
+		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
 	}
 
 	/*
@@ -355,7 +382,7 @@ public class AdminController {
 	public String statsManager(Model model) {
 		model.addAttribute("event_types_map", SettingsRepository.getEvent_types());
 		model.addAttribute("reasons_for_absences_map", SettingsRepository.getReasons_for_absences());
-		return "admin/statsmgr/statsmgr";
+		return "admin/statsmgr";
 	}
 
 	@GetMapping("/statsmgr/table")

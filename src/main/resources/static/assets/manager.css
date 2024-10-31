@@ -1,0 +1,252 @@
+body {
+	margin: 0;
+	font-family: Arial, sans-serif;
+	padding: 0;
+	background-color: #f0f0f0;
+	padding-bottom: 60px;
+}
+
+#userTableWrapper {
+	overflow-x: auto;
+	/* Добавляем горизонтальную прокрутку */
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 20px;
+	border: 1px solid #ccc;
+	background-color: #fff;
+	table-layout: auto;
+}
+
+th,
+td {
+	padding: 10px;
+	text-align: center;
+	border-bottom: 1px solid #ccc;
+	white-space: nowrap;
+	/* Сохраняет текст внутри ячеек в одну строку */
+}
+
+th {
+	position: sticky;
+	top: 0;
+	/* Закрепляет заголовки таблицы */
+	z-index: 2;
+	/* Чтобы заголовки были поверх остальных ячеек */
+	background-color: #f2f2f2;
+}
+
+tr:nth-child(even) {
+	background-color: #f9f9f9;
+}
+
+tr:hover {
+	background-color: #f1f1f1;
+}
+
+.bottomPanel {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	background-color: #f1f1f1;
+	padding: 10px;
+	text-align: center;
+	box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.btn {
+	margin: 0 10px;
+	padding: 8px 16px;
+	border: none;
+	background-color: #007BFF;
+	color: #fff;
+	cursor: pointer;
+	border-radius: 4px;
+	transition: background-color 0.3s;
+}
+
+.btn:hover {
+	background-color: #0056b3;
+}
+
+.floating-button {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	width: 60px;
+	height: 60px;
+	background-color: #ff9800;
+	color: #fff;
+	border-radius: 50%;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 24px;
+	transition: background-color 0.3s ease;
+	cursor: pointer;
+}
+
+.floating-button:hover {
+	background-color: #e68900;
+}
+
+.button {
+	background-color: #4CAF50;
+	color: white;
+	padding: 10px 20px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	border-radius: 5px;
+	transition: background-color 0.3s;
+}
+
+.button:hover {
+	background-color: #45a049;
+}
+
+.action-buttons {
+	display: flex;
+	gap: 10px;
+	float: right;
+}
+
+.edit-btn {
+	background-color: blue;
+}
+
+.edit-btn:hover {
+	background-color: darkblue;
+}
+
+.delete-btn {
+	background-color: red;
+}
+
+.delete-btn:hover {
+	background-color: darkred;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 600px) {
+
+	th,
+	td {
+		padding: 8px;
+	}
+
+	.btn {
+		padding: 8px;
+		font-size: 14px;
+	}
+
+	#userTableWrapper {
+		padding: 10px;
+	}
+}
+
+.swal2-popup {
+	animation: slide-in 0.5s forwards;
+}
+
+@keyframes slide-in {
+	0% {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateX(0%);
+		opacity: 1;
+	}
+}
+
+.overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: none;
+	align-items: center;
+	justify-content: center;
+	z-index: 1000;
+}
+
+/* Стили для модальной формы */
+.modal {
+	background-color: white;
+	padding: 20px;
+	border-radius: 8px;
+	max-width: 400px;
+	width: 90%;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modal h2 {
+	margin-top: 0;
+	text-align: center;
+}
+
+.form-group {
+	margin-bottom: 15px;
+}
+
+.form-group label {
+	display: block;
+	margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group textarea {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+.form-group textarea {
+	resize: vertical;
+}
+
+.modal-buttons {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 20px;
+}
+
+.modal-buttons button {
+	padding: 10px 15px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.modal-buttons .submit-button {
+	background-color: #4CAF50;
+	color: white;
+}
+
+.modal-buttons .close-button {
+	background-color: #f44336;
+	color: white;
+}
+
+select {
+	padding: 5px;
+	margin-bottom: 15px;
+	border-radius: 4px;
+	border: 1px solid #ccc;
+	width: 100%;
+	/* Заполняет всю ширину */
+	max-width: 250px;
+	/* Ограничение максимальной ширины */
+}

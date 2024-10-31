@@ -17,12 +17,14 @@
 	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
+			<h2>Стастистика для <span th:text="${person}"></span></h2>
 			<div class="card">
 				<h3>Пропуски и посещения</h3>
 				<h4>Суммарная статистика:</h4>
 				<p>Посещено <strong th:text="${attendance.getFirst()}"></strong> событий<br>Пропущено <strong
 						th:text="${attendance.getSecond()}"></strong> событий</p>
 				<h4>Статистика по событиям:</h4>
+				<h5>Звено:</h5>
 				<table>
 					<thead>
 						<tr>
@@ -32,10 +34,25 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="data : ${eventsData}">
+						<tr th:each="data : ${squadData}">
 							<td th:text="${data.key}">Событие</td>
 							<td th:text="${data.value.getFirst()}">Посещений</td>
 							<td th:text="${data.value.getSecond()}">Пропусков</td>
+						</tr>
+					</tbody>
+				</table>
+				<h5>Остальное:</h5>
+				<table>
+					<thead>
+						<tr>
+							<th>Событие</th>
+							<th>Посещений</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="data : ${commanderData}">
+							<td th:text="${data.key}">Событие</td>
+							<td th:text="${data.value}">Посещений</td>
 						</tr>
 					</tbody>
 				</table>
