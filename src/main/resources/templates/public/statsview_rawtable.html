@@ -19,8 +19,9 @@
 				<th>Событие<br><button onclick="sortTable(3)" class="sortbtn">Сортировать</button></th>
 				<th>Пришел<br><button onclick="sortTable(4)" class="sortbtn">Сортировать</button></th>
 				<th>Причина отсутствия<br><button onclick="sortTable(5)" class="sortbtn">Сортировать</button></th>
-				<th>EventID<br><button onclick="sortTable(6)" class="sortbtn">Сортировать</button></th>
-				<th>StatsID<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
+				<th>Отметил<br><button onclick="sortTable(6)" class="sortbtn">Сортировать</button></th>
+				<th>EventID<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
+				<th>StatsID<br><button onclick="sortTable(8)" class="sortbtn">Сортировать</button></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -31,6 +32,7 @@
 				<td th:text="${stats.type}"></td>
 				<td th:text="${stats.isPresent}"></td>
 				<td th:text="${stats.reason}"></td>
+				<td th:text="${stats.author}"></td>
 				<td th:text="${stats.event_id}"></td>
 				<td th:text="${stats.id}"></td>
 			</tr>
