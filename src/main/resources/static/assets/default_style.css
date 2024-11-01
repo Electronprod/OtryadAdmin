@@ -164,6 +164,11 @@ button,
 	height: 20px;
 	accent-color: #4CAF50;
 }
+.all-checkbox {
+	width: 20px;
+	height: 20px;
+	accent-color: orange;
+}
 
 button:hover {
 	background-color: #45a049;

@@ -1,6 +1,7 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -39,17 +40,18 @@ public class SquadCommanderController {
 
 	@GetMapping("/humans")
 	public String humans(Model model) {
-		model.addAttribute("user_role", authHelper.getCurrentUser().getRole());
-		model.addAttribute("humans", dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId())
-				.orElseThrow().getSquad().getHumans());
+		model.addAttribute("humans",
+				dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId()).orElseThrow().getSquad()
+						.getHumans().stream().sorted(Comparator.comparing(Human::getLastname))
+						.collect(Collectors.toList()));
 		return "public/humans_rawtable";
 	}
 
 	@GetMapping("/mark")
 	public String mark(Model model) {
 		User user = authHelper.getCurrentUser();
-		model.addAttribute("humanList",
-				dbservice.getUserRepository().findById(user.getId()).orElseThrow().getSquad().getHumans());
+		model.addAttribute("humanList", dbservice.getUserRepository().findById(user.getId()).orElseThrow().getSquad()
+				.getHumans().stream().sorted(Comparator.comparing(Human::getLastname)).collect(Collectors.toList()));
 		model.addAttribute("reasons_for_absences_map", SettingsRepository.getReasons_for_absences());
 		model.addAttribute("event_types_map", SettingsRepository.getEvent_types());
 		model.addAttribute("login", user.getLogin());

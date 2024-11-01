@@ -28,8 +28,6 @@ import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
-import ru.electronprod.OtryadAdmin.models.dto.HumanHelper;
-import ru.electronprod.OtryadAdmin.models.dto.SquadHelper;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.AdminService;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
@@ -134,18 +132,6 @@ public class AdminController {
 		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
 	}
 
-	@GetMapping("/usermgr/setpassword")
-	public String userManager_setPassword(@RequestParam() int id, @RequestParam() String password) {
-		Optional<User> user = dbservice.getUserRepository().findById(id);
-		if (user.isEmpty()) {
-			return "redirect:/admin/usermgr?error";
-		}
-		User usr = user.get();
-		usr.setPassword(password);
-		auth.register(usr);
-		return "redirect:/admin/usermgr?saved";
-	}
-
 	@SuppressWarnings("unchecked")
 	@PostMapping("/usermgr/delete")
 	public ResponseEntity<String> userManager_delete(@RequestParam() int id) {
@@ -244,6 +230,8 @@ public class AdminController {
 		return "admin/humanmgr";
 	}
 
+	// TODO replace with something better
+	@Deprecated
 	@PostMapping("/humanmgr/addlist")
 	public String handleFileUpload(@RequestParam("file") MultipartFile file, Model model) {
 		List<Human> records = new ArrayList<Human>();
