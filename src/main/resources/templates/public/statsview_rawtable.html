@@ -6,6 +6,7 @@
 	<title>Статистика пользователей</title>
 	<link rel="stylesheet" href="/assets/tablemgr.css">
 	<link rel="icon" href="/icon.png">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -37,9 +38,16 @@
 	</table>
 	<div class="bottomPanel">
 		<button class="btn" onclick="window.history.back();">Вернуться</button>
+		<button class="btn" id="sheetjsexport">Экспортировать как XLSX</button>
 	</div>
 </body>
 <script src="/assets/mgr.js"></script>
 <script src="/assets/stats_renamer.js"></script>
+<script>
+	document.getElementById("sheetjsexport").addEventListener('click', function () {
+		var wb = XLSX.utils.table_to_book(document.getElementById("userTable"));
+		XLSX.writeFile(wb, "stats.xlsx");
+	});
+</script>
 
 </html>

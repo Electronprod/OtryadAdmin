@@ -5,6 +5,7 @@
 	<meta charset="UTF-8">
 	<title>Список ребят</title>
 	<link rel="stylesheet" href="/assets/tablemgr.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 	<link rel="icon" href="/icon.png">
 </head>
 
@@ -43,8 +44,15 @@
 	</table>
 	<div class="bottomPanel">
 		<button class="btn" onclick="window.history.back();">Вернуться</button>
+		<button class="btn" id="sheetjsexport">Экспорт как XLSX</button>
 	</div>
 </body>
 <script src="/assets/mgr.js"></script>
+<script>
+	document.getElementById("sheetjsexport").addEventListener('click', function () {
+		var wb = XLSX.utils.table_to_book(document.getElementById("userTable"));
+		XLSX.writeFile(wb, "humans.xlsx");
+	});
+</script>
 
 </html>
