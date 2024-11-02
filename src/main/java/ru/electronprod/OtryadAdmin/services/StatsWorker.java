@@ -33,39 +33,19 @@ public class StatsWorker {
 	@Autowired
 	private DBService dbservice;
 
-	/**
-	 * Generates Map(event, Map(Human, Integer)) visitor statistics for registered
-	 * event types for squad
-	 * 
-	 * @param records - stats records to work with
-	 * @return Map(String, Map(Human, Integer))
-	 */
-	public Map<String, Map<Human, Integer>> squad_getEventsReport(List<SquadStats> records) {
-		Map<String, Map<Human, Integer>> result = new LinkedHashMap<String, Map<Human, Integer>>();
-		// For each registered type
-		for (String type : SettingsRepository.convertEventTypeDTOs().keySet()) {
-			// Getting stats records with this type
-			List<SquadStats> typedStats = records.stream().filter(stats -> stats.getType().equals(type)).toList();
-			// Declaring type's result variable
-			Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
-			// Adding data to typedStatsMap
-			for (SquadStats stats : typedStats) {
-				Human human = stats.getHuman();
-				typedStatsMap.putIfAbsent(human, 0);
+	public Map<Human, Integer> getEventReport(List<SquadStats> typedStats) {
+		Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
+		for (SquadStats stats : typedStats) {
+			Human human = stats.getHuman();
+			typedStatsMap.putIfAbsent(human, 0);
 
-				if (stats.isPresent()) {
-					typedStatsMap.merge(human, 1, Integer::sum);
-				}
+			if (stats.isPresent()) {
+				typedStatsMap.merge(human, 1, Integer::sum);
 			}
-			// Sorting it
-			Map<Human, Integer> sortedMap = typedStatsMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
-					.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1,
-							LinkedHashMap::new));
-			// Adding to result
-			result.put(SettingsRepository.convertEventTypeDTOs().get(type), sortedMap);
-			records.removeAll(typedStats);
 		}
-		return result;
+		Map<Human, Integer> sortedMap = typedStatsMap.entrySet().stream().sorted(Map.Entry.comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		return sortedMap;
 	}
 
 	/**
@@ -73,9 +53,6 @@ public class StatsWorker {
 	 * 
 	 * @param personalStats - person's stats records
 	 * @param model         - Model to add data
-	 * @apiNote <b>Added attributes:</b><br>
-	 *          "attendance" - Pair(present_count, notpresent_count) "eventsData" -
-	 *          Map(Strig)
 	 */
 	public void getMainPersonalReportModel(List<SquadStats> personalStats, Model model) {
 		// Getting present and non present list
@@ -139,6 +116,8 @@ public class StatsWorker {
 	 * @param user      - user who marks
 	 * @return EventID of this event in database
 	 */
+	@PreAuthorize("hasAuthority('ROLE_COMMANDER')")
+	@Transactional
 	public int commander_mark(JSONArray ids, String eventName, String date, User user) {
 		List<SquadStats> resultArray = new ArrayList<SquadStats>();
 		int event_id = dbservice.getStatsRepository().findMaxEventIDValue() + 1;

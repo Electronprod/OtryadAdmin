@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Статистика события</title>
+	<link rel="stylesheet" href="/assets/default_style.css">
+	<link rel="icon" href="/icon.png">
+	<script defer src="/assets/navbar.js"></script>
+</head>
+
+<body>
+	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="navbar"></div>
+	<div id="dashboard">
+		<div id="content">
+			<div class="card">
+				<h3>Статистика посещаемости события <u th:text="${eventName}"></u>:</h3>
+				<p>Отсортировано в порядке от меньшего к большему.</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Фамилия</th>
+							<th>Имя</th>
+							<th>Посещений</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="humansEntry : ${data}">
+							<td th:text="${humansEntry.key.lastname}"></td>
+							<td th:text="${humansEntry.key.name}"></td>
+							<td th:text="${humansEntry.value}"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

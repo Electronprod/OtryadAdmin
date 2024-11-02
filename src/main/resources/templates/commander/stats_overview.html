@@ -73,6 +73,14 @@
 		</div>
 	</div>
 </body>
-<script src="/assets/messagesUtil.js"></script>
+<script>
+	if (window.location.href.includes("error_notfound")) {
+		Swal.fire({
+			title: "ОШИБКА!",
+			text: "Обьект не найден в базе данных.",
+			icon: "error"
+		});
+	}
+</script>
 
 </html>

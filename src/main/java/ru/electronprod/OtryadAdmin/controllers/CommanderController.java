@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
-import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
@@ -42,17 +41,6 @@ public class CommanderController {
 	public String overview() {
 		// A placeholder for the future
 		return "forward:/commander/mark";
-	}
-
-	@GetMapping("/stats")
-	public String stats_overview() {
-		return "commander/stats_overview";
-	}
-
-	@GetMapping("/humans")
-	public String getAllData(Model model) {
-		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
-		return "public/humans_rawtable";
 	}
 
 	@GetMapping("/mark")
@@ -79,20 +67,23 @@ public class CommanderController {
 		return ResponseEntity.ok(answer.toJSONString());
 	}
 
+	@GetMapping("/stats")
+	public String stats_overview() {
+		return "commander/stats_overview";
+	}
+
 	@GetMapping("/stats/date")
-	public String getDateStats(@RequestParam String date, Model model) {
+	public String stats_byDateTable(@RequestParam String date, Model model) {
 		User user = authHelper.getCurrentUser();
-		List<SquadStats> statsList = dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."));
-		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
-		model.addAttribute("statss", statsList);
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."), user.getLogin()));
 		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/alltable")
-	public String getAllStats(Model model) {
+	public String stats_allTable(Model model) {
 		User user = authHelper.getCurrentUser();
-		List<SquadStats> statsList = dbservice.getStatsRepository().findByAuthor(user.getLogin());
-		model.addAttribute("statss", statsList);
+		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(user.getLogin()));
 		return "public/statsview_rawtable";
 	}
 
@@ -103,9 +94,13 @@ public class CommanderController {
 		if (human == null || human.getStats() == null) {
 			return "redirect:/commander/stats?error_notfound";
 		}
-		List<SquadStats> s = dbservice.getStatsRepository().findByHuman(human);
-		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
-		model.addAttribute("statss", s);
+		model.addAttribute("statss", dbservice.getStatsRepository().findByHumanAndAuthor(human, user.getLogin()));
 		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/humans")
+	public String getHumansData(Model model) {
+		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
+		return "public/humans_rawtable";
 	}
 }
