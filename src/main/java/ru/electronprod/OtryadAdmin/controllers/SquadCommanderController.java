@@ -38,15 +38,6 @@ public class SquadCommanderController {
 		return "forward:/squadcommander/mark";
 	}
 
-	@GetMapping("/humans")
-	public String humans(Model model) {
-		model.addAttribute("humans",
-				dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId()).orElseThrow().getSquad()
-						.getHumans().stream().sorted(Comparator.comparing(Human::getLastname))
-						.collect(Collectors.toList()));
-		return "public/humans_rawtable";
-	}
-
 	@GetMapping("/mark")
 	public String mark(Model model) {
 		User user = authHelper.getCurrentUser();
@@ -81,59 +72,64 @@ public class SquadCommanderController {
 		}
 	}
 
-	@GetMapping("/stats/date")
-	public String statsTable_date(@RequestParam String date, Model model) {
-		User user = authHelper.getCurrentUser();
-		if (user == null)
-			return "redirect:/squadcommander?error_usernotfound";
-		List<SquadStats> statsList = dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."));
-		statsList.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
-		model.addAttribute("statss", statsList);
-		return "public/statsview_rawtable";
-	}
-
-	@GetMapping("/stats/table")
-	public String deleteStats(Model model) {
-		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(user.getLogin()));
-		return "public/statsview_rawtable";
-	}
-
-	@GetMapping("/stats/report")
-	public String general_stats(Model model) {
-		User user = authHelper.getCurrentUser();
-		model.addAttribute("dataMap",
-				statsHelper.squad_getEventsReport(dbservice.getStatsRepository().findByAuthor(user.getLogin())));
-		return "squadcommander/general_stats";
-	}
-
-	@GetMapping("/stats/personal/table")
-	public String personal_statsTable(@RequestParam int id, Model model) {
-		User user = authHelper.getCurrentUser();
-		List<SquadStats> statsList = dbservice.getStatsRepository().findByAuthor(user.getLogin());
-		statsList.removeIf(stats -> stats.getHuman().getId() != id);
-		model.addAttribute("statss", statsList);
-		return "public/statsview_rawtable";
-	}
-
-	@GetMapping("/stats/personal")
-	public String personal_stats(@RequestParam int id, Model model) {
-		User user = authHelper.getCurrentUser();
-		// Getting stats for human
-		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
-		List<SquadStats> s = human.getStats();
-		// Removing records from other commanders
-		s.removeIf(stats -> !stats.getAuthor().equals(user.getLogin()));
-		statsHelper.getMainPersonalReportModel(s, model);
-		model.addAttribute("person", human.getName() + " " + human.getLastname());
-		return "squadcommander/personal_stats";
-	}
-
 	@GetMapping("/stats")
 	public String stats_overview(Model model) {
 		User user = authHelper.getCurrentUser();
 		model.addAttribute("humans",
 				dbservice.getUserRepository().findById(user.getId()).orElseThrow().getSquad().getHumans());
+		model.addAttribute("events", dbservice.getStatsRepository().findByAuthor(user.getLogin()).stream()
+				.map(SquadStats::getType).distinct().sorted().collect(Collectors.toList()));
 		return "squadcommander/stats_overview";
+	}
+
+	@GetMapping("/stats/report")
+	public String stats_forEvent(@RequestParam String event_name, Model model) {
+		User user = authHelper.getCurrentUser();
+		List<SquadStats> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name, user.getLogin());
+		model.addAttribute("data", statsHelper.getEventReport(stats));
+		model.addAttribute("eventName", event_name);
+		return "public/event_stats";
+	}
+
+	@GetMapping("/stats/date")
+	public String stats_byDateTable(@RequestParam String date, Model model) {
+		User user = authHelper.getCurrentUser();
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."), user.getLogin()));
+		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/stats/table")
+	public String stats_allMarksTable(Model model) {
+		User user = authHelper.getCurrentUser();
+		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(user.getLogin()));
+		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/stats/personal")
+	public String stats_personal(@RequestParam int id, Model model) {
+		User user = authHelper.getCurrentUser();
+		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
+		statsHelper.getMainPersonalReportModel(
+				dbservice.getStatsRepository().findByHumanAndAuthor(human, user.getLogin()), model);
+		model.addAttribute("person", human.getLastname() + " " + human.getName());
+		return "squadcommander/personal_stats";
+	}
+
+	@GetMapping("/stats/personal/table")
+	public String stats_personalTable(@RequestParam int id, Model model) {
+		User user = authHelper.getCurrentUser();
+		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
+		model.addAttribute("statss", dbservice.getStatsRepository().findByHumanAndAuthor(human, user.getLogin()));
+		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/humans")
+	public String humans_data(Model model) {
+		model.addAttribute("humans",
+				dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId()).orElseThrow().getSquad()
+						.getHumans().stream().sorted(Comparator.comparing(Human::getLastname))
+						.collect(Collectors.toList()));
+		return "public/humans_rawtable";
 	}
 }

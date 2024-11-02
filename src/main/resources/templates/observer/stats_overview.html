@@ -9,7 +9,6 @@
 	<script defer src="/assets/navbar.js"></script>
 	<link rel="icon" href="/icon.png">
 	<script src="/public_resources/sweetalert2.js"></script>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
 </head>
 
 <body>
@@ -34,7 +33,6 @@
 						<b>Всего ребят:</b> <span th:text="${people_size}"></span><br>
 						<b>Количество пропусков:</b> <span th:text="${people_missed}"></span><br>
 						<b>Количество посещений:</b> <span th:text="${people_attended}"></span>
-						<a href="/observer/stats/table">Подробнее...</a>
 					</p>
 				</div>
 
@@ -76,8 +74,8 @@
 				</table>
 			</div>
 			<div class="card">
-				<h3>Просмотр отметок посещений по дате</h3>
-				<p>Посмотрите посещения в выбранную дату.</p>
+				<h3>Просмотр отметок по дате</h3>
+				<p>Посмотрите посещения и пропуски в выбранную дату.</p>
 				<form id="date-form" action="/observer/stats/date">
 					<label for="date">Дата:</label>
 					<input type="date" id="date" name="date" required>
@@ -86,26 +84,48 @@
 				</form>
 			</div>
 			<div class="card">
-				<h3>Просмотр персональной статистики</h3>
-				<p>Посмотрите статистику для человека. Введите его ФИ в строку ниже и нажмите кнопку "найти"</p>
-				<form th:action="@{/observer/stats/personal}" method="get">
+				<h3>Персональная статистика</h3>
+				<p>Посмотрите подробную статистику для любого человека. Введите его ФИ в строку ниже и выберите нужный
+					вариант.</p>
+				<form method="get">
 					<input placeholder="Введите ФИ" name="name" type="text" required />
-					<button type="submit">Найти</button>
+					<button class="form-btn" type="submit" formaction="/observer/stats/personal">Посмотреть</button>
+					<button class="form-btn" type="submit" formaction="/observer/stats/personal/table">Посмотреть в виде
+						таблицы</button>
 				</form>
 			</div>
 			<div class="card">
-				<h3>Просмотр персональной таблицы данных</h3>
-				<p>Посмотрите таблицу данных для человека. Введите его ФИ в строку ниже и нажмите кнопку "найти"</p>
-				<form th:action="@{/observer/stats/personal/table}" method="get">
-					<input placeholder="Введите ФИ" name="name" type="text" required />
-					<button type="submit">Найти</button>
+				<h3>Просмотр по событию</h3>
+				<p>Посмотрите, кто и сколько раз посетил выбранное событие или таблицу отметок для этого события</p>
+				<form method="get">
+					<label for="event_name">Выберите событие:</label>
+					<select id="event_name" name="event_name">
+						<option th:each="event : ${events}" th:value="${event}" th:text="${event}">
+						</option>
+					</select>
+					<button class="form-btn" type="submit" formaction="/observer/stats/report">Посмотреть
+						посещаемость</button>
+					<button class="form-btn" type="submit" formaction="/observer/stats/event_table">Посмотреть
+						таблицу отметок</button>
 				</form>
+			</div>
+			<div class="card">
+				<h3>Просмотр всех отметок</h3>
+				<p>Просмотрите все отметки, которые были проставлены за все время. <br><b>Не использовать без нужды!
+						Сильно нагружает сервер.</b></p>
+				<a class="greenbtn" href="/observer/stats/table">Перейти</a>
 			</div>
 		</div>
 	</div>
 </body>
-<script src="/assets/messagesUtil.js"></script>
 <script>
+	if (window.location.href.includes("error_notfound")) {
+		Swal.fire({
+			title: "ОШИБКА!",
+			text: "Обьект не найден в базе данных.",
+			icon: "error"
+		});
+	}
 	function showWhoMarked() {
 		Swal.fire({
 			title: 'Введите дату',

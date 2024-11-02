@@ -33,7 +33,7 @@
 			<div class="card">
 				<h3>Добро пожаловать, <span th:text="${login}"></span>!</h3>
 				<p>Это ваша панель командира. Снизу вы можете отметить ребят. Сверху вы можете посмотреть информацию о
-					ребятах в "Список отряда", а также посмотреть ваши отметки в "Статистика"</p>
+					ребятах в разделе "Список отряда", а также посмотреть ваши отметки в разделе "Статистика"</p>
 			</div>
 			<div class="card">
 				<h3>Отметьте ПРИСУТСТВОВАВШИХ ребят:</h3>
@@ -71,97 +71,6 @@
 					<button type="button" onclick="submitData()">Отправить</button>
 				</form>
 			</div>
-			<script>
-				document.getElementById("dateField").valueAsDate = new Date()
-				async function fetchData(url) {
-					try {
-						const response = await fetch(url);
-						if (!response.ok) {
-							throw new Error(`Ошибка HTTP: ${response.status}`);
-						}
-						return await response.json();
-					} catch (error) {
-						console.error('Ошибка при получении данных:', error);
-						Swal.fire({
-							title: "Ошибка!",
-							text: "Ошибка при получении информации. Пожалуйста, перезагрузите страницу. \nОшибка: " + error,
-							icon: "error"
-						});
-						return "";
-					}
-				}
-				function submitData() {
-					Swal.fire({
-						title: 'Вы уверены?',
-						text: "Вы точно выбрали всех ребят? \n Вы ввели правильное название события?",
-						icon: 'warning',
-						showCancelButton: true,
-						confirmButtonColor: '#3085d6',
-						cancelButtonColor: '#d33',
-						confirmButtonText: 'Да, отправить',
-						cancelButtonText: 'Отмена'
-					}).then((result) => {
-						if (result.isConfirmed) {
-							sendData();
-						}
-					});
-				}
-
-				function sendData() {
-					const uncheckedPeople = [];
-					// Проходим по всем чекбоксам
-					const checkboxes = document.querySelectorAll('.custom-checkbox');
-					checkboxes.forEach(checkbox => {
-						if (checkbox.checked) {
-							const row = checkbox.closest('tr');
-							uncheckedPeople.push(
-								checkbox.value
-							);
-						}
-					});
-					var selectElement = document.getElementById('statsType');
-					if (selectElement.value == "") {
-						Swal.fire({
-							title: "Ошибка заполнения!",
-							text: "Вы не ввели название события",
-							icon: "error"
-						});
-						return;
-					}
-					const bodyData = {
-						checkedPeople: uncheckedPeople,
-						date: document.getElementById("dateField").value,
-						eventName: selectElement.value
-					};
-					var csrfToken = document.querySelector('input[name="_csrf"]').value;
-					// Отправляем данные на сервер
-					fetch('/commander/mark', {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'X-CSRF-TOKEN': csrfToken,
-						},
-						body: JSON.stringify(bodyData),
-					})
-						.then(response => response.json())
-						.then(data => {
-							console.log('mark success:', data);
-							Swal.fire({
-								title: "Успех!",
-								text: "Ребята отмечены",
-								icon: "success"
-							});
-						})
-						.catch((error) => {
-							console.error('mark error:', error);
-							Swal.fire({
-								title: "Провал!",
-								text: "Ошибка при выставлении отметок\n" + error,
-								icon: "error"
-							});
-						});
-				}
-			</script>
-			<script src="/assets/messagesUtil.js"></script>
+			<script src="/onepage_scripts/commander_mark.js"></script>
 
 </html>

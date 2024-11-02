@@ -2,6 +2,8 @@ package ru.electronprod.OtryadAdmin.controllers;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,52 +51,99 @@ public class ObserverController {
 		model.addAttribute("people_size", dbservice.getHumanRepository().getSize());
 		model.addAttribute("people_missed", dbservice.getStatsRepository().countByIsPresent(false));
 		model.addAttribute("people_attended", dbservice.getStatsRepository().countByIsPresent(true));
-		model.addAttribute("people_missed_today", dbservice.getStatsRepository().findByDate(DBService.getStringDate())
-				.stream().filter(stats -> !stats.isPresent()).count());
-		model.addAttribute("people_attended_today", dbservice.getStatsRepository().findByDate(DBService.getStringDate())
-				.stream().filter(stats -> stats.isPresent()).count());
-		model.addAttribute("commanders_marked_today", dbservice.getStatsRepository()
-				.findByDate(DBService.getStringDate()).stream().map(SquadStats::getAuthor).distinct().count());
+		model.addAttribute("people_missed_today",
+				dbservice.getStatsRepository().countByDateAndIsPresent(DBService.getStringDate(), false));
+		model.addAttribute("people_attended_today",
+				dbservice.getStatsRepository().countByDateAndIsPresent(DBService.getStringDate(), true));
+		model.addAttribute("commanders_marked_today",
+				dbservice.getStatsRepository().countDistinctAuthorsByDate(DBService.getStringDate()));
+		model.addAttribute("events", dbservice.getStatsRepository().findDistinctTypes().stream().sorted().toList());
 		return "observer/stats_overview";
 	}
 
 	@GetMapping("/stats/date")
-	public String statsTable_date(@RequestParam String date, Model model) {
-		List<SquadStats> statsList = dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."));
-		model.addAttribute("statss", statsList);
+	public String stats_byDateTable(@RequestParam String date, Model model) {
+		model.addAttribute("statss", dbservice.getStatsRepository().findByDate(date.replaceAll("-", ".")));
+		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/stats/table")
+	public String stats_allTable(Model model) {
+		model.addAttribute("statss", dbservice.getStatsRepository().findAll(Sort.by(Sort.Direction.DESC, "id")));
+		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/stats/report")
+	public String stats_event(@RequestParam String event_name, Model model) {
+		List<SquadStats> stats = dbservice.getStatsRepository().findByType(event_name);
+		model.addAttribute("data", statsWorker.getEventReport(stats));
+		model.addAttribute("eventName", event_name);
+		return "public/event_stats";
+	}
+
+	@GetMapping("/stats/event_table")
+	public String stats_eventTable(@RequestParam String event_name, Model model) {
+		model.addAttribute("statss", dbservice.getStatsRepository().findByType(event_name));
+		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/stats/personal")
+	public String stats_personal(@RequestParam String name, Model model) {
+		Human human = SearchUtil.findMostSimilarHuman(name, dbservice.getHumanRepository().findAll());
+		if (human == null || human.getStats() == null) {
+			return "redirect:/observer/stats?error_notfound";
+		}
+		statsWorker.getMainPersonalReportModel(dbservice.getStatsRepository().findByHuman(human), model);
+		model.addAttribute("person", human.getLastname() + " " + human.getName());
+		return "observer/personal_stats";
+	}
+
+	@GetMapping("/stats/personal/table")
+	public String stats_personalTable(@RequestParam String name, Model model) {
+		Human human = SearchUtil.findMostSimilarHuman(name, dbservice.getHumanRepository().findAll());
+		if (human == null || human.getStats() == null) {
+			return "redirect:/observer/stats?error_notfound";
+		}
+		model.addAttribute("statss", dbservice.getStatsRepository().findByHuman(human));
 		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/squad/{id}")
-	public String stats(@PathVariable("id") int id, Model model) {
+	public String stats_squad_overview(@PathVariable("id") int id, Model model) {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
+		model.addAttribute("squad", squad.get().getCommanderName());
 		model.addAttribute("humans", squad.get().getHumans());
+		model.addAttribute("events", dbservice.getStatsRepository().findByAuthor(squad.get().getCommander().getLogin())
+				.stream().map(SquadStats::getType).distinct().sorted().collect(Collectors.toList()));
 		return "observer/squadstats/stats_overview";
 	}
 
 	@GetMapping("/stats/squad/{id}/date")
-	public String statsTable_date_squad(@PathVariable("id") int id, @RequestParam String date, Model model) {
-		List<SquadStats> statsList = dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."));
-		statsList.removeIf(stats -> !stats.getAuthor()
-				.equals(dbservice.getSquadRepository().findById(id).orElseThrow().getCommander().getLogin()));
-		model.addAttribute("statss", statsList);
+	public String stats_squad_byDate(@PathVariable("id") int id, @RequestParam String date, Model model) {
+		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
+		if (squad.isEmpty())
+			return "redirect:/observer/stats?error_notfound";
+		model.addAttribute("statss", dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."),
+				squad.get().getCommander().getLogin()));
 		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/squad/{id}/report")
-	public String SquadStatsReport(@PathVariable("id") int id, Model model) {
+	public String stats_squad_eventTable(@PathVariable("id") int id, @RequestParam String event_name, Model model) {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model.addAttribute("dataMap", statsWorker.squad_getEventsReport(
-				dbservice.getStatsRepository().findByAuthor(squad.get().getCommander().getLogin())));
-		return "observer/squadstats/general_stats";
+		List<SquadStats> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name,
+				squad.get().getCommander().getLogin());
+		model.addAttribute("data", statsWorker.getEventReport(stats));
+		model.addAttribute("eventName", event_name);
+		return "public/event_stats";
 	}
 
 	@GetMapping("/stats/squad/{id}/table")
-	public String statsTable(@PathVariable("id") int id, Model model) {
+	public String stats_squad_allTable(@PathVariable("id") int id, Model model) {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
@@ -103,38 +152,8 @@ public class ObserverController {
 		return "public/statsview_rawtable";
 	}
 
-	@GetMapping("/stats/table")
-	public String statsTableAll(Model model) {
-		List<SquadStats> stats = dbservice.getStatsRepository().findAll(Sort.by(Sort.Direction.DESC, "id"));
-		model.addAttribute("statss", stats);
-		return "public/statsview_rawtable";
-	}
-
-	@GetMapping("/stats/personal")
-	public String personalStats(@RequestParam String name, Model model) {
-		Human human = SearchUtil.findMostSimilarHuman(name, dbservice.getHumanRepository().findAll());
-		if (human == null || human.getStats() == null) {
-			return "redirect:/observer/stats?error_notfound";
-		}
-		List<SquadStats> statsArray = dbservice.getStatsRepository().findByHuman(human);
-		statsWorker.getMainPersonalReportModel(statsArray, model);
-		model.addAttribute("person", human.getName() + " " + human.getLastname());
-		return "observer/personal_stats";
-	}
-
-	@GetMapping("/stats/personal/table")
-	public String personalStatsTable(@RequestParam String name, Model model) {
-		Human human = SearchUtil.findMostSimilarHuman(name, dbservice.getHumanRepository().findAll());
-		if (human == null || human.getStats() == null) {
-			return "redirect:/observer/stats?error_notfound";
-		}
-		List<SquadStats> s = dbservice.getStatsRepository().findByHuman(human);
-		model.addAttribute("statss", s);
-		return "public/statsview_rawtable";
-	}
-
 	@GetMapping("/data")
-	public String getAllData(Model model) {
+	public String humans_data(Model model) {
 		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
 		return "public/humans_rawtable";
 	}
