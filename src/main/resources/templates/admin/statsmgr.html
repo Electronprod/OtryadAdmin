@@ -202,6 +202,17 @@
 					</div>
 				</div>
 			</div>
+			<div class="card">
+				<h3>Изменить тип всех записей в базе данных.</h3>
+				<p>
+					<b>Процесс необратим! Смотрите, что делаете!</b>
+				</p>
+				<form th:action="@{/admin/statsmgr/edit_type_all}" method="post">
+					<input placeholder="from" name="from" type="text" required />
+					<input placeholder="to" name="to" type="text" required />
+					<button class="red-button" type="submit">Выполнить</button>
+				</form>
+			</div>
 		</div>
 	</div>
 </body>

@@ -464,6 +464,17 @@ public class AdminController {
 		return "redirect:/admin/statsmgr?edited";
 	}
 
+	@PostMapping("/statsmgr/edit_type_all")
+	public String statsManager_edit_type_all(@RequestParam String from, @RequestParam String to) {
+		List<SquadStats> statsList = dbservice.getStatsRepository().findByType(from);
+		if (statsList.isEmpty()) {
+			return "redirect:/admin/statsmgr?error_notfound";
+		}
+		statsList.stream().forEach(stat -> stat.setType(to));
+		dbservice.getStatsRepository().saveAll(statsList);
+		return "redirect:/admin/statsmgr?edited";
+	}
+
 	@GetMapping("/config")
 	public String config(Model model) {
 		model.addAttribute("raw_config", FileOptions.getFileLine(SettingsRepository.getConfig()));
