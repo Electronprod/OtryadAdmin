@@ -6,6 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Статистика события</title>
 	<link rel="stylesheet" href="/assets/default_style.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 	<link rel="icon" href="/icon.png">
 	<script defer src="/assets/navbar.js"></script>
 </head>
@@ -18,8 +19,9 @@
 		<div id="content">
 			<div class="card">
 				<h3>Статистика посещаемости события <u th:text="${eventName}"></u>:</h3>
-				<p>Отсортировано в порядке от меньшего к большему.</p>
-				<table>
+				<p>Отсортировано в порядке от меньшего к большему.<br></p>
+				<button class="greenbtn" id="sheetjsexport">Экспортировать как XLSX</button>
+				<table id="dataTable">
 					<thead>
 						<tr>
 							<th>Фамилия</th>
@@ -39,5 +41,11 @@
 		</div>
 	</div>
 </body>
+<script>
+	document.getElementById("sheetjsexport").addEventListener('click', function () {
+		var wb = XLSX.utils.table_to_book(document.getElementById("dataTable"));
+		XLSX.writeFile(wb, "event_stats.xlsx");
+	});
+</script>
 
 </html>

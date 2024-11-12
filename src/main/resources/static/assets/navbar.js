@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			{ name: 'Пользователи', url: '/admin/usermgr' },
 			{ name: 'Звенья', url: '/admin/squadmgr' },
 			{ name: 'Люди', url: '/admin/humanmgr' },
+			{ name: 'Группы', url: '/admin/groupmgr' },
 			{ name: 'Статистика', url: '/admin/statsmgr' }
 		];
 	}

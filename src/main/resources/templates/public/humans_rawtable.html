@@ -23,7 +23,8 @@
 				<th>Телефон<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
 				<th>Звено<br><button onclick="sortTable(8)" class="sortbtn">Сортировать</button></th>
 				<th>Командир<br><button onclick="sortTable(9)" class="sortbtn">Сортировать</button></th>
-				<th>ID<br><button onclick="sortTable(10)" class="sortbtn">Сортировать</button></th>
+				<th>Группы<br><button onclick="sortTable(10)" class="sortbtn">Сортировать</button></th>
+				<th>ID<br><button onclick="sortTable(11)" class="sortbtn">Сортировать</button></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -38,6 +39,7 @@
 				<td th:text="${human.phone}"></td>
 				<td th:text="${human.squad.squadName}"></td>
 				<td th:text="${human.squad.commanderName}"></td>
+				<td th:text="${human.showGroups()}"></td>
 				<td th:text="${human.id}"></td>
 			</tr>
 		</tbody>
