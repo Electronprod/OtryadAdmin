@@ -15,6 +15,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.*;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
+import ru.electronprod.OtryadAdmin.models.Group;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.SquadStats;
@@ -360,6 +362,33 @@ public class AdminController {
 		if (result)
 			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
 		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
+	}
+
+	/*
+	 * Group manager
+	 */
+	@GetMapping("/groupmgr")
+	public String groupManager(Model model) {
+		List<User> markers = dbservice.getUserRepository().findAllByRole("ROLE_COMMANDER");
+		model.addAttribute("markers", markers);
+		model.addAttribute("groups", dbservice.getGroupRepository().findAll());
+		return "admin/groupmgr";
+	}
+
+	@PostMapping("/groupmgr/add")
+	public String groupManager_addAction(@ModelAttribute Group group) {
+		if (dbservice.getGroupRepository().save(group) != null)
+			return "redirect:/admin/groupmgr?saved";
+		return "redirect:/admin/groupmgr?error_unknown";
+	}
+
+	@PostMapping("/groupmgr/delete")
+	public ResponseEntity<String> groupManager_delete(@RequestParam() int id) {
+		if (dbservice.getGroupRepository().findById(id).isEmpty()) {
+			return ResponseEntity.badRequest().body("{\"result\": \"fail\"}");
+		}
+		dbservice.getGroupRepository().deleteById(id);
+		return ResponseEntity.accepted().body("{\"result\": \"success\"}");
 	}
 
 	/*

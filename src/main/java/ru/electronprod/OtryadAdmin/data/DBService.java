@@ -22,6 +22,9 @@ public class DBService {
 	@Getter
 	@Autowired
 	private UserRepository userRepository;
+	@Getter
+	@Autowired
+	private GroupRepository groupRepository;
 
 	public static String getStringDate() {
 		Calendar calendar = Calendar.getInstance();

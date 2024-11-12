@@ -1,5 +1,9 @@
 package ru.electronprod.OtryadAdmin.models;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -8,9 +12,6 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-/**
- * Таблица данных пользователя. Родитель для Squad таблицы
- */
 public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,4 +29,6 @@ public class User {
 	private String vkID;
 	@OneToOne(mappedBy = "commander", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private Squad squad;
+	@OneToMany(mappedBy = "marker", orphanRemoval = false)
+	private Set<Group> groups = new HashSet<Group>();
 }
