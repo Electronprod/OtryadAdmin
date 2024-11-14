@@ -13,8 +13,13 @@ const sendPostData = async (url) => {
 		});
 
 		if (!response.ok) {
-			console.log("HTTP error: " + response);
-			showNotification("Ошибка HTTP " + response.status, "Некорректный ответ от сервера.", "error");
+			let a = await response.json();
+			console.log("Error message: " + JSON.stringify(a));
+			if (JSON.stringify(a).includes("message") && JSON.stringify(a).includes("result") && JSON.stringify(a).includes("fail")) {
+				showNotification("Ошибка HTTP " + response.status, "Некорректный ответ от сервера: " + a.message, "error");
+			} else {
+				showNotification("Ошибка HTTP " + response.status, "Некорректный ответ от сервера.", "error");
+			}
 			return false;
 		}
 

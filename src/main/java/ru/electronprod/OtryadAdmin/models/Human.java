@@ -24,9 +24,6 @@ public class Human implements Serializable {
 	@OneToMany(mappedBy = "human", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<SquadStats> stats;
 
-	@ManyToMany(mappedBy = "humans", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-	private Set<Group> groups = new HashSet<>();
-
 	@Column
 	private String name;
 	@Column
@@ -41,21 +38,21 @@ public class Human implements Serializable {
 	private String classnum;
 	@Column
 	private String phone;
+	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+	@JoinTable(name = "human_group", joinColumns = @JoinColumn(name = "human_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
+	private Set<Group> groups = new HashSet<>();
 
-	public void addDepartment(Group group) {
-		groups.add(group);
-		group.getHumans().add(this);
-	}
-
-	public void removeDepartment(Group group) {
-		groups.remove(group);
-		group.getHumans().remove(this);
+	public boolean hasGroup(Group group) {
+		return groups.contains(group);
 	}
 
 	public String showGroups() {
-		String result = "";
-		for (Group group : groups)
-			result = result + ", " + group.getName();
-		return result;
+		String result = "[";
+		for (Group group : groups) {
+			result = result + group.getName() + ",";
+		}
+		if (result.endsWith(","))
+			result = result.replaceFirst("(?s)(.*)" + ",", "$1" + "");
+		return result + "]";
 	}
 }

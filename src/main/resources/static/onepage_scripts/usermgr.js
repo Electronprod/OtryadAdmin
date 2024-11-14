@@ -75,7 +75,7 @@ async function editUser() {
 async function remove(id) {
 	const result = await swal.fire({
 		title: 'Вы уверены?',
-		text: "Это действие нельзя будет отменить!",
+		text: "Данное действие приведет к удалению звена (если таковое имеется), а за ним и людей с их статистикой.",
 		icon: 'warning',
 		showCancelButton: true,
 		confirmButtonColor: '#3085d6',

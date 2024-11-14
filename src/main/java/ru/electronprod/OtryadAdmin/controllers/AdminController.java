@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
@@ -31,6 +32,7 @@ import ru.electronprod.OtryadAdmin.models.SquadStats;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.security.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.AdminService;
+import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
 @Slf4j
@@ -82,7 +84,7 @@ public class AdminController {
 			@RequestParam String role, @RequestParam(required = false) String telegram,
 			@RequestParam(required = false) String vkid) {
 		if (dbservice.getUserRepository().findByLogin(login).isPresent())
-			return ResponseEntity.status(409).body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(409).body(Answer.fail("Login is busy"));
 		User user = new User();
 		user.setLogin(login);
 		user.setPassword(password);
@@ -90,8 +92,8 @@ public class AdminController {
 		user.setTelegram(telegram);
 		user.setVkID(vkid);
 		if (auth.register(user))
-			return ResponseEntity.accepted().body("{\"result\": \"success\"}");
-		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
+			return ResponseEntity.accepted().body(Answer.success());
+		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save user to DB."));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -99,7 +101,7 @@ public class AdminController {
 	public ResponseEntity<String> userManager_edit(@RequestParam int id) {
 		Optional<User> user1 = dbservice.getUserRepository().findById(id);
 		if (user1.isEmpty())
-			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(404).body(Answer.fail("User not found"));
 		User user = user1.get();
 		JSONObject data = new JSONObject();
 		data.put("login", user.getLogin());
@@ -115,7 +117,7 @@ public class AdminController {
 			@RequestParam(required = false) String vkid, int id) {
 		Optional<User> user1 = dbservice.getUserRepository().findById(id);
 		if (user1.isEmpty())
-			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(404).body(Answer.fail("User not found"));
 		User user = user1.get();
 		user.setLogin(login);
 		user.setRole(role);
@@ -129,28 +131,21 @@ public class AdminController {
 			result = auth.register(user);
 		}
 		if (result)
-			return ResponseEntity.accepted().body("{\"result\": \"success\"}");
-		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
+			return ResponseEntity.accepted().body(Answer.success());
+		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save user to DB."));
 	}
 
-	@SuppressWarnings("unchecked")
 	@PostMapping("/usermgr/delete")
 	public ResponseEntity<String> userManager_delete(@RequestParam() int id) {
 		Optional<User> user = dbservice.getUserRepository().findById(id);
-		JSONObject answer = new JSONObject();
-		if (user.isEmpty()) {
-			answer.put("success", false);
-			answer.put("message", "User not found");
-			return ResponseEntity.badRequest().body(answer.toJSONString());
-		}
-		if (adminService.isNativeAdmin(user.get())) {
-			answer.put("success", false);
-			answer.put("message", "Unremovable user");
-			return ResponseEntity.unprocessableEntity().body(answer.toJSONString());
-		}
+		if (user.isEmpty())
+			return ResponseEntity.badRequest().body(Answer.fail("User not found"));
+		if (!user.get().getGroups().isEmpty())
+			return ResponseEntity.unprocessableEntity().body(Answer.fail("User has dependant group"));
+		if (adminService.isNativeAdmin(user.get()))
+			return ResponseEntity.unprocessableEntity().body(Answer.fail("Protected user"));
 		dbservice.getUserRepository().deleteById(id);
-		answer.put("success", true);
-		return ResponseEntity.accepted().body(answer.toJSONString());
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	/*
@@ -169,15 +164,15 @@ public class AdminController {
 			@RequestParam String name) {
 		Optional<User> commander = dbservice.getUserRepository().findById(Integer.parseInt(user));
 		if (commander.isPresent())
-			ResponseEntity.status(409).body("{\"result\": \"fail\"}");
+			ResponseEntity.status(409).body(Answer.fail("User already has squad"));
 		Squad squad = new Squad();
 		squad.setSquadName(name);
 		squad.setCommanderName(commandername);
 		squad.setCommander(commander.get());
 		boolean result = dbservice.getSquadRepository().save(squad) != null;
 		if (result)
-			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
-		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
+			return ResponseEntity.ok(Answer.success());
+		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save squad to DB"));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -185,7 +180,7 @@ public class AdminController {
 	public ResponseEntity<String> squadManager_edit(@RequestParam int id) {
 		Optional<Squad> squad1 = dbservice.getSquadRepository().findById(id);
 		if (squad1.isEmpty())
-			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(404).body(Answer.fail("Squad not found"));
 		Squad squad = squad1.get();
 		JSONObject data = new JSONObject();
 		data.put("name", squad.getSquadName());
@@ -200,24 +195,24 @@ public class AdminController {
 		Optional<Squad> squad1 = dbservice.getSquadRepository().findById(id);
 		Optional<User> commander = dbservice.getUserRepository().findById(user);
 		if (squad1.isEmpty() || commander.isEmpty())
-			ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+			ResponseEntity.status(404).body(Answer.fail("Squad or User not found"));
 		Squad squad = squad1.get();
 		squad.setSquadName(name);
 		squad.setCommanderName(commandername);
 		squad.setCommander(commander.get());
 		boolean result = dbservice.getSquadRepository().save(squad) != null;
 		if (result)
-			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
-		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
+			return ResponseEntity.ok(Answer.success());
+		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save squad to DB"));
 	}
 
 	@PostMapping("/squadmgr/delete")
 	public ResponseEntity<String> squadManager_delete(@RequestParam() int id) {
 		if (dbservice.getSquadRepository().findById(id).isEmpty()) {
-			return ResponseEntity.badRequest().body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(404).body(Answer.fail("Squad not found"));
 		}
 		dbservice.getSquadRepository().deleteById(id);
-		return ResponseEntity.accepted().body("{\"result\": \"success\"}");
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	/*
@@ -271,7 +266,7 @@ public class AdminController {
 			@RequestParam String classnum, @RequestParam String phone, @RequestParam int squad) {
 		Optional<Squad> squadO = dbservice.getSquadRepository().findById(squad);
 		if (squadO.isEmpty())
-			return ResponseEntity.badRequest().body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(404).body(Answer.fail("Squad not found"));
 		Human human = new Human();
 		human.setName(name);
 		human.setLastname(lastname);
@@ -283,8 +278,8 @@ public class AdminController {
 		human.setSquad(squadO.get());
 		boolean result = dbservice.getHumanRepository().save(human) != null;
 		if (result)
-			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
-		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
+			return ResponseEntity.ok(Answer.success());
+		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save human to DB"));
 	}
 
 	@GetMapping("/humanmgr/fullinfo")
@@ -305,17 +300,11 @@ public class AdminController {
 
 	@PostMapping("/humanmgr/delete")
 	public ResponseEntity<String> humanManager_delete(@RequestParam() int id) {
-		if (dbservice.getHumanRepository().findById(id).isEmpty()) {
-			return ResponseEntity.badRequest().body("{\"result\": \"fail\"}");
-		}
+		Optional<Human> human = dbservice.getHumanRepository().findById(id);
+		if (human.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Human not found"));
 		dbservice.getHumanRepository().deleteById(id);
-		return ResponseEntity.accepted().body("{\"result\": \"success\"}");
-	}
-
-	@PostMapping("/humanmgr/deleteall")
-	public String humanManager_deleteAll() {
-		dbservice.getHumanRepository().deleteAll();
-		return "redirect:/admin/humanmgr?deleted_all";
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -323,7 +312,7 @@ public class AdminController {
 	public ResponseEntity<String> humanManager_edit(@RequestParam int id) {
 		Optional<Human> human1 = dbservice.getHumanRepository().findById(id);
 		if (human1.isEmpty())
-			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(404).body(Answer.fail("Human not found"));
 		Human human = human1.get();
 		JSONObject data = new JSONObject();
 		data.put("name", human.getName());
@@ -344,11 +333,11 @@ public class AdminController {
 			@RequestParam int squad) {
 		Optional<Human> h = dbservice.getHumanRepository().findById(id);
 		if (h.isEmpty()) {
-			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(404).body(Answer.fail("Human not found"));
 		}
 		Optional<Squad> squadO = dbservice.getSquadRepository().findById(squad);
 		if (squadO.isEmpty())
-			return ResponseEntity.status(404).body("{\"result\": \"fail\"}");
+			return ResponseEntity.status(404).body(Answer.fail("Squad not found"));
 		Human human = h.get();
 		human.setName(name);
 		human.setLastname(lastname);
@@ -360,8 +349,8 @@ public class AdminController {
 		human.setSquad(squadO.get());
 		boolean result = dbservice.getHumanRepository().save(human) != null;
 		if (result)
-			return ResponseEntity.ok("\"{\\\"result\\\": \\\"success\\\"}\"");
-		return ResponseEntity.internalServerError().body("{\"result\": \"fail\"}");
+			return ResponseEntity.ok(Answer.success());
+		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save human to DB"));
 	}
 
 	/*
@@ -383,12 +372,50 @@ public class AdminController {
 	}
 
 	@PostMapping("/groupmgr/delete")
-	public ResponseEntity<String> groupManager_delete(@RequestParam() int id) {
-		if (dbservice.getGroupRepository().findById(id).isEmpty()) {
-			return ResponseEntity.badRequest().body("{\"result\": \"fail\"}");
-		}
+	@Transactional
+	public ResponseEntity<String> groupManager_delete(@RequestParam() int id) throws InterruptedException {
+		Optional<Group> group1 = dbservice.getGroupRepository().findById(id);
+		if (group1.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Group not found"));
+		if (!group1.get().getHumans().isEmpty())
+			return ResponseEntity.unprocessableEntity()
+					.body(Answer.fail("Cannot delete group with people! Delete people from group and try again."));
 		dbservice.getGroupRepository().deleteById(id);
-		return ResponseEntity.accepted().body("{\"result\": \"success\"}");
+		return ResponseEntity.accepted().body(Answer.success());
+	}
+
+	@GetMapping("/groupmgr/manage")
+	public String groupManager(Model model, @RequestParam int id) {
+		Optional<Group> group1 = dbservice.getGroupRepository().findById(id);
+		if (group1.isEmpty())
+			return "redirect:/admin/groupmgr?error_notfound";
+		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
+		model.addAttribute("group", group1.get());
+		return "admin/groupmgr_manage";
+	}
+
+	@PostMapping("/groupmgr/manage/add")
+	public ResponseEntity<String> groupManager_add(@RequestParam() int id, @RequestParam() int humanid) {
+		Optional<Human> human = dbservice.getHumanRepository().findById(humanid);
+		Optional<Group> group = dbservice.getGroupRepository().findById(id);
+		if (human.isEmpty() || group.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Group or Human not found"));
+		Group gr = group.get();
+		gr.addHuman(human.get());
+		dbservice.getGroupRepository().save(gr);
+		return ResponseEntity.accepted().body(Answer.success());
+	}
+
+	@PostMapping("/groupmgr/manage/delete")
+	public ResponseEntity<String> groupManager_delete(@RequestParam() int id, @RequestParam() int humanid) {
+		Optional<Human> human1 = dbservice.getHumanRepository().findById(humanid);
+		Optional<Group> group = dbservice.getGroupRepository().findById(id);
+		if (human1.isEmpty() || group.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Group or Human not found"));
+		Group gr = group.get();
+		gr.removeHuman(human1.get());
+		dbservice.getGroupRepository().save(gr);
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	/*
