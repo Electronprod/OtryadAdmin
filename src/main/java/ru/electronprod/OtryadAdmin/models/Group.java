@@ -1,5 +1,6 @@
 package ru.electronprod.OtryadAdmin.models;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,7 +14,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Group {
+public class Group implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
@@ -22,8 +23,7 @@ public class Group {
 	@ManyToOne
 	@JoinColumn(name = "user_id")
 	private User marker;
-	@ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-	@JoinTable(name = "human_group", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "human_id"))
+	@ManyToMany(mappedBy = "groups", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	private Set<Human> humans = new HashSet<>();
 
 	public void addHuman(Human human) {

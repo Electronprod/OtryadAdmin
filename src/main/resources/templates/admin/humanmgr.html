@@ -37,6 +37,7 @@
 				<th onclick="sortTable(1)">Имя</th>
 				<th onclick="sortTable(2)">Отчество</th>
 				<th onclick="sortTable(3)">Командир</th>
+				<th onclick="sortTable(4)">Группы</th>
 				<th> Действия</th>
 			</tr>
 		</thead>
@@ -46,6 +47,7 @@
 				<td th:text="${human.name}"></td>
 				<td th:text="${human.surname}"></td>
 				<td th:text="${human.squad.commanderName}"></td>
+				<td th:text="${human.showGroups()}"></td>
 				<td>
 					<div class="action-buttons">
 						<a class="button" th:href="@{/admin/humanmgr/fullinfo(id=${human.id})}">Подробнее</a>
@@ -90,7 +92,7 @@
 		<button class="btn" onclick="addHumanAction()">Добавить</button>
 		<button class="btn" onclick="addList()">Массовое добавление</button>
 		<button class="btn" onclick="window.location.href='/admin/humanmgr/fullinfo'">Подробная информация</button>
-		<button class="btn" onclick="deleteAll();">Удалить ВСЕХ</button>
+		<!--<button class="btn" onclick="deleteAll();">Удалить ВСЕХ</button>-->
 	</div>
 </body>
 <script src="/assets/manager.js"></script>

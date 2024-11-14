@@ -6,9 +6,24 @@ body {
 	padding-bottom: 60px;
 }
 
+.header {
+	background-color: #f0f0f0;
+	border-radius: 8px;
+	padding: 10px;
+	margin: 10px 0;
+	text-align: center;
+	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	font-size: 16px;
+	font-weight: bold;
+	color: #333;
+}
+
+.header span {
+	color: #007bff;
+}
+
 #userTableWrapper {
 	overflow-x: auto;
-	/* Добавляем горизонтальную прокрутку */
 	padding: 20px;
 	box-sizing: border-box;
 }
@@ -133,7 +148,6 @@ tr:hover {
 	background-color: darkred;
 }
 
-/* Адаптивные стили для мобильных устройств */
 @media (max-width: 600px) {
 
 	th,
@@ -246,7 +260,5 @@ select {
 	border-radius: 4px;
 	border: 1px solid #ccc;
 	width: 100%;
-	/* Заполняет всю ширину */
 	max-width: 250px;
-	/* Ограничение максимальной ширины */
 }
