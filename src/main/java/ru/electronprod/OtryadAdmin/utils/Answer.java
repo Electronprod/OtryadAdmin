@@ -7,6 +7,7 @@ public class Answer {
 		return "{\"result\": \"success\"}";
 	}
 
+	@SuppressWarnings("unchecked")
 	public static String fail(String message) {
 		JSONObject o = new JSONObject();
 		o.put("result", "fail");
