@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
@@ -201,5 +202,44 @@ public class StatsWorker {
 		log.info("Squadcommander " + user.getLogin() + " marked " + resultArray.size() + " people. EventID: "
 				+ event_id);
 		return event_id;
+	}
+
+	@PreAuthorize("hasAuthority('ROLE_COMMANDER')")
+	@Transactional
+	public boolean commander_mark(Set<Integer> presentIDs, Map<Integer, String> unpresentIDs, String eventType,
+			String formattedDate, User user) {
+		// Variables
+		List<SquadStats> resultArray = new ArrayList<SquadStats>();
+		int event_id = dbservice.getStatsRepository().findMaxEventIDValue() + 1;
+		// Present people
+		Set<Human> presentHumans = dbservice.getHumanRepository().findByIdIn(presentIDs);
+		for (Human human : presentHumans) {
+			SquadStats stats = new SquadStats(human);
+			stats.setAuthor(user.getLogin());
+			stats.setDate(formattedDate);
+			stats.setPresent(true);
+			stats.setReason("error:present");
+			stats.setType(eventType);
+			stats.setUser_role(user.getRole());
+			stats.setEvent_id(event_id);
+			resultArray.add(stats);
+		}
+		presentHumans = null;
+		// Unpresent people
+		Set<Human> unpresentHumans = dbservice.getHumanRepository().findByIdIn(unpresentIDs.keySet());
+		for (Human human : unpresentHumans) {
+			SquadStats stats = new SquadStats(human);
+			stats.setAuthor(user.getLogin());
+			stats.setDate(formattedDate);
+			stats.setPresent(false);
+			stats.setReason(unpresentIDs.get(human.getId()));
+			stats.setType(eventType);
+			stats.setUser_role(user.getRole());
+			stats.setEvent_id(event_id);
+			resultArray.add(stats);
+		}
+		unpresentHumans = null;
+		// Saving to DB
+		return dbservice.getStatsRepository().saveAll(resultArray) != null;
 	}
 }
