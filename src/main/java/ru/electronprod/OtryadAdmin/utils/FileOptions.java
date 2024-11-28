@@ -97,4 +97,16 @@ public class FileOptions {
 		Object obj = (new JSONParser()).parse(toParse);
 		return obj;
 	}
+
+	public static String getFileLineWithSeparator(List<String> lines1, String splitter) {
+		List<String> lines = lines1;
+		if (lines == null) {
+			return "Error loading file: null";
+		}
+		String result = "";
+		for (int i = 0; i < lines.size(); i++) {
+			result = result + lines.get(i) + splitter;
+		}
+		return result;
+	}
 }

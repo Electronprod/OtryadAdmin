@@ -1,6 +1,7 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.info.BuildProperties;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -46,6 +48,9 @@ public class AdminController {
 	private DBService dbservice;
 	@Autowired
 	private AuthHelper auth;
+	// TODO
+	@Autowired
+	BuildProperties appInfo;
 
 	/*
 	 * Main page
@@ -66,7 +71,7 @@ public class AdminController {
 		double totalPhysicalMemory = adminService.getTotalDiskSpace();
 		model.addAttribute("disk", String.format("%.2f GB / %.2f GB / %.2f GB", freePhysicalMemory,
 				usablePhysicalMemory, totalPhysicalMemory));
-
+		model.addAttribute("show_log", (new File("log.txt")).exists());
 		return "admin/dashboard";
 	}
 
@@ -606,5 +611,11 @@ public class AdminController {
 			log.error("Error removing replacement. ", e);
 			return "redirect:/admin/config?error_unknown";
 		}
+	}
+
+	@GetMapping("/log")
+	public String log(Model model) {
+		model.addAttribute("log", FileOptions.getFileLineWithSeparator(FileOptions.getFileLines("log.txt"), "\n"));
+		return "admin/log";
 	}
 }
