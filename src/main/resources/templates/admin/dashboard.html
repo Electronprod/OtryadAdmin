@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="/assets/default_style.css">
 	<link rel="icon" href="/icon.png">
 	<script defer src="/assets/navbar.js"></script>
+	<script src="/public_resources/sweetalert2.js"></script>
 </head>
 
 <body>
@@ -17,7 +18,7 @@
 		<div id="content">
 			<div class="card">
 				<h3>Добро пожаловать!</h3>
-				<p>Это ваша панель администратора. Здесь вы можете управлять вашим сайтом. Если вы хотите помотреть
+				<p>Это ваша панель администратора. Здесь вы можете управлять вашим сайтом. Если вы хотите посмотреть
 					статистику, перейдите в панель наблюдателя, нажав на кнопку ниже.</p>
 				<a class="greenbtn" href="/observer">Перейти в панель наблюдателя</a>
 			</div>
@@ -25,6 +26,11 @@
 				<h3>Редактор конфигурации приложения</h3>
 				<p>Отредактируйте конфигурацию приложения.</p>
 				<a class="greenbtn" href="/admin/config">Перейти в редактор</a>
+			</div>
+			<div class="card" th:if="${show_log == true}">
+				<h3>Просмотр лога</h3>
+				<p>Просмотрите лог приложения.</p>
+				<a class="greenbtn" href="/admin/log">Просмотреть</a>
 			</div>
 			<div class="card">
 				<h3>Ресурсы системы</h3>

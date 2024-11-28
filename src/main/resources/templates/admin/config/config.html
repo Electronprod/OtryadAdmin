@@ -24,54 +24,33 @@
 
 		.container {
 			width: 100%;
-			/* Устанавливаем div на всю ширину родительского элемента */
 			height: 100%;
-			/* Устанавливаем div на всю высоту родительского элемента */
 			display: flex;
-			/* Используем flexbox для выравнивания */
 			justify-content: center;
-			/* По горизонтали (опционально) */
 			align-items: center;
-			/* По вертикали (опционально) */
 			padding: 10px;
-			/* Внутренние отступы # могут быть скорректированы по необходимости */
 			box-sizing: border-box;
-			/* Включаем отступы в общие размеры элемента */
 		}
 
 		textarea {
 			width: 100%;
-			/* Устанавливаем textarea на всю ширину div */
 			height: 100%;
-			/* Устанавливаем textarea на всю высоту div */
 			resize: none;
-			/* Убираем возможность изменения размеров вручную */
 			padding: 10px;
-			/* Внутренние отступы внутри textarea */
 			border-radius: 5px;
-			/* Скругляем углы */
 			border: 1px solid #ccc;
-			/* Цвет и стиль границы */
 			font-family: Arial, sans-serif;
-			/* Устанавливаем шрифт */
 			font-size: 14px;
-			/* Размер шрифта */
 			box-sizing: border-box;
-			/* Включаем отступы в общие размеры элемента */
 		}
 
-		/* Дополнительный hover-стиль для textarea */
 		textarea:hover {
 			border-color: #888;
-			/* Изменяем цвет границы при наведении курсора */
 		}
 
-		/* Стиль для фокусированного состояния textarea */
 		textarea:focus {
 			outline: none;
-			/* Убираем стандартную обводку */
 			border-color: #555;
-			/* Цвет границы при фокусе */
 		}
 
 		.cardc {
@@ -94,13 +73,9 @@
 		.red-button {
 			background-color: red;
 			color: white;
-			/* Для лучшей читаемости текста на красном фоне */
 			border: none;
-			/* Убрать рамку, если требуется */
 			padding: 10px 20px;
-			/* Добавить отступы вокруг текста */
 			cursor: pointer;
-			/* Изменить курсор на указатель при наведении */
 		}
 
 		.red-button:hover {
@@ -110,13 +85,9 @@
 		.blue-button {
 			background-color: blue;
 			color: white;
-			/* Для лучшей читаемости текста на красном фоне */
 			border: none;
-			/* Убрать рамку, если требуется */
 			padding: 10px 20px;
-			/* Добавить отступы вокруг текста */
 			cursor: pointer;
-			/* Изменить курсор на указатель при наведении */
 		}
 
 		.blue-button:hover {
@@ -132,76 +103,70 @@
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
-				<div class="container">
-					<div class="cardc">
-						<h3>Добавить событие</h3>
-						<form th:action="@{/admin/config/addevent}" method="post">
-							<input placeholder="Название события" name="name" type="text" required />
-							<input placeholder="Строковый идентификатор события" name="event" type="text" required />
-							<label for="canSetReason">Показывать выбор причин пропуска?</label>
-							<select name="canSetReason">
-								<option value="false">Нет</option>
-								<option value="true">Да</option>
-							</select>
-							<button type="submit">Добавить</button>
-						</form>
-					</div>
-					<div class="cardc">
-						<h3>Удалить событие</h3>
-						<form th:action="@{/admin/config/delevent}" method="post">
-							<select name="event" required>
-								<option th:each="entry : ${eventtypes}" th:value="${entry.getEvent()}"
-									th:text="${entry.getName()}">
-								</option>
-							</select>
-							<button class="red-button" type="submit">Удалить</button>
-						</form>
-					</div>
+				<div class="cardc">
+					<h3>Добавить событие</h3>
+					<form th:action="@{/admin/config/addevent}" method="post">
+						<input placeholder="Название события" name="name" type="text" required />
+						<input placeholder="Строковый идентификатор события" name="event" type="text" required />
+						<label for="canSetReason">Показывать выбор причин пропуска?</label>
+						<select name="canSetReason">
+							<option value="false">Нет</option>
+							<option value="true">Да</option>
+						</select>
+						<button type="submit">Добавить</button>
+					</form>
+				</div>
+				<div class="cardc">
+					<h3>Удалить событие</h3>
+					<form th:action="@{/admin/config/delevent}" method="post">
+						<select name="event" required>
+							<option th:each="entry : ${eventtypes}" th:value="${entry.getEvent()}"
+								th:text="${entry.getName()}">
+							</option>
+						</select>
+						<button class="red-button" type="submit">Удалить</button>
+					</form>
 				</div>
 			</div>
 			<div class="card">
-				<div class="container">
-					<div class="cardc">
-						<h3>Добавить причину отсутствия</h3>
-						<form th:action="@{/admin/config/addreason}" method="post">
-							<input placeholder="Причина" name="name" type="text" required />
-							<input placeholder="Строковый идентификатор причины" name="reason" type="text" required />
-							<button type="submit">Добавить</button>
-						</form>
-					</div>
-					<div class="cardc">
-						<h3>Удалить причину отсутствия</h3>
-						<form th:action="@{/admin/config/delreason}" method="post">
-							<select name="reason" required>
-								<option th:each="entry : ${reasons}" th:value="${entry.key}" th:text="${entry.value}">
-								</option>
-							</select>
-							<button class="red-button" type="submit">Удалить</button>
-						</form>
-					</div>
+				<div class="cardc">
+					<h3>Добавить причину отсутствия</h3>
+					<form th:action="@{/admin/config/addreason}" method="post">
+						<input placeholder="Причина" name="name" type="text" required />
+						<input placeholder="Строковый идентификатор причины" name="reason" type="text" required />
+						<button type="submit">Добавить</button>
+					</form>
+				</div>
+				<div class="cardc">
+					<h3>Удалить причину отсутствия</h3>
+					<form th:action="@{/admin/config/delreason}" method="post">
+						<select name="reason" required>
+							<option th:each="entry : ${reasons}" th:value="${entry.key}" th:text="${entry.value}">
+							</option>
+						</select>
+						<button class="red-button" type="submit">Удалить</button>
+					</form>
 				</div>
 			</div>
 			<div class="card">
-				<div class="container">
-					<div class="cardc">
-						<h3>Добавить замену</h3>
-						<form th:action="@{/admin/config/addreplacement}" method="post">
-							<input placeholder="Что заменить?" name="from" type="text" required />
-							<input placeholder="На что заменить?" name="to" type="text" required />
-							<button type="submit">Добавить</button>
-						</form>
-					</div>
-					<div class="cardc">
-						<h3>Удалить замену</h3>
-						<form th:action="@{/admin/config/delreplacement}" method="post">
-							<select name="from" required>
-								<option th:each="entry : ${replacements}" th:value="${entry.key}"
-									th:text="${entry.key} +' >>> '+ ${entry.value}">
-								</option>
-							</select>
-							<button class="red-button" type="submit">Удалить</button>
-						</form>
-					</div>
+				<div class="cardc">
+					<h3>Добавить замену</h3>
+					<form th:action="@{/admin/config/addreplacement}" method="post">
+						<input placeholder="Что заменить?" name="from" type="text" required />
+						<input placeholder="На что заменить?" name="to" type="text" required />
+						<button type="submit">Добавить</button>
+					</form>
+				</div>
+				<div class="cardc">
+					<h3>Удалить замену</h3>
+					<form th:action="@{/admin/config/delreplacement}" method="post">
+						<select name="from" required>
+							<option th:each="entry : ${replacements}" th:value="${entry.key}"
+								th:text="${entry.key} +' >>> '+ ${entry.value}">
+							</option>
+						</select>
+						<button class="red-button" type="submit">Удалить</button>
+					</form>
 				</div>
 			</div>
 			<div class="card">
