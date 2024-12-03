@@ -239,6 +239,7 @@ public class StatsWorker {
 			resultArray.add(stats);
 		}
 		unpresentHumans = null;
+		log.info("Commander " + user.getLogin() + " marked " + resultArray.size() + " people. EventID: " + event_id);
 		// Saving to DB
 		return dbservice.getStatsRepository().saveAll(resultArray) != null;
 	}

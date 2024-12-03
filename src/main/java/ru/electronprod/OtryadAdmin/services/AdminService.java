@@ -24,7 +24,6 @@ public class AdminService implements InitializingBean {
 	private String admin_login;
 	@Value("${security.admin.password}")
 	private String admin_password;
-
 	@Autowired
 	private AuthHelper auth;
 
@@ -41,7 +40,6 @@ public class AdminService implements InitializingBean {
 			user.setPassword(admin_password);
 			auth.register(user);
 		}
-
 		log.info("Admin registered. Use authorization data from application.properties file.");
 	}
 

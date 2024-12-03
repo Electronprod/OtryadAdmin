@@ -9,6 +9,26 @@ document.getElementById('selectAll').addEventListener('change', function() {
 		}
 	});
 });
+function loadScript(url, callback) {
+	const script = document.createElement('script');
+	script.src = url;
+	script.type = 'text/javascript';
+	//script.async = true;
+	script.onload = function() {
+		console.log(`Script ${url} connected successfully.`);
+		if (callback) callback();
+	};
+	script.onerror = function() {
+		console.error(`Error connecting script: ${url}.`);
+		alert("Возникла критическая ошибка при загрузке страницы. Повторите попытку позже.");
+	};
+	document.body.appendChild(script);
+}
+// Loading other scripts
+loadScript("/assets/loader_modal.js", null);
+if ((typeof Swal === "function") == false) {
+	loadScript("/public_resources/sweetalert2.js", null);
+}
 async function fetchData(url) {
 	try {
 		const response = await fetch(url);
@@ -44,6 +64,7 @@ function submitData() {
 }
 
 async function sendData() {
+	showLoader();
 	const uncheckedPeople = [];
 	// Проходим по всем чекбоксам
 	const checkboxes = document.querySelectorAll('.custom-checkbox');
@@ -75,6 +96,7 @@ async function sendData() {
 			text: "Не удалось найти элемент для выбранного типа статистики. Пожалуйста, обновите страницу.",
 			icon: "error"
 		});
+		hideLoader();
 		return;
 	}
 	var csrfTokenInput = document.querySelector('input[name="_csrf"]');
@@ -86,6 +108,7 @@ async function sendData() {
 			text: "Не удалось найти CSRF токен. Пожалуйста, обновите страницу.",
 			icon: "error"
 		});
+		hideLoader();
 		return;
 	}
 	try {
@@ -97,7 +120,6 @@ async function sendData() {
 			},
 			body: JSON.stringify(bodyData)
 		});
-
 		if (!response.ok) {
 			console.log("HTTP error: " + response);
 			Swal.fire({
@@ -105,9 +127,9 @@ async function sendData() {
 				text: `Ошибка HTTP: ${response.status}\nНекорректный ответ от сервера.`,
 				icon: "error"
 			});
+			hideLoader();
 			return false;
 		}
-
 		const data = await response.json();
 		console.log('mark success:', data);
 		Swal.fire({
@@ -115,6 +137,7 @@ async function sendData() {
 			text: "Ребята отмечены",
 			icon: "success"
 		});
+		hideLoader();
 		return true;
 	} catch (error) {
 		console.error('mark error:', error);
@@ -123,6 +146,7 @@ async function sendData() {
 			text: `Ошибка при выставлении отметок\n${error}`,
 			icon: "error"
 		});
+		hideLoader();
 		return false;
 	}
 }
@@ -198,12 +222,10 @@ function showColumn(columnIndex) {
 }
 document.addEventListener('DOMContentLoaded', function() {
 	const checkboxes = document.querySelectorAll('.custom-checkbox');
-
 	checkboxes.forEach(checkbox => {
 		checkbox.addEventListener('change', function() {
 			const index = this.id.split('-')[1];
 			const selectInput = document.getElementById('details-' + index);
-
 			if (selectInput) {
 				selectInput.disabled = this.checked;
 			}

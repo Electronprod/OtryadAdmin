@@ -1,3 +1,4 @@
+// Initializing page
 document.getElementById("dateField").valueAsDate = new Date();
 const groupID = document.getElementById('groupid').value;
 document.getElementById('selectAll').addEventListener('change', function() {
@@ -25,6 +26,27 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	});
 });
+function loadScript(url, callback) {
+	const script = document.createElement('script');
+	script.src = url;
+	script.type = 'text/javascript';
+	//script.async = true;
+	script.onload = function() {
+		console.log(`Script ${url} connected successfully.`);
+		if (callback) callback();
+	};
+	script.onerror = function() {
+		console.error(`Error connecting script: ${url}.`);
+		alert("Возникла критическая ошибка при загрузке страницы. Повторите попытку позже.");
+	};
+	document.body.appendChild(script);
+}
+// Loading other scripts
+loadScript("/assets/loader_modal.js", null);
+if ((typeof Swal === "function") == false) {
+	loadScript("/public_resources/sweetalert2.js", null);
+}
+
 function submitData() {
 	Swal.fire({
 		title: 'Вы уверены?',
@@ -42,6 +64,7 @@ function submitData() {
 	});
 }
 async function sendData() {
+	showLoader();
 	const uncheckedPeople = [];
 	const checkedPeople = [];
 	const checkboxes = document.querySelectorAll('.custom-checkbox');
@@ -79,6 +102,7 @@ async function sendData() {
 			text: "Не удалось найти элемент для выбранного типа статистики. Пожалуйста, обновите страницу.",
 			icon: "error"
 		});
+		hideLoader();
 		return;
 	}
 	var csrfTokenInput = document.querySelector('input[name="_csrf"]');
@@ -90,6 +114,7 @@ async function sendData() {
 			text: "Не удалось найти CSRF токен. Пожалуйста, обновите страницу.",
 			icon: "error"
 		});
+		hideLoader();
 		return;
 	}
 	try {
@@ -109,6 +134,7 @@ async function sendData() {
 				text: `Ошибка HTTP: ${response.status}\nНекорректный ответ от сервера.`,
 				icon: "error"
 			});
+			hideLoader();
 			return false;
 		}
 
@@ -119,6 +145,7 @@ async function sendData() {
 			text: "Ребята отмечены",
 			icon: "success"
 		});
+		hideLoader();
 		return true;
 	} catch (error) {
 		console.error('mark error:', error);
@@ -127,6 +154,7 @@ async function sendData() {
 			text: `Ошибка при выставлении отметок\n${error}`,
 			icon: "error"
 		});
+		hideLoader();
 		return false;
 	}
 }

@@ -52,8 +52,7 @@ public class CommanderController {
 
 	@GetMapping("/mark")
 	public String mark(Model model) {
-		User user1 = authHelper.getCurrentUser();
-		User user = dbservice.getUserRepository().findById(user1.getId()).orElseThrow();
+		User user = dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId()).orElseThrow();
 		model.addAttribute("user", user);
 		model.addAttribute("groups", user.getGroups());
 		model.addAttribute("humanList",
@@ -64,13 +63,12 @@ public class CommanderController {
 	@SuppressWarnings("unchecked")
 	@PostMapping("/mark")
 	public ResponseEntity<String> mark(@RequestBody Map<String, Object> requestBody) {
-		User user = authHelper.getCurrentUser();
 		List<?> uncheckedPeopleList = (List<?>) requestBody.get("checkedPeople");
 		JSONArray checkedPeopleArray = new JSONArray();
 		checkedPeopleArray.addAll(uncheckedPeopleList);
 		JSONObject answer = new JSONObject();
 		int id = statsWorker.commander_mark(checkedPeopleArray, String.valueOf(requestBody.get("eventName")),
-				String.valueOf(requestBody.get("date")), user);
+				String.valueOf(requestBody.get("date")), authHelper.getCurrentUser());
 		answer.put("result", "success");
 		answer.put("event_id", id);
 		return ResponseEntity.ok(answer.toJSONString());
@@ -88,7 +86,7 @@ public class CommanderController {
 
 	@SuppressWarnings("unchecked")
 	@PostMapping("/markgroup")
-	public ResponseEntity<String> mark(@RequestBody String data) {
+	public ResponseEntity<String> markGroup(@RequestBody String data) {
 		User user = authHelper.getCurrentUser();
 		try {
 			JSONObject in = (JSONObject) FileOptions.ParseJS(data);

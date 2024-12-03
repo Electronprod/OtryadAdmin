@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
 	var csrfToken = document.querySelector('input[name="_csrf"]').value;
-	// Pages
 	let pages = [
 		{ name: 'Error', url: '/' }
 	];
