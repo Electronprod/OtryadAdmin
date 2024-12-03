@@ -4,11 +4,10 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Группа ребят: отметить</title>
+	<title>Отметить группу ребят</title>
 	<link rel="stylesheet" href="/assets/default_style.css">
 	<link rel="icon" href="/icon.png">
 	<script defer src="/assets/navbar.js"></script>
-	<script src="/public_resources/sweetalert2.js"></script>
 	<style>
 		input[type="text"],
 		input[type="password"],
@@ -49,7 +48,6 @@
 	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<input type="hidden" id="groupid" th:value="${group.id}" />
-	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
@@ -97,6 +95,8 @@
 					</table>
 					<button type="button" onclick="submitData()">Отправить</button>
 				</form>
+			</div>
+			</div>
 			</div>
 			<script defer src="/onepage_scripts/commander_mark_group.js"></script>
 

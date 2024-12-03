@@ -2,47 +2,54 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Отметить ребят</title>
-	<link rel="stylesheet" href="/assets/default_style.css">
-	<link rel="icon" href="/icon.png">
-	<script defer src="/assets/navbar.js"></script>
-	<script src="/public_resources/sweetalert2.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Отметить ребят</title>
+<link rel="stylesheet" href="/assets/default_style.css">
+<link rel="icon" href="/icon.png">
+<script defer src="/assets/navbar.js"></script>
 </head>
 
 <body>
 	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
-	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-	<div id="navbar"></div>
+	<input type="hidden" th:name="${_csrf.parameterName}"
+		th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
-				<h3>Добро пожаловать, <span th:text="${login}"></span>!</h3>
-				<p>Это ваша панель командира. Сверху вы можете перейти в другой раздел сайта. Ниже вы можете отметить
-					ребят. Приятного пользования!</p>
+				<h3>
+					Добро пожаловать, <span th:text="${login}"></span>!
+				</h3>
+				<p>Это ваша панель командира. Сверху вы можете перейти в другой
+					раздел сайта. Ниже вы можете отметить ребят. Приятного пользования!</p>
 			</div>
 			<div class="card">
-				<h3><b>КАК ПРАВИЛЬНО ОТМЕТИТЬ???</b></h3>
-				<p>В форме ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии, остальным укажите
-					причины отсутсвия. Выберите событие
-					в селекторе
-					над таблицей и нажмите "Отправить".<br><strong>Отправленные данные изменить нельзя!</strong></p>
+				<h3>
+					<b>КАК ПРАВИЛЬНО ОТМЕТИТЬ???</b>
+				</h3>
+				<p>
+					В форме ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong>
+					на событии, остальным укажите причины отсутсвия. Выберите событие в
+					селекторе над таблицей и нажмите "Отправить".<br> <strong>Отправленные
+						данные изменить нельзя!</strong>
+				</p>
 			</div>
 			<div class="card">
 				<h3>Отметьте ПРИСУТСТВОВАВШИХ ребят:</h3>
-				<form th:action="@{/squadcommander/mark}" method="post" id="markForm">
-					<label>Выберите событие:</label>
-					<select name="statsType" id="statsType" onchange="handleSelectChange(this)" required>
-						<option th:each="entry : ${event_types_map}" th:value="${entry.getEvent()}"
-							th:text="${entry.getName()}">
+				<form th:action="@{/squadcommander/mark}" method="post"
+					id="markForm">
+					<label>Выберите событие:</label> <select name="statsType"
+						id="statsType" onchange="handleSelectChange(this)" required>
+						<option th:each="entry : ${event_types_map}"
+							th:value="${entry.getEvent()}" th:text="${entry.getName()}">
 						</option>
 						<option value="unknown-event">Другое событие...</option>
 					</select>
 					<table id="markTable">
 						<thead>
 							<tr>
-								<th><input class="all-checkbox" type="checkbox" id="selectAll" /> </th>
+								<th><input class="all-checkbox" type="checkbox"
+									id="selectAll" /></th>
 								<th>Фамилия</th>
 								<th>Имя</th>
 								<th>Причина</th>
@@ -50,26 +57,24 @@
 						</thead>
 						<tbody>
 							<tr th:each="human, iterStat : ${humanList}">
-								<td>
-									<input class="custom-checkbox" type="checkbox" name="selectedIds"
-										th:value="${human.id}" th:id="'checkbox-' + ${iterStat.index}" />
-								</td>
+								<td><input class="custom-checkbox" type="checkbox"
+									name="selectedIds" th:value="${human.id}"
+									th:id="'checkbox-' + ${iterStat.index}" /></td>
 								<td th:text="${human.lastname}">Фамилия</td>
 								<td th:text="${human.name}">Имя</td>
-								<td>
-									<select class="details-input" th:name="'details[' + ${human.id} + ']'"
-										th:id="'details-' + ${iterStat.index}">
-										<option th:each="entry : ${reasons_for_absences_map}" th:value="${entry.key}"
-											th:text="${entry.value}">
-										</option>
-									</select>
-								</td>
+								<td><select class="details-input"
+									th:name="'details[' + ${human.id} + ']'"
+									th:id="'details-' + ${iterStat.index}">
+										<option th:each="entry : ${reasons_for_absences_map}"
+											th:value="${entry.key}" th:text="${entry.value}"></option>
+								</select></td>
 							</tr>
 						</tbody>
 					</table>
 					<button type="button" onclick="submitData()">Отправить</button>
 				</form>
 			</div>
-			<script defer src="/onepage_scripts/squadcommander_mark.js"></script>
-
+		</div>
+	</div>
+	<script defer src="/onepage_scripts/squadcommander_mark.js"></script>
 </html>
