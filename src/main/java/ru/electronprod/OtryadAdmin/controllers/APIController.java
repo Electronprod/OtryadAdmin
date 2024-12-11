@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
-import ru.electronprod.OtryadAdmin.models.SquadStats;
+import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.dto.EventTypeDTO;
 
@@ -73,19 +73,19 @@ public class APIController {
 		if (date == null || date.isEmpty())
 			date = DBService.getStringDate();
 		JSONArray answer = new JSONArray();
-		List<SquadStats> statsArr = dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."));
-		List<User> usersFromStatsArr = statsArr.stream().map(SquadStats::getAuthor)
+		List<StatsRecord> statsArr = dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."));
+		List<User> usersFromStatsArr = statsArr.stream().map(StatsRecord::getAuthor)
 				.map(author -> dbservice.getUserRepository().findByLogin(author).get()).distinct().toList();
 		usersFromStatsArr.forEach(user -> {
 			JSONObject o = new JSONObject();
 			o.put("login", user.getLogin());
-			if (user.getSquad() != null)
-				o.put("name", user.getSquad().getCommanderName());
-			o.put("role", user.getRole());
+			o.put("name", user.getName());
+			o.put("role", SettingsRepository.getRoles().get(user.getRole()));
+			o.put("role_raw", user.getRole());
 			o.put("id", user.getId());
 			JSONArray events = new JSONArray();
 			List<String> eventsArr = statsArr.stream().filter(stats -> stats.getAuthor().equals(user.getLogin()))
-					.map(SquadStats::getType).distinct().toList();
+					.map(StatsRecord::getType).distinct().toList();
 			o.put("events_count", eventsArr.size());
 			events.addAll(eventsArr);
 			o.put("events", events);

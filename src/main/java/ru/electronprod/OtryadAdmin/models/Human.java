@@ -22,7 +22,7 @@ public class Human implements Serializable {
 	private Squad squad;
 
 	@OneToMany(mappedBy = "human", cascade = CascadeType.REMOVE, orphanRemoval = true)
-	private List<SquadStats> stats;
+	private List<StatsRecord> stats;
 
 	@Column
 	private String name;

@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
-import ru.electronprod.OtryadAdmin.models.SquadStats;
+import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
@@ -34,9 +34,9 @@ public class StatsWorker {
 	@Autowired
 	private DBService dbservice;
 
-	public Map<Human, Integer> getEventReport(List<SquadStats> typedStats) {
+	public Map<Human, Integer> getEventReport(List<StatsRecord> typedStats) {
 		Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
-		for (SquadStats stats : typedStats) {
+		for (StatsRecord stats : typedStats) {
 			Human human = stats.getHuman();
 			typedStatsMap.putIfAbsent(human, 0);
 
@@ -55,10 +55,10 @@ public class StatsWorker {
 	 * @param personalStats - person's stats records
 	 * @param model         - Model to add data
 	 */
-	public void getMainPersonalReportModel(List<SquadStats> personalStats, Model model) {
+	public void getMainPersonalReportModel(List<StatsRecord> personalStats, Model model) {
 		// Getting present and non present list
-		List<SquadStats> present = personalStats.stream().filter(stats -> stats.isPresent()).toList();
-		List<SquadStats> notPresent = personalStats.stream().filter(stats -> !stats.isPresent()).toList();
+		List<StatsRecord> present = personalStats.stream().filter(stats -> stats.isPresent()).toList();
+		List<StatsRecord> notPresent = personalStats.stream().filter(stats -> !stats.isPresent()).toList();
 		// Adding visits & omissions data
 		model.addAttribute("attendance", Pair.of(present.size(), notPresent.size()));
 		/*
@@ -66,10 +66,10 @@ public class StatsWorker {
 		 */
 		// Getting all events from List
 		List<String> squadEvents = personalStats.stream()
-				.filter(stats -> stats.getUser_role().equals("ROLE_SQUADCOMMANDER")).map(SquadStats::getType)
+				.filter(stats -> stats.getUser_role().equals("ROLE_SQUADCOMMANDER")).map(StatsRecord::getType)
 				.collect(Collectors.toList());
 		List<String> commanderEvents = personalStats.stream()
-				.filter(stats -> stats.getUser_role().equals("ROLE_COMMANDER")).map(SquadStats::getType)
+				.filter(stats -> stats.getUser_role().equals("ROLE_COMMANDER")).map(StatsRecord::getType)
 				.collect(Collectors.toList());
 		// There should always be the same order
 		Collections.sort(squadEvents);
@@ -93,7 +93,7 @@ public class StatsWorker {
 		 * Generating table of reasons for absences
 		 */
 		Map<String, Integer> reasons_data = new TreeMap<String, Integer>();
-		for (SquadStats stats : notPresent) {
+		for (StatsRecord stats : notPresent) {
 			String reason = stats.getReason();
 			if (reason.equals("error:present") || reason.equals("error:unsupported_event"))
 				continue;
@@ -103,8 +103,8 @@ public class StatsWorker {
 		/*
 		 * Adding a few stats records
 		 */
-		List<SquadStats> lastRecords = personalStats.stream().limit(30).collect(Collectors.toList());
-		lastRecords.sort(Comparator.comparingInt(SquadStats::getEvent_id).reversed());
+		List<StatsRecord> lastRecords = personalStats.stream().limit(30).collect(Collectors.toList());
+		lastRecords.sort(Comparator.comparingInt(StatsRecord::getEvent_id).reversed());
 		model.addAttribute("lastRecords", lastRecords);
 	}
 
@@ -120,13 +120,13 @@ public class StatsWorker {
 	@PreAuthorize("hasAuthority('ROLE_COMMANDER')")
 	@Transactional
 	public int commander_mark(JSONArray ids, String eventName, String date, User user) {
-		List<SquadStats> resultArray = new ArrayList<SquadStats>();
+		List<StatsRecord> resultArray = new ArrayList<StatsRecord>();
 		int event_id = dbservice.getStatsRepository().findMaxEventIDValue() + 1;
 		List<Human> humans = dbservice.getHumanRepository().findAll();
 		for (Object o : ids) {
 			int human_id = Integer.parseInt(String.valueOf(o));
 			Human human1 = humans.stream().filter(human -> human.getId() == human_id).findFirst().orElseThrow();
-			SquadStats stats = new SquadStats(human1);
+			StatsRecord stats = new StatsRecord(human1);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(date.replaceAll("-", "."));
 			stats.setPresent(true);
@@ -155,7 +155,7 @@ public class StatsWorker {
 	@PreAuthorize("hasAuthority('ROLE_SQUADCOMMANDER')")
 	@Transactional
 	public int squad_mark(JSONArray markedArr, String eventType, User user) throws ParseException {
-		List<SquadStats> resultArray = new ArrayList<SquadStats>();
+		List<StatsRecord> resultArray = new ArrayList<StatsRecord>();
 		Map<String, String> availableEventsForReasons = SettingsRepository.convertEventTypeDTOs(
 				SettingsRepository.getEvent_types().stream().filter(dto -> dto.isCanSetReason() == true).toList());
 		int event_id = dbservice.getStatsRepository().findMaxEventIDValue() + 1;
@@ -171,7 +171,7 @@ public class StatsWorker {
 			Human human1 = humans.stream()
 					.filter(human -> human.getId() == Integer.parseInt(String.valueOf(data.get("id")))).findFirst()
 					.orElseThrow();
-			SquadStats stats = new SquadStats(human1);
+			StatsRecord stats = new StatsRecord(human1);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(DBService.getStringDate());
 			stats.setPresent(false);
@@ -188,7 +188,7 @@ public class StatsWorker {
 		}
 		// Those who come
 		for (Human human : humans) {
-			SquadStats stats = new SquadStats(human);
+			StatsRecord stats = new StatsRecord(human);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(DBService.getStringDate());
 			stats.setPresent(true);
@@ -209,12 +209,12 @@ public class StatsWorker {
 	public boolean commander_mark(Set<Integer> presentIDs, Map<Integer, String> unpresentIDs, String eventType,
 			String formattedDate, User user) {
 		// Variables
-		List<SquadStats> resultArray = new ArrayList<SquadStats>();
+		List<StatsRecord> resultArray = new ArrayList<StatsRecord>();
 		int event_id = dbservice.getStatsRepository().findMaxEventIDValue() + 1;
 		// Present people
 		Set<Human> presentHumans = dbservice.getHumanRepository().findByIdIn(presentIDs);
 		for (Human human : presentHumans) {
-			SquadStats stats = new SquadStats(human);
+			StatsRecord stats = new StatsRecord(human);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(formattedDate);
 			stats.setPresent(true);
@@ -228,7 +228,7 @@ public class StatsWorker {
 		// Unpresent people
 		Set<Human> unpresentHumans = dbservice.getHumanRepository().findByIdIn(unpresentIDs.keySet());
 		for (Human human : unpresentHumans) {
-			SquadStats stats = new SquadStats(human);
+			StatsRecord stats = new StatsRecord(human);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(formattedDate);
 			stats.setPresent(false);

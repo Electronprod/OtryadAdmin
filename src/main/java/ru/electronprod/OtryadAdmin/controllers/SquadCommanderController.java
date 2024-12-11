@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
-import ru.electronprod.OtryadAdmin.security.AuthHelper;
+import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
 
 @Slf4j
@@ -45,7 +45,7 @@ public class SquadCommanderController {
 				.getHumans().stream().sorted(Comparator.comparing(Human::getLastname)).collect(Collectors.toList()));
 		model.addAttribute("reasons_for_absences_map", SettingsRepository.getReasons_for_absences());
 		model.addAttribute("event_types_map", SettingsRepository.getEvent_types());
-		model.addAttribute("login", user.getLogin());
+		model.addAttribute("login", user.getName());
 		return "squadcommander/mark";
 	}
 
@@ -78,14 +78,14 @@ public class SquadCommanderController {
 		model.addAttribute("humans",
 				dbservice.getUserRepository().findById(user.getId()).orElseThrow().getSquad().getHumans());
 		model.addAttribute("events", dbservice.getStatsRepository().findByAuthor(user.getLogin()).stream()
-				.map(SquadStats::getType).distinct().sorted().collect(Collectors.toList()));
+				.map(StatsRecord::getType).distinct().sorted().collect(Collectors.toList()));
 		return "squadcommander/stats_overview";
 	}
 
 	@GetMapping("/stats/report")
 	public String stats_forEvent(@RequestParam String event_name, Model model) {
 		User user = authHelper.getCurrentUser();
-		List<SquadStats> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name, user.getLogin());
+		List<StatsRecord> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name, user.getLogin());
 		model.addAttribute("data", statsHelper.getEventReport(stats));
 		model.addAttribute("eventName", event_name);
 		return "public/event_stats";

@@ -18,7 +18,7 @@ public class DBService {
 	private SquadRepository squadRepository;
 	@Getter
 	@Autowired
-	private SquadStatsRepository statsRepository;
+	private StatsRecordRepository statsRepository;
 	@Getter
 	@Autowired
 	private UserRepository userRepository;

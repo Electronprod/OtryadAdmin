@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
-import ru.electronprod.OtryadAdmin.models.SquadStats;
-import ru.electronprod.OtryadAdmin.security.AuthHelper;
+import ru.electronprod.OtryadAdmin.models.StatsRecord;
+import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
 import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 
@@ -43,7 +43,7 @@ public class ObserverController {
 	 */
 	@GetMapping("/stats")
 	public String stats_overview(Model model) {
-		model.addAttribute("login", auth.getCurrentUser().getLogin());
+		model.addAttribute("login", auth.getCurrentUser().getName());
 		model.addAttribute("user_role", auth.getCurrentUser().getRole());
 		// Squads view
 		model.addAttribute("squadList", dbservice.getSquadRepository().findAll());
@@ -75,7 +75,7 @@ public class ObserverController {
 
 	@GetMapping("/stats/report")
 	public String stats_event(@RequestParam String event_name, Model model) {
-		List<SquadStats> stats = dbservice.getStatsRepository().findByType(event_name);
+		List<StatsRecord> stats = dbservice.getStatsRepository().findByType(event_name);
 		model.addAttribute("data", statsWorker.getEventReport(stats));
 		model.addAttribute("eventName", event_name);
 		return "public/event_stats";
@@ -108,15 +108,36 @@ public class ObserverController {
 		return "public/statsview_rawtable";
 	}
 
+	@GetMapping("/stats/personal_id")
+	public String stats_personal(@RequestParam int id, Model model) {
+		Optional<Human> human = dbservice.getHumanRepository().findById(id);
+		if (human.isEmpty()) {
+			return "redirect:/observer/stats?error_notfound";
+		}
+		statsWorker.getMainPersonalReportModel(dbservice.getStatsRepository().findByHuman(human.get()), model);
+		model.addAttribute("person", human.get().getLastname() + " " + human.get().getName());
+		return "observer/personal_stats";
+	}
+
+	@GetMapping("/stats/personal/table_id")
+	public String stats_personalTable(@RequestParam int id, Model model) {
+		Optional<Human> human = dbservice.getHumanRepository().findById(id);
+		if (human.isEmpty()) {
+			return "redirect:/observer/stats?error_notfound";
+		}
+		model.addAttribute("statss", dbservice.getStatsRepository().findByHuman(human.get()));
+		return "public/statsview_rawtable";
+	}
+
 	@GetMapping("/stats/squad/{id}")
 	public String stats_squad_overview(@PathVariable("id") int id, Model model) {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model.addAttribute("squad", squad.get().getCommanderName());
+		model.addAttribute("commander", squad.get().getCommander().getName());
 		model.addAttribute("humans", squad.get().getHumans());
 		model.addAttribute("events", dbservice.getStatsRepository().findByAuthor(squad.get().getCommander().getLogin())
-				.stream().map(SquadStats::getType).distinct().sorted().collect(Collectors.toList()));
+				.stream().map(StatsRecord::getType).distinct().sorted().collect(Collectors.toList()));
 		return "observer/squadstats/stats_overview";
 	}
 
@@ -135,7 +156,7 @@ public class ObserverController {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		List<SquadStats> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name,
+		List<StatsRecord> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name,
 				squad.get().getCommander().getLogin());
 		model.addAttribute("data", statsWorker.getEventReport(stats));
 		model.addAttribute("eventName", event_name);

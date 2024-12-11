@@ -9,8 +9,7 @@ function showAddUser() {
 	document.getElementById('login').value = "";
 	document.getElementById('password').value = "";
 	document.getElementById('role').value = "";
-	document.getElementById('telegram').value = "";
-	document.getElementById('vkid').value = "";
+	document.getElementById('name').value = "";
 	var oldButton = document.getElementById('editbtn');
 	var newButton = document.getElementById('addbtn');
 	oldButton.style.display = 'none';
@@ -21,14 +20,13 @@ async function addUser() {
 	const login = document.getElementById('login').value;
 	const password = document.getElementById('password').value;
 	const role = document.getElementById('role').value;
-	const telegram = document.getElementById('telegram').value;
-	const vkid = document.getElementById('vkid').value;
+	const name = document.getElementById('name').value;
 
-	if (!login || !password || !role) {
-		alert('Пожалуйста, заполните обязательные поля: Логин, пароль, роль.');
+	if (!login || !password || !role || !name) {
+		alert('Пожалуйста, заполните обязательные поля: Логин, пароль, роль, имя.');
 		return;
 	}
-	const success = await sendPostData("/admin/usermgr/add?login=" + login + "&password=" + password + "&role=" + role + "&telegram=" + telegram + "&vkid=" + vkid);
+	const success = await sendPostData("/admin/usermgr/add?login=" + login + "&password=" + password + "&role=" + role + "&name=" + name);
 	if (success) {
 		window.location.href = window.location.href + "?added_user"
 	}
@@ -48,25 +46,23 @@ async function edit(id) {
 	document.getElementById('login').value = data.login;
 	document.getElementById('password').value = savepass;
 	document.getElementById('role').value = data.role;
-	document.getElementById('telegram').value = data.telegram;
-	document.getElementById('vkid').value = data.vkid;
+	document.getElementById('name').value = data.name;
 	showModal();
 }
 async function editUser() {
 	const login = document.getElementById('login').value;
 	let password = document.getElementById('password').value;
 	const role = document.getElementById('role').value;
-	const telegram = document.getElementById('telegram').value;
-	const vkid = document.getElementById('vkid').value;
+	const name = document.getElementById('name').value;
 	const userid = document.getElementById('userid').value;
-	if (!login || !password || !role || !userid) {
+	if (!login || !password || !role || !userid || !name) {
 		alert('Пожалуйста, заполните обязательные поля.');
 		return;
 	}
 	if (password == savepass) {
 		password = "not_changed";
 	}
-	const success = await sendPostData("/admin/usermgr/edit?login=" + login + "&password=" + password + "&role=" + role + "&telegram=" + telegram + "&vkid=" + vkid + "&id=" + userid);
+	const success = await sendPostData("/admin/usermgr/edit?login=" + login + "&password=" + password + "&role=" + role + "&name=" + name + "&id=" + userid);
 	if (success) {
 		window.location.href = "/admin/usermgr?edited_user"
 	}
@@ -75,7 +71,7 @@ async function editUser() {
 async function remove(id) {
 	const result = await swal.fire({
 		title: 'Вы уверены?',
-		text: "Данное действие приведет к удалению звена (если таковое имеется), а за ним и людей с их статистикой.",
+		text: "Данное действие приведет к удалению пользователя.",
 		icon: 'warning',
 		showCancelButton: true,
 		confirmButtonColor: '#3085d6',

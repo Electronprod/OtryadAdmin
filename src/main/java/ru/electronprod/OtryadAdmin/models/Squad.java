@@ -20,18 +20,6 @@ public class Squad implements Serializable {
 	private User commander;
 	@Column(name = "name", nullable = false)
 	private String squadName;
-	@Column(name = "commander_name")
-	private String commanderName;
 	@OneToMany(mappedBy = "squad", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<Human> humans;
-
-	public void addHuman(Human human) {
-		humans.add(human);
-		human.setSquad(this);
-	}
-
-	public void removeHuman(Human human) {
-		humans.remove(human);
-		human.setSquad(null);
-	}
 }
