@@ -6,14 +6,13 @@ if (window.location.href.includes("edited_squad")) {
 }
 async function addSquad() {
 	const name = document.getElementById('name').value;
-	const commandername = document.getElementById('commandername').value;
 	const commander = document.getElementById('commander').value;
 
-	if (!name || !commander || !commandername) {
+	if (!name || !commander) {
 		alert('Пожалуйста, заполните обязательные поля.');
 		return;
 	}
-	const success = await sendPostData("/admin/squadmgr/add?user=" + commander + "&commandername=" + commandername + "&name=" + name);
+	const success = await sendPostData("/admin/squadmgr/add?user=" + commander + "&name=" + name);
 	if (success) {
 		window.location.href = "/admin/squadmgr?added_squad"
 	}
@@ -21,14 +20,13 @@ async function addSquad() {
 }
 async function editSquad() {
 	const name = document.getElementById('name').value;
-	const commandername = document.getElementById('commandername').value;
 	const commander = document.getElementById('commander').value;
 	const sid = document.getElementById('squadid').value;
-	if (!name || !commandername || !sid) {
+	if (!name || !sid || !commander) {
 		alert('Пожалуйста, заполните обязательные поля.');
 		return;
 	}
-	let success = await sendPostData("/admin/squadmgr/edit?id=" + sid + "&commandername=" + commandername + "&name=" + name + "&user=" + commander);
+	let success = await sendPostData("/admin/squadmgr/edit?id=" + sid + "&name=" + name + "&user=" + commander);
 	if (success) {
 		window.location.href = "/admin/squadmgr?edited_squad"
 	}
@@ -40,7 +38,6 @@ function add() {
 	oldButton.style.display = 'none';
 	newButton.style.display = 'inline-block';
 	document.getElementById('name').value = "";
-	document.getElementById('commandername').value = "";
 	document.getElementById('commander').value = "";
 	showModal();
 }
@@ -56,7 +53,6 @@ async function edit(id) {
 	}
 	document.getElementById('squadid').value = id;
 	document.getElementById('name').value = data.name;
-	document.getElementById('commandername').value = data.commandername;
 	const select = document.getElementById('commander');
 	const newOption = document.createElement('option');
 	newOption.text = 'Не менять';

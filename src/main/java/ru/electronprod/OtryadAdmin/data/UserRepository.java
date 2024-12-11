@@ -14,6 +14,4 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	Optional<User> findByLogin(String login);
 
 	List<User> findAllByRole(String role);
-
-	Optional<User> findByTelegram(String telegram);
 }

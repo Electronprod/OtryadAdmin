@@ -3,6 +3,7 @@ package ru.electronprod.OtryadAdmin.data.filesystem;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 import lombok.Getter;
@@ -30,6 +32,10 @@ public class SettingsRepository implements InitializingBean {
 	private static Map<String, String> reasons_for_absences = new LinkedHashMap<String, String>();
 	@Getter
 	private static Map<String, String> replacements = new LinkedHashMap<String, String>();
+	@Getter
+	private static final Map<String, String> roles = Map.of("ROLE_ADMIN", "ADMIN", "ROLE_SQUADCOMMANDER",
+			"КОМАНДИР ЗВЕНА", "ROLE_COMMANDER", "ЗАМ. КОМАНДИРА ОТРЯДА", "ROLE_OBSERVER", "НАБЛЮДАТЕЛЬ");
+
 	@Getter
 	private static File config = new File("settings.txt");
 

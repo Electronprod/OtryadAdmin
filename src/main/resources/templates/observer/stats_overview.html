@@ -14,7 +14,6 @@
 <body>
 	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
@@ -60,7 +59,7 @@
 					</thead>
 					<tbody>
 						<tr th:each="squad : ${squadList}">
-							<td th:text="${squad.commanderName}"></td>
+							<td th:text="${squad.commander.getName()}"></td>
 							<td th:text="${squad.squadName}"></td>
 							<td th:text="${squad.humans.size()}"></td>
 							<td>
@@ -150,7 +149,7 @@
 	                                <thead>
 	                                    <tr>
 	                                        <th>Роль</th>
-	                                        <th>Логин</th>
+	                                        <th>Имя</th>
 	                                        <th>События</th>
 	                                    </tr>
 	                                </thead>
@@ -160,7 +159,7 @@
 							content += `
 	                                <tr>
 	                                    <td>${item.role}</td>
-	                                    <td>${item.login}</td>
+	                                    <td>${item.name}</td>
 	                                    <td>${item.events.join(", ")}</td>
 	                                </tr>
 	                            `;

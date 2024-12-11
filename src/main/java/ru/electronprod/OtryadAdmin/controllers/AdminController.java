@@ -30,10 +30,9 @@ import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.models.Group;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
-import ru.electronprod.OtryadAdmin.models.SquadStats;
+import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
-import ru.electronprod.OtryadAdmin.security.AuthHelper;
-import ru.electronprod.OtryadAdmin.services.AdminService;
+import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
@@ -42,8 +41,6 @@ import ru.electronprod.OtryadAdmin.utils.FileOptions;
 @RequestMapping("/admin")
 @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class AdminController {
-	@Autowired
-	private AdminService adminService;
 	@Autowired
 	private DBService dbservice;
 	@Autowired
@@ -57,20 +54,6 @@ public class AdminController {
 	 */
 	@GetMapping("")
 	public String dash(Model model) {
-		double processCpuLoad = adminService.getSystemInfoBean().getProcessCpuLoad();
-		double cpuLoad = adminService.getSystemInfoBean().getCpuLoad();
-		model.addAttribute("cpu", String.format("%.2f%% / %.2f%%", processCpuLoad * 100, cpuLoad * 100));
-		long committedMemory = adminService.getSystemInfoBean().getCommittedVirtualMemorySize();
-		long freeMemory = adminService.getSystemInfoBean().getFreeMemorySize();
-		long totalMemory = adminService.getSystemInfoBean().getTotalMemorySize();
-		model.addAttribute("memory", String.format("%.2f GB / %d MB / %d MB",
-				committedMemory / (1024.0 * 1024.0 * 1024.0), freeMemory / (1024 * 1024), totalMemory / (1024 * 1024)));
-
-		double freePhysicalMemory = adminService.getFreeDiskSpace();
-		double usablePhysicalMemory = adminService.getUsableDiskSpace();
-		double totalPhysicalMemory = adminService.getTotalDiskSpace();
-		model.addAttribute("disk", String.format("%.2f GB / %.2f GB / %.2f GB", freePhysicalMemory,
-				usablePhysicalMemory, totalPhysicalMemory));
 		model.addAttribute("show_log", (new File("log.txt")).exists());
 		return "admin/dashboard";
 	}
@@ -81,21 +64,20 @@ public class AdminController {
 	@GetMapping("/usermgr")
 	public String usermgr(Model model) {
 		model.addAttribute("users", dbservice.getUserRepository().findAll());
+		model.addAttribute("roles", SettingsRepository.getRoles());
 		return "admin/usermgr";
 	}
 
 	@PostMapping("/usermgr/add")
 	public ResponseEntity<String> userManager_addAction(@RequestParam String login, @RequestParam String password,
-			@RequestParam String role, @RequestParam(required = false) String telegram,
-			@RequestParam(required = false) String vkid) {
+			@RequestParam String role, @RequestParam String name) {
 		if (dbservice.getUserRepository().findByLogin(login).isPresent())
 			return ResponseEntity.status(409).body(Answer.fail("Login is busy"));
 		User user = new User();
 		user.setLogin(login);
 		user.setPassword(password);
 		user.setRole(role);
-		user.setTelegram(telegram);
-		user.setVkID(vkid);
+		user.setName(name);
 		if (auth.register(user))
 			return ResponseEntity.accepted().body(Answer.success());
 		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save user to DB."));
@@ -111,23 +93,23 @@ public class AdminController {
 		JSONObject data = new JSONObject();
 		data.put("login", user.getLogin());
 		data.put("role", user.getRole());
-		data.put("telegram", user.getTelegram());
-		data.put("vkid", user.getVkID());
+		data.put("name", user.getName());
 		return ResponseEntity.ok(data.toJSONString());
 	}
 
 	@PostMapping("/usermgr/edit")
 	public ResponseEntity<String> userManager_editAction(@RequestParam String login, @RequestParam String password,
-			@RequestParam String role, @RequestParam(required = false) String telegram,
-			@RequestParam(required = false) String vkid, int id) {
+			@RequestParam String role, @RequestParam String name, int id) {
 		Optional<User> user1 = dbservice.getUserRepository().findById(id);
 		if (user1.isEmpty())
 			return ResponseEntity.status(404).body(Answer.fail("User not found"));
 		User user = user1.get();
 		user.setLogin(login);
+		user.setName(name);
+		if ((user.getSquad() != null || !user.getGroups().isEmpty()) && !user.getRole().equals(role))
+			return ResponseEntity.badRequest()
+					.body(Answer.fail("You can't change roles if you have a squad or group."));
 		user.setRole(role);
-		user.setTelegram(telegram);
-		user.setVkID(vkid);
 		boolean result = false;
 		if (password.equals("not_changed")) {
 			result = dbservice.getUserRepository().save(user) != null;
@@ -147,8 +129,8 @@ public class AdminController {
 			return ResponseEntity.badRequest().body(Answer.fail("User not found"));
 		if (!user.get().getGroups().isEmpty())
 			return ResponseEntity.unprocessableEntity().body(Answer.fail("User has dependant group"));
-		if (adminService.isNativeAdmin(user.get()))
-			return ResponseEntity.unprocessableEntity().body(Answer.fail("Protected user"));
+		if (user.get().getSquad() != null)
+			return ResponseEntity.unprocessableEntity().body(Answer.fail("User has dependant squad"));
 		dbservice.getUserRepository().deleteById(id);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
@@ -165,14 +147,12 @@ public class AdminController {
 	}
 
 	@PostMapping("/squadmgr/add")
-	public ResponseEntity<String> squadManager_addAction(@RequestParam String user, @RequestParam String commandername,
-			@RequestParam String name) {
+	public ResponseEntity<String> squadManager_addAction(@RequestParam String user, @RequestParam String name) {
 		Optional<User> commander = dbservice.getUserRepository().findById(Integer.parseInt(user));
 		if (commander.isPresent())
 			ResponseEntity.status(409).body(Answer.fail("User already has squad"));
 		Squad squad = new Squad();
 		squad.setSquadName(name);
-		squad.setCommanderName(commandername);
 		squad.setCommander(commander.get());
 		boolean result = dbservice.getSquadRepository().save(squad) != null;
 		if (result)
@@ -189,21 +169,19 @@ public class AdminController {
 		Squad squad = squad1.get();
 		JSONObject data = new JSONObject();
 		data.put("name", squad.getSquadName());
-		data.put("commandername", squad.getCommanderName());
 		data.put("commander", squad.getCommander().getId());
 		return ResponseEntity.ok(data.toJSONString());
 	}
 
 	@PostMapping("/squadmgr/edit")
-	public ResponseEntity<String> squadManager_editAction(@RequestParam int id, @RequestParam String commandername,
-			@RequestParam String name, @RequestParam int user) {
+	public ResponseEntity<String> squadManager_editAction(@RequestParam int id, @RequestParam String name,
+			@RequestParam int user) {
 		Optional<Squad> squad1 = dbservice.getSquadRepository().findById(id);
 		Optional<User> commander = dbservice.getUserRepository().findById(user);
 		if (squad1.isEmpty() || commander.isEmpty())
 			ResponseEntity.status(404).body(Answer.fail("Squad or User not found"));
 		Squad squad = squad1.get();
 		squad.setSquadName(name);
-		squad.setCommanderName(commandername);
 		squad.setCommander(commander.get());
 		boolean result = dbservice.getSquadRepository().save(squad) != null;
 		if (result)
@@ -440,7 +418,7 @@ public class AdminController {
 
 	@GetMapping("/statsmgr/delete_event")
 	public String statsManager_delete_byEventID(@RequestParam int id) {
-		List<SquadStats> stats = dbservice.getStatsRepository().findByEventId(id);
+		List<StatsRecord> stats = dbservice.getStatsRepository().findByEventId(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
@@ -450,7 +428,7 @@ public class AdminController {
 
 	@GetMapping("/statsmgr/delete")
 	public String statsManager_delete_byID(@RequestParam int id) {
-		Optional<SquadStats> stats = dbservice.getStatsRepository().findById(id);
+		Optional<StatsRecord> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
@@ -460,7 +438,7 @@ public class AdminController {
 
 	@PostMapping("/statsmgr/edit_type")
 	public String statsManager_edit_type(@RequestParam int eventid, @RequestParam String statsType) {
-		List<SquadStats> stats = dbservice.getStatsRepository().findByEventId(eventid);
+		List<StatsRecord> stats = dbservice.getStatsRepository().findByEventId(eventid);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
@@ -471,7 +449,7 @@ public class AdminController {
 
 	@PostMapping("/statsmgr/edit_type_single")
 	public String statsManager_edit_type_single(@RequestParam int id, @RequestParam String statsType) {
-		Optional<SquadStats> stats = dbservice.getStatsRepository().findById(id);
+		Optional<StatsRecord> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
@@ -482,7 +460,7 @@ public class AdminController {
 
 	@PostMapping("/statsmgr/edit_date")
 	public String statsManager_edit_date(@RequestParam int eventid, @RequestParam String date) {
-		List<SquadStats> stats = dbservice.getStatsRepository().findByEventId(eventid);
+		List<StatsRecord> stats = dbservice.getStatsRepository().findByEventId(eventid);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
@@ -493,7 +471,7 @@ public class AdminController {
 
 	@PostMapping("/statsmgr/edit_date_single")
 	public String statsManager_edit_date_single(@RequestParam int id, @RequestParam String date) {
-		Optional<SquadStats> stats = dbservice.getStatsRepository().findById(id);
+		Optional<StatsRecord> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
@@ -504,7 +482,7 @@ public class AdminController {
 
 	@PostMapping("/statsmgr/edit_reason")
 	public String statsManager_edit_reason(@RequestParam int eventid, @RequestParam String reason) {
-		List<SquadStats> statsList = dbservice.getStatsRepository().findByEventId(eventid);
+		List<StatsRecord> statsList = dbservice.getStatsRepository().findByEventId(eventid);
 		statsList.removeIf(stats -> stats.isPresent());
 		if (statsList.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
@@ -516,7 +494,7 @@ public class AdminController {
 
 	@PostMapping("/statsmgr/edit_reason_single")
 	public String statsManager_edit_reason_single(@RequestParam int id, @RequestParam String reason) {
-		Optional<SquadStats> stats = dbservice.getStatsRepository().findById(id);
+		Optional<StatsRecord> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}
@@ -527,7 +505,7 @@ public class AdminController {
 
 	@PostMapping("/statsmgr/edit_type_all")
 	public String statsManager_edit_type_all(@RequestParam String from, @RequestParam String to) {
-		List<SquadStats> statsList = dbservice.getStatsRepository().findByType(from);
+		List<StatsRecord> statsList = dbservice.getStatsRepository().findByType(from);
 		if (statsList.isEmpty()) {
 			return "redirect:/admin/statsmgr?error_notfound";
 		}

@@ -2,25 +2,27 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Административная панель</title>
-	<link rel="stylesheet" href="/assets/default_style.css">
-	<link rel="icon" href="/icon.png">
-	<script defer src="/assets/navbar.js"></script>
-	<script src="/public_resources/sweetalert2.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Административная панель</title>
+<link rel="stylesheet" href="/assets/default_style.css">
+<link rel="icon" href="/icon.png">
+<script src="/assets/navbar.js"></script>
 </head>
 
 <body>
 	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
-	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<input type="hidden" th:name="${_csrf.parameterName}"
+		th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
 				<h3>Добро пожаловать!</h3>
-				<p>Это ваша панель администратора. Здесь вы можете управлять вашим сайтом. Если вы хотите посмотреть
-					статистику, перейдите в панель наблюдателя, нажав на кнопку ниже.</p>
-				<a class="greenbtn" href="/observer">Перейти в панель наблюдателя</a>
+				<p>Это ваша панель администратора. Здесь вы можете управлять
+					вашим сайтом. Если вы хотите посмотреть статистику, перейдите в
+					панель наблюдателя, нажав на кнопку ниже.</p>
+				<a class="greenbtn" href="/observer">Перейти в панель
+					наблюдателя</a>
 			</div>
 			<div class="card">
 				<h3>Редактор конфигурации приложения</h3>
@@ -32,18 +34,8 @@
 				<p>Просмотрите лог приложения.</p>
 				<a class="greenbtn" href="/admin/log">Просмотреть</a>
 			</div>
-			<div class="card">
-				<h3>Ресурсы системы</h3>
-				<b>CPU (ПРОЦЕСС/ВСЯ СИСТЕМА):</b> <span th:text="${cpu}"></span>
-				<br>
-				<b>Память(РЕЗЕРВ/СВОБОДНАЯ/ВСЕГО):</b> <span th:text="${memory}"></span>
-				<br>
-				<b>Жесткий диск (СВОБОДНО/ДОСТУПНО/ВСЕГО):</b> <span th:text="${disk}"></span>
-				</p>
-			</div>
 		</div>
 	</div>
 </body>
-</script>
 
 </html>
