@@ -2,12 +2,12 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Статистика</title>
-	<link rel="stylesheet" href="/assets/default_style.css">
-	<link rel="icon" href="/icon.png">
-	<script defer src="/assets/navbar.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Статистика</title>
+<link rel="stylesheet" href="/assets/default_style.css">
+<link rel="icon" href="/icon.png">
+<script src="/assets/navbar.js"></script>
 </head>
 
 <body>
@@ -20,9 +20,7 @@
 				<h3>Просмотр отметок по дате</h3>
 				<p>Посмотрите посещения и пропуски в выбранную дату.</p>
 				<form id="date-form" action="/squadcommander/stats/date">
-					<label for="date">Дата:</label>
-					<input type="date" id="date" name="date" required>
-					<br>
+					<label for="date">Дата:</label> <input type="date" id="dateField" name="date" required> <br>
 					<button type="submit">Посмотреть</button>
 				</form>
 			</div>
@@ -30,10 +28,8 @@
 				<h3>Статистика посещений события</h3>
 				<p>Посмотрите, кто и сколько раз посетил выбранное событие.</p>
 				<form method="get" th:action="@{/squadcommander/stats/report}">
-					<label for="event_name">Выберите событие:</label>
-					<select id="event_name" name="event_name">
-						<option th:each="event : ${events}" th:value="${event}" th:text="${event}">
-						</option>
+					<label for="event_name">Выберите событие:</label> <select id="event_name" name="event_name">
+						<option th:each="event : ${events}" th:value="${event}" th:text="${event}"></option>
 					</select>
 					<button type="submit">Показать</button>
 				</form>
@@ -41,25 +37,14 @@
 			<div class="card">
 				<h3>Персональная статистика</h3>
 				<p>Посмотрите подробную статистику для любого члена вашего звена.</p>
-				<form th:action="@{/squadcommander/stats/personal}" method="get">
+				<form method="get">
 					<select name="id">
-						<option th:each="human: ${humans}" th:value="${human.id}"
-							th:text="${human.lastname} + ' ' + ${human.name}">
+						<option th:each="human: ${humans}" th:value="${human.id}" th:text="${human.lastname} + ' ' + ${human.name}">
 						</option>
 					</select>
-					<button type="submit">Посмотреть</button>
-				</form>
-			</div>
-			<div class="card">
-				<h3>Персональная статистика в виде таблицы</h3>
-				<p>Посмотрите статистические записи в виде таблицы.</p>
-				<form th:action="@{/squadcommander/stats/personal/table}" method="get">
-					<select name="id">
-						<option th:each="human: ${humans}" th:value="${human.id}"
-							th:text="${human.lastname} + ' ' + ${human.name}">
-						</option>
-					</select>
-					<button type="submit">Посмотреть</button>
+					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal">Посмотреть</button>
+					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal/table">Посмотреть в виде
+						таблицы</button>
 				</form>
 			</div>
 			<div class="card">
@@ -68,6 +53,9 @@
 				<a class="greenbtn" href="/squadcommander/stats/table">Перейти</a>
 			</div>
 		</div>
+	</div>
 </body>
-
+<script>
+	document.getElementById("dateField").valueAsDate = new Date();
+</script>
 </html>

@@ -138,3 +138,18 @@ document.addEventListener('DOMContentLoaded', function() {
 	logoutForm.appendChild(logoutButton);
 	navbar.appendChild(logoutForm);
 });
+
+function loadScript(url, callback) {
+	const script = document.createElement('script');
+	script.src = url;
+	script.type = 'text/javascript';
+	script.onload = function() {
+		console.log(`Script ${url} connected successfully.`);
+		if (callback) callback();
+	};
+	script.onerror = function() {
+		console.error(`Error connecting script: ${url}.`);
+		alert("Возникла критическая ошибка при загрузке страницы. Повторите попытку позже.");
+	};
+	document.body.appendChild(script);
+}

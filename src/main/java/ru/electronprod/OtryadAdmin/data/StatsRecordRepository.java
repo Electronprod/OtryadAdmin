@@ -1,5 +1,6 @@
 package ru.electronprod.OtryadAdmin.data;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +13,8 @@ import ru.electronprod.OtryadAdmin.models.StatsRecord;
 public interface StatsRecordRepository extends JpaRepository<StatsRecord, Integer> {
 	List<StatsRecord> findByAuthor(String author);
 
+	List<StatsRecord> findByAuthor(String author, Sort sort);
+
 	List<StatsRecord> findByDate(String date);
 
 	List<StatsRecord> findByType(String type);
@@ -21,9 +24,13 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 
 	List<StatsRecord> findByDateAndAuthor(String date, String author);
 
+	List<StatsRecord> findByDateAndAuthor(String date, String author, Sort sort);
+
 	List<StatsRecord> findByTypeAndAuthor(String type, String author);
 
 	List<StatsRecord> findByHumanAndAuthor(Human human, String author);
+
+	List<StatsRecord> findByHumanAndAuthor(Human human, String author, Sort sort);
 
 	int countByDateAndIsPresent(String date, boolean isPresent);
 

@@ -1,0 +1,22 @@
+.event-data-container label {
+	flex: 1 1 100%;
+	margin-bottom: 5px;
+	font-weight: 500;
+	color: #444;
+}
+
+.event-data-container select, .event-data-container input[type="date"],
+	.event-data-container input[type="text"] {
+	flex: 1 1 calc(50% - 20px);
+	padding: 8px 10px;
+	border: 1px solid #ccc;
+	border-radius: 6px;
+	transition: border-color 0.3s ease-in-out;
+	font-size: 14px;
+}
+
+.event-data-container select:focus, .event-data-container input[type="date"]:focus,
+	.event-data-container input[type="text"]:focus {
+	border-color: #007bff;
+	outline: none;
+}

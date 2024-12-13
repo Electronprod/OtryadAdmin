@@ -3,7 +3,6 @@ package ru.electronprod.OtryadAdmin.data.filesystem;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 import lombok.Getter;
@@ -115,12 +113,13 @@ public class SettingsRepository implements InitializingBean {
 		JSONObject data = new JSONObject();
 		// Adding event types
 		JSONArray eventtypes = new JSONArray();
-		eventtypes.add(generateEvent("general", "Посещение общего сбора", true));
-		eventtypes.add(generateEvent("duty", "Дежурство (вызвался дежурить в кабинете)", false));
-		eventtypes.add(generateEvent("walk", "Прогулка (гулял со звеном)", false));
+		eventtypes.add(generateEvent("Общий сбор", "Общий сбор", true));
+		eventtypes.add(generateEvent("Дежурство", "Дежурство (вызвался дежурить в кабинете)", false));
+		eventtypes.add(generateEvent("Звеньевое событие", "Звеньевое событие", false));
 		data.put(SECTION_EVENT_TYPES, eventtypes);
 		// Adding reasons for absences
 		JSONArray reasons = new JSONArray();
+		reasons.add(generateReason("unknown_reason", "Неизвестно"));
 		reasons.add(generateReason("ill", "Заболел(а)"));
 		reasons.add(generateReason("away", "Уехал(а)"));
 		reasons.add(generateReason("study", "Учеба"));
@@ -133,9 +132,6 @@ public class SettingsRepository implements InitializingBean {
 		repls.add(generateReplacement("error:unsupported_event", "N/S"));
 		repls.add(generateReplacement("true", "+"));
 		repls.add(generateReplacement("false", "-"));
-		repls.add(generateReplacement("ROLE_ADMIN", "ADMIN"));
-		repls.add(generateReplacement("ROLE_SQUADCOMMANDER", "Коммандир звена"));
-		repls.add(generateReplacement("ROLE_COMMANDER", "Коммандир"));
 		data.put(SECTION_REPLACEMENTS, repls);
 		FileOptions.writeFile(data.toJSONString(), config);
 		log.info("Wrote defaults to " + config.getName());

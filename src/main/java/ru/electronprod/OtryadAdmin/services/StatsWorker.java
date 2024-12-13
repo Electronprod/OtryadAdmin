@@ -1,6 +1,7 @@
 package ru.electronprod.OtryadAdmin.services;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
 @Slf4j
@@ -242,5 +244,71 @@ public class StatsWorker {
 		log.info("Commander " + user.getLogin() + " marked " + resultArray.size() + " people. EventID: " + event_id);
 		// Saving to DB
 		return dbservice.getStatsRepository().saveAll(resultArray) != null;
+	}
+
+	public List<StatsRecord> generatePresentStats(Collection<Human> humans, String event_type, String formatted_date,
+			User user, int event_id) {
+		List<StatsRecord> resultArray = new ArrayList<StatsRecord>();
+		for (Human human : humans) {
+			StatsRecord stats = new StatsRecord(human);
+			stats.setAuthor(user.getLogin());
+			stats.setDate(formatted_date);
+			stats.setPresent(true);
+			stats.setReason("error:present");
+			stats.setType(event_type);
+			stats.setUser_role(user.getRole());
+			stats.setEvent_id(event_id);
+			resultArray.add(stats);
+		}
+		return resultArray;
+	}
+
+	private StatsRecord createUnpresentStatsRecord(JSONObject data, String event, String formatted_date, User user,
+			int event_id, List<Human> humans) {
+		// Finding human to add stats record
+		Human human = humans.stream().filter(h -> h.getId() == Integer.parseInt(String.valueOf(data.get("id"))))
+				.findFirst().orElseThrow(() -> new IllegalStateException("Human not found"));
+		// Creating stats record
+		StatsRecord stats = new StatsRecord(human);
+		stats.setAuthor(user.getLogin());
+		stats.setDate(formatted_date);
+		stats.setPresent(false);
+		stats.setReason(String.valueOf(data.get("reason")));
+		stats.setType(event);
+		stats.setUser_role(user.getRole());
+		stats.setEvent_id(event_id);
+		humans.remove(human);
+		return stats;
+	}
+
+	@Transactional
+	public int squadcommander_mark(MarkDTO dto, User user) throws Exception {
+		// Validating input
+		String date = dbservice.getStringDate(dto.getDate() != null ? dto.getDate() : DBService.getStringDate());
+		String event;
+		if (dto.getEvent() != null) {
+			event = dto.getEvent();
+		} else {
+			throw new IllegalArgumentException("Event is null");
+		}
+		// Defining variables
+		List<StatsRecord> resultRecords = new ArrayList<StatsRecord>();
+		int event_id = dbservice.getStatsRepository().findMaxEventIDValue() + 1;
+		List<Human> humans = dbservice.getSquadRepository().findByCommander(user).getHumans();
+
+		// Marking unPresent humans
+		for (Object o : dto.getUnpresentPeople()) {
+			JSONObject data = (JSONObject) FileOptions.ParseJS(String.valueOf(o));
+			resultRecords.add(createUnpresentStatsRecord(data, event, date, user, event_id, humans));
+		}
+		// Marking Present humans
+		resultRecords.addAll(generatePresentStats(humans, event, date, user, event_id));
+
+		// Saving records to database
+		if (dbservice.getStatsRepository().saveAll(resultRecords) == null)
+			throw new Exception("Error saving stats records to database!");
+		log.info("Squadcommander " + user.getLogin() + " marked " + resultRecords.size() + " people. EventID: "
+				+ event_id);
+		return event_id;
 	}
 }
