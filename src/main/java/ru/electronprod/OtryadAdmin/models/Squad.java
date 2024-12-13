@@ -1,6 +1,5 @@
 package ru.electronprod.OtryadAdmin.models;
 
-import java.io.Serializable;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -11,7 +10,7 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Squad implements Serializable {
+public class Squad {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;

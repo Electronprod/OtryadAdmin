@@ -3,10 +3,8 @@ package ru.electronprod.OtryadAdmin.controllers;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -17,8 +15,10 @@ import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
+import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
+import ru.electronprod.OtryadAdmin.utils.Answer;
 
 @Slf4j
 @Controller
@@ -45,38 +45,27 @@ public class SquadCommanderController {
 				.getHumans().stream().sorted(Comparator.comparing(Human::getLastname)).collect(Collectors.toList()));
 		model.addAttribute("reasons_for_absences_map", SettingsRepository.getReasons_for_absences());
 		model.addAttribute("event_types_map", SettingsRepository.getEvent_types());
-		model.addAttribute("login", user.getName());
+		model.addAttribute("user_name", user.getName());
 		return "squadcommander/mark";
 	}
 
-	@SuppressWarnings("unchecked")
 	@PostMapping("/mark")
-	public ResponseEntity<String> mark(@RequestBody Map<String, Object> requestBody) {
-		User user = authHelper.getCurrentUser();
-		List<?> uncheckedPeopleList = (List<?>) requestBody.get("uncheckedPeople");
-		JSONArray uncheckedPeopleArray = new JSONArray();
-		uncheckedPeopleArray.addAll(uncheckedPeopleList);
-		JSONObject answer = new JSONObject();
+	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
 		try {
-			statsHelper.squad_mark(uncheckedPeopleArray, String.valueOf(requestBody.get("statsType")), user);
-			answer.put("result", "success");
-			return ResponseEntity.ok(answer.toJSONString());
-		} catch (ParseException e) {
-			log.warn("Error parsing input JSON for " + user.getLogin() + ". JSONArray: "
-					+ uncheckedPeopleArray.toJSONString());
-			answer.put("result", "error");
-			answer.put("message", "Error parsing input JSON.");
-			answer.put("user", user.getLogin());
-			answer.put("JSONArray", uncheckedPeopleArray.toJSONString());
-			return ResponseEntity.internalServerError().body(answer.toJSONString());
+			statsHelper.squadcommander_mark(dto, authHelper.getCurrentUser());
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
 		}
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	@GetMapping("/stats")
 	public String stats_overview(Model model) {
 		User user = authHelper.getCurrentUser();
 		model.addAttribute("humans",
-				dbservice.getUserRepository().findById(user.getId()).orElseThrow().getSquad().getHumans());
+				dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId()).orElseThrow().getSquad()
+						.getHumans().stream().sorted(Comparator.comparing(Human::getLastname))
+						.collect(Collectors.toList()));
 		model.addAttribute("events", dbservice.getStatsRepository().findByAuthor(user.getLogin()).stream()
 				.map(StatsRecord::getType).distinct().sorted().collect(Collectors.toList()));
 		return "squadcommander/stats_overview";
@@ -84,8 +73,8 @@ public class SquadCommanderController {
 
 	@GetMapping("/stats/report")
 	public String stats_forEvent(@RequestParam String event_name, Model model) {
-		User user = authHelper.getCurrentUser();
-		List<StatsRecord> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name, user.getLogin());
+		List<StatsRecord> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name,
+				authHelper.getCurrentUser().getLogin());
 		model.addAttribute("data", statsHelper.getEventReport(stats));
 		model.addAttribute("eventName", event_name);
 		return "public/event_stats";
@@ -93,34 +82,37 @@ public class SquadCommanderController {
 
 	@GetMapping("/stats/date")
 	public String stats_byDateTable(@RequestParam String date, Model model) {
-		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss",
-				dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."), user.getLogin()));
+		try {
+			model.addAttribute("statss",
+					dbservice.getStatsRepository().findByDateAndAuthor(DBService.getStringDate(date),
+							authHelper.getCurrentUser().getLogin(), Sort.by(Sort.Direction.DESC, "id")));
+		} catch (Exception e) {
+		}
 		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/table")
 	public String stats_allMarksTable(Model model) {
-		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(user.getLogin()));
+		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(authHelper.getCurrentUser().getLogin(),
+				Sort.by(Sort.Direction.DESC, "date")));
 		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/personal")
 	public String stats_personal(@RequestParam int id, Model model) {
-		User user = authHelper.getCurrentUser();
 		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
 		statsHelper.getMainPersonalReportModel(
-				dbservice.getStatsRepository().findByHumanAndAuthor(human, user.getLogin()), model);
+				dbservice.getStatsRepository().findByHumanAndAuthor(human, authHelper.getCurrentUser().getLogin()),
+				model);
 		model.addAttribute("person", human.getLastname() + " " + human.getName());
 		return "squadcommander/personal_stats";
 	}
 
 	@GetMapping("/stats/personal/table")
 	public String stats_personalTable(@RequestParam int id, Model model) {
-		User user = authHelper.getCurrentUser();
 		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
-		model.addAttribute("statss", dbservice.getStatsRepository().findByHumanAndAuthor(human, user.getLogin()));
+		model.addAttribute("statss", dbservice.getStatsRepository().findByHumanAndAuthor(human,
+				authHelper.getCurrentUser().getLogin(), Sort.by(Sort.Direction.DESC, "date")));
 		return "public/statsview_rawtable";
 	}
 

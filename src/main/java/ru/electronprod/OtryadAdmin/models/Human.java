@@ -1,6 +1,5 @@
 package ru.electronprod.OtryadAdmin.models;
 
-import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +12,7 @@ import lombok.*;
 @NoArgsConstructor
 @Getter
 @Setter
-public class Human implements Serializable {
+public class Human {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int id;
