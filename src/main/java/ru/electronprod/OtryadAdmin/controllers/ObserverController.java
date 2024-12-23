@@ -134,7 +134,7 @@ public class ObserverController {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model.addAttribute("commander", squad.get().getCommander().getName());
+		model.addAttribute("name", squad.get().getCommander().getName());
 		model.addAttribute("humans", squad.get().getHumans());
 		model.addAttribute("events", dbservice.getStatsRepository().findByAuthor(squad.get().getCommander().getLogin())
 				.stream().map(StatsRecord::getType).distinct().sorted().collect(Collectors.toList()));
@@ -147,7 +147,7 @@ public class ObserverController {
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
 		model.addAttribute("statss", dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."),
-				squad.get().getCommander().getLogin()));
+				squad.get().getCommander().getLogin(), Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 
@@ -168,8 +168,8 @@ public class ObserverController {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model.addAttribute("statss",
-				dbservice.getStatsRepository().findByAuthor(squad.get().getCommander().getLogin()));
+		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(squad.get().getCommander().getLogin(),
+				Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 

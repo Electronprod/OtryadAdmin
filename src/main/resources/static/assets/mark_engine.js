@@ -20,7 +20,13 @@ async function sendData(address, bodyData) {
 			body: JSON.stringify(bodyData),
 		});
 		if (!response.ok) {
-			showError(`Ошибка HTTP: ${response.status}`);
+			let a = await response.json();
+			console.log("Error message: " + JSON.stringify(a));
+			if (JSON.stringify(a).includes("message") && JSON.stringify(a).includes("result") && JSON.stringify(a).includes("fail")) {
+				showError("Ошибка HTTP " + response.status, "Некорректный ответ от сервера: " + a.message, "error");
+			} else {
+				showError("Ошибка HTTP " + response.status, "Некорректный ответ от сервера.", "error");
+			}
 			return false;
 		}
 		const data = await response.json();
@@ -34,7 +40,6 @@ async function sendData(address, bodyData) {
 		hideLoader();
 	}
 }
-
 function showSuccess(message) {
 	Swal.fire({
 		title: "Успех!",
@@ -42,7 +47,6 @@ function showSuccess(message) {
 		icon: "success",
 	});
 }
-
 function showError(message) {
 	Swal.fire({
 		title: "Провал!",
@@ -50,7 +54,13 @@ function showError(message) {
 		icon: "error",
 	});
 }
-
+function showError(title, message) {
+	Swal.fire({
+		title: title,
+		text: message,
+		icon: "error",
+	});
+}
 function handleError(error) {
 	console.error('mark error:', error);
 	showError(`Ошибка при выставлении отметок:\n${error}`);

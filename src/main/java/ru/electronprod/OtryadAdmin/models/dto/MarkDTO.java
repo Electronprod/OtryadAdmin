@@ -10,4 +10,5 @@ public class MarkDTO {
 	private String date;
 	private JSONArray unpresentPeople;
 	private JSONArray presentPeople;
+	private int groupID;
 }

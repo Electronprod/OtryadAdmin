@@ -14,4 +14,12 @@ public class Answer {
 		o.put("message", message);
 		return o.toJSONString();
 	}
+
+	@SuppressWarnings("unchecked")
+	public static String marked(int event_id) {
+		JSONObject o = new JSONObject();
+		o.put("result", "success");
+		o.put("event_id", String.valueOf(event_id));
+		return o.toJSONString();
+	}
 }

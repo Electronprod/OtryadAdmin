@@ -12,33 +12,27 @@
 
 <body>
 	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
-	<input type="hidden" th:name="${_csrf.parameterName}"
-		th:value="${_csrf.token}" />
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
 			<h2>
-				Звено, где командир <u th:text="commander"></u>:
+				Звено, где командир <u th:text="${name}"></u>:
 			</h2>
 			<div class="card">
 				<h3>Статистика посещений события</h3>
-				<p>Посмотрите, кто и сколько раз посетил выбранное событие в
-					этом звене</p>
+				<p>Посмотрите, кто и сколько раз посетил выбранное событие в этом звене</p>
 				<form method="get">
-					<label for="event_name">Выберите событие:</label> <select
-						id="event_name" name="event_name">
-						<option th:each="event : ${events}" th:value="${event}"
-							th:text="${event}"></option>
+					<label for="event_name">Выберите событие:</label> <select id="event_name" name="event_name">
+						<option th:each="event : ${events}" th:value="${event}" th:text="${event}"></option>
 					</select>
 					<button id="reportbtn" type="submit">Показать</button>
 				</form>
 			</div>
 			<div class="card">
 				<h3>Просмотр отметок по дате</h3>
-				<p>Посмотрите посещения и пропуски в выбранную дату для этого
-					звена</p>
+				<p>Посмотрите посещения и пропуски в выбранную дату для этого звена</p>
 				<form id="date-form" method="get" onsubmit="return submitForm()">
-					<label for="date">Дата:</label> <input type="date" id="date"
-						name="date" required> <br>
+					<label for="date">Дата:</label> <input type="date" id="date" name="date" required> <br>
 					<button type="submit">Посмотреть</button>
 				</form>
 			</div>
@@ -51,11 +45,12 @@
 	</div>
 </body>
 <script>
+	document.getElementById("date").valueAsDate = new Date();
 	function submitForm() {
 		const form = document.getElementById('date-form');
 		const dateInput = document.getElementById('date').value;
 		const currentUrl = window.location.href;
-		const newUrl = `${currentUrl}/date?${dateInput}`;
+		const newUrl = `${currentUrl}/date?${encodeURIComponent(dateInput)}`;
 		form.action = newUrl;
 		return true;
 	}
