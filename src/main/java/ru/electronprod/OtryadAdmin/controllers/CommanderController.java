@@ -1,15 +1,10 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Optional;
-import java.util.Set;
+import java.util.stream.Collectors;
 
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -27,10 +22,10 @@ import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.models.Group;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
 import ru.electronprod.OtryadAdmin.utils.Answer;
-import ru.electronprod.OtryadAdmin.utils.FileOptions;
 import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 
 @Slf4j
@@ -60,18 +55,15 @@ public class CommanderController {
 		return "commander/mark";
 	}
 
-	@SuppressWarnings("unchecked")
 	@PostMapping("/mark")
-	public ResponseEntity<String> mark(@RequestBody Map<String, Object> requestBody) {
-		List<?> uncheckedPeopleList = (List<?>) requestBody.get("checkedPeople");
-		JSONArray checkedPeopleArray = new JSONArray();
-		checkedPeopleArray.addAll(uncheckedPeopleList);
-		JSONObject answer = new JSONObject();
-		int id = statsWorker.commander_mark(checkedPeopleArray, String.valueOf(requestBody.get("eventName")),
-				String.valueOf(requestBody.get("date")), authHelper.getCurrentUser());
-		answer.put("result", "success");
-		answer.put("event_id", id);
-		return ResponseEntity.ok(answer.toJSONString());
+	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
+		try {
+			int event_id = statsWorker.mark_only_present(dto, authHelper.getCurrentUser());
+			return ResponseEntity.accepted().body(Answer.marked(event_id));
+		} catch (Exception e) {
+			log.error("Mark error (commander.mark):", e);
+			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
+		}
 	}
 
 	@GetMapping("/markgroup")
@@ -79,39 +71,23 @@ public class CommanderController {
 		Optional<Group> group1 = dbservice.getGroupRepository().findById(id);
 		if (group1.isEmpty())
 			return "forward:/commander/mark";
+		model.addAttribute("humansList", group1.get().getHumans().stream()
+				.sorted(Comparator.comparing(Human::getLastname)).collect(Collectors.toList()));
 		model.addAttribute("group", group1.get());
 		model.addAttribute("reasons", SettingsRepository.getReasons_for_absences());
 		return "commander/mark_group";
 	}
 
-	@SuppressWarnings("unchecked")
-	@PostMapping("/markgroup")
-	public ResponseEntity<String> markGroup(@RequestBody String data) {
-		User user = authHelper.getCurrentUser();
+	@PostMapping("/mark_group")
+	public ResponseEntity<String> markGroup(@RequestBody MarkDTO dto) {
 		try {
-			JSONObject in = (JSONObject) FileOptions.ParseJS(data);
-			// Getting group
-			Optional<Group> group1 = dbservice.getGroupRepository()
-					.findById(Integer.parseInt(String.valueOf(in.get("group"))));
-			if (group1.isEmpty())
-				return ResponseEntity.status(404).body(Answer.fail("Group not found"));
-			// Getting people data
-			Set<Integer> presentIDs = new HashSet<Integer>();
-			presentIDs.addAll(((JSONArray) in.get("checkedPeople")));
-			Map<Integer, String> unpresentIDs = new HashMap<Integer, String>();
-			for (Object obj : ((JSONArray) in.get("uncheckedPeople"))) {
-				JSONObject o = (JSONObject) FileOptions.ParseJS(String.valueOf(obj));
-				unpresentIDs.put(Integer.parseInt(String.valueOf(o.get("id"))), String.valueOf(o.get("reason")));
-			}
-			// Marking
-			if (!statsWorker.commander_mark(presentIDs, unpresentIDs,
-					group1.get().getName() + ": " + String.valueOf(in.get("statsType")),
-					String.valueOf(in.get("date")).replaceAll("-", "."), user)) {
-				ResponseEntity.internalServerError().body(Answer.fail("Can't save data to DB"));
-			}
-			return ResponseEntity.ok(Answer.success());
-		} catch (ParseException e) {
-			return ResponseEntity.badRequest().body(Answer.fail("Can't parse JSON: " + e.getMessage()));
+			User user = authHelper.getCurrentUser();
+			int event_id = statsWorker.mark_group(dto, user, dbservice.getGroupRepository().findById(dto.getGroupID())
+					.orElseThrow().getHumans().stream().collect(Collectors.toCollection(ArrayList::new)));
+			return ResponseEntity.accepted().body(Answer.marked(event_id));
+		} catch (Exception e) {
+			log.error("Mark error (commander.mark_group):", e);
+			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
 		}
 	}
 
@@ -123,15 +99,16 @@ public class CommanderController {
 	@GetMapping("/stats/date")
 	public String stats_byDateTable(@RequestParam String date, Model model) {
 		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss",
-				dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."), user.getLogin()));
+		model.addAttribute("statss", dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."),
+				user.getLogin(), Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/alltable")
 	public String stats_allTable(Model model) {
 		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(user.getLogin()));
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByAuthor(user.getLogin(), Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 
@@ -142,7 +119,8 @@ public class CommanderController {
 		if (human == null || human.getStats() == null) {
 			return "redirect:/commander/stats?error_notfound";
 		}
-		model.addAttribute("statss", dbservice.getStatsRepository().findByHumanAndAuthor(human, user.getLogin()));
+		model.addAttribute("statss", dbservice.getStatsRepository().findByHumanAndAuthor(human, user.getLogin(),
+				Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 

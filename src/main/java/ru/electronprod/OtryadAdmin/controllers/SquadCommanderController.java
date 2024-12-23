@@ -52,11 +52,13 @@ public class SquadCommanderController {
 	@PostMapping("/mark")
 	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
 		try {
-			statsHelper.squadcommander_mark(dto, authHelper.getCurrentUser());
+			int event_id = statsHelper.mark_group(dto, authHelper.getCurrentUser(),
+					dbservice.getSquadRepository().findByCommander(authHelper.getCurrentUser()).getHumans());
+			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
+			log.error("Mark error (squadcommander.mark):", e);
 			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
 		}
-		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	@GetMapping("/stats")
