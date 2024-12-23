@@ -51,4 +51,8 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 	List<StatsRecord> findByHuman(Human human, Sort by);
 
 	List<StatsRecord> findByTypeAndAuthor(String event_name, String login, Sort by);
+
+	List<StatsRecord> findByDate(String replaceAll, Sort by);
+
+	List<StatsRecord> findByType(String event_name, Sort by);
 }

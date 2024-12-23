@@ -43,7 +43,7 @@ public class ObserverController {
 	 */
 	@GetMapping("/stats")
 	public String stats_overview(Model model) {
-		model.addAttribute("login", auth.getCurrentUser().getName());
+		model.addAttribute("name", auth.getCurrentUser().getName());
 		model.addAttribute("user_role", auth.getCurrentUser().getRole());
 		// Squads view
 		model.addAttribute("squadList", dbservice.getSquadRepository().findAll());
@@ -63,7 +63,8 @@ public class ObserverController {
 
 	@GetMapping("/stats/date")
 	public String stats_byDateTable(@RequestParam String date, Model model) {
-		model.addAttribute("statss", dbservice.getStatsRepository().findByDate(date.replaceAll("-", ".")));
+		model.addAttribute("statss", dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."),
+				Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 
@@ -83,7 +84,8 @@ public class ObserverController {
 
 	@GetMapping("/stats/event_table")
 	public String stats_eventTable(@RequestParam String event_name, Model model) {
-		model.addAttribute("statss", dbservice.getStatsRepository().findByType(event_name));
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByType(event_name, Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 
@@ -104,7 +106,8 @@ public class ObserverController {
 		if (human == null || human.getStats() == null) {
 			return "redirect:/observer/stats?error_notfound";
 		}
-		model.addAttribute("statss", dbservice.getStatsRepository().findByHuman(human));
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByHuman(human, Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 
@@ -125,7 +128,8 @@ public class ObserverController {
 		if (human.isEmpty()) {
 			return "redirect:/observer/stats?error_notfound";
 		}
-		model.addAttribute("statss", dbservice.getStatsRepository().findByHuman(human.get()));
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByHuman(human.get(), Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 
@@ -157,7 +161,7 @@ public class ObserverController {
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
 		List<StatsRecord> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name,
-				squad.get().getCommander().getLogin());
+				squad.get().getCommander().getLogin(), Sort.by(Sort.Direction.DESC, "id"));
 		model.addAttribute("data", statsWorker.getEventReport(stats));
 		model.addAttribute("eventName", event_name);
 		return "public/event_stats";
