@@ -591,4 +591,10 @@ public class AdminController {
 		model.addAttribute("log", FileOptions.getFileLineWithSeparator(FileOptions.getFileLines("log.txt"), "\n"));
 		return "admin/log";
 	}
+
+	@PostMapping("/log/clear")
+	public ResponseEntity<String> log_clear(Model model) {
+		FileOptions.writeFile("", new File("log.txt"));
+		return ResponseEntity.ok(Answer.success());
+	}
 }

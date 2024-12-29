@@ -9,40 +9,54 @@
 <link rel="icon" href="/icon.png">
 <script src="/assets/navbar.js"></script>
 <style>
-input[type="text"], input[type="password"], input[type="date"], input[type="number"]
-	{
-	width: 100%;
-	padding: 10px;
-	margin: 5px 0;
-	border: 1px solid #ccc;
-	border-radius: 5px;
+body {
+	font-family: Arial, sans-serif;
+	line-height: 1.6;
+	margin: 0;
+	padding: 0;
 	box-sizing: border-box;
 }
 
-.container {
-	width: 100%;
-	height: 100%;
+.log-container {
+	max-width: 1200px;
+	margin: 20px auto;
+	padding: 20px;
+	border-radius: 10px;
+	border: 1px solid #ccc;
+	background-color: #f9f9f9;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.log-header {
 	display: flex;
-	justify-content: center;
+	justify-content: space-between;
 	align-items: center;
-	padding: 10px;
-	box-sizing: border-box;
+}
+
+.log-header h1 {
+	margin: 0;
+	font-size: 24px;
+	color: #333;
+}
+
+.log-actions {
+	display: flex;
+	gap: 10px;
 }
 
 textarea {
 	width: 100%;
-	height: 100%;
+	height: 600px;
 	resize: none;
-	padding: 10px;
+	padding: 15px;
 	border-radius: 5px;
 	border: 1px solid #ccc;
-	font-family: Arial, sans-serif;
+	font-family: "Courier New", Courier, monospace;
 	font-size: 14px;
+	background-color: #fff;
+	color: #222;
 	box-sizing: border-box;
-}
-
-textarea:hover {
-	border-color: #888;
+	overflow: auto;
 }
 
 textarea:focus {
@@ -50,54 +64,69 @@ textarea:focus {
 	border-color: #555;
 }
 
-.cardc {
-	flex: 1;
-	margin: 5px;
-	padding: 10px;
+.blue-button {
+	background-color: blue;
+	color: white;
+	border: none;
+	padding: 10px 15px;
+	cursor: pointer;
 	border-radius: 5px;
-	border: 1px solid #ddd;
-	background-color: rgb(249, 250, 251);
+	font-size: 14px;
 }
 
-.container {
-	display: flex;
-	justify-content: space-between;
-	border: 1px solid #ccc;
-	border-style: none;
-	padding: 10px;
+.blue-button:hover {
+	background-color: royalblue;
 }
 
 .red-button {
 	background-color: red;
 	color: white;
 	border: none;
-	padding: 10px 20px;
+	padding: 10px 15px;
 	cursor: pointer;
+	border-radius: 5px;
+	font-size: 14px;
 }
 
 .red-button:hover {
 	background-color: orangered;
 }
-
-.blue-button {
-	background-color: blue;
-	color: white;
-	border: none;
-	padding: 10px 20px;
-	cursor: pointer;
-}
-
-.blue-button:hover {
-	background-color: royalblue;
-}
 </style>
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
-	<input type="hidden" th:name="${_csrf.parameterName}"
-		th:value="${_csrf.token}" />
-	<pre th:text="${log}"></pre>
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div class="log-container">
+		<div class="log-header">
+			<h1>Лог приложения</h1>
+			<div class="log-actions">
+				<button class="blue-button" onclick="refreshLog()">Обновить</button>
+				<button class="red-button" onclick="clearLog()">Очистить</button>
+			</div>
+		</div>
+		<textarea readonly th:text="${log}"></textarea>
+	</div>
+	<script>
+    function refreshLog() {
+      location.reload();
+    }
+
+    function clearLog() {
+      const confirmed = confirm("Вы уверены, что хотите очистить лог?");
+      if (confirmed) {
+        fetch('/admin/log/clear', { method: 'POST', headers: { 'X-CSRF-Token': document.querySelector('input[name="_csrf"]').value } })
+          .then(response => {
+            if (response.ok) {
+              alert('Лог был успешно очищен!');
+              location.reload();
+            } else {
+              alert('Ошибка при очистке лога!');
+            }
+          })
+          .catch(error => console.error('Ошибка:', error));
+      }
+    }
+  </script>
 </body>
 
 </html>
