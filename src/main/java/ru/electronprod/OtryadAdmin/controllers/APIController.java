@@ -56,12 +56,13 @@ public class APIController {
 
 	@SuppressWarnings("unchecked")
 	@GetMapping("/api/getrenamerdata")
-	public String getReasons_for_absences_with_additions() {
+	public String getRenamerData() {
 		JSONObject jsonObject = new JSONObject();
 		Map<String, String> map = new HashMap<String, String>();
 		map.putAll(SettingsRepository.convertEventTypeDTOs());
 		map.putAll(SettingsRepository.getReasons_for_absences());
 		map.putAll(SettingsRepository.getReplacements());
+		map.putAll(SettingsRepository.getRoles());
 		jsonObject.putAll(map);
 		return jsonObject.toJSONString();
 	}

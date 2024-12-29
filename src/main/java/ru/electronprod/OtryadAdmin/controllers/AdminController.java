@@ -55,6 +55,10 @@ public class AdminController {
 	@GetMapping("")
 	public String dash(Model model) {
 		model.addAttribute("show_log", (new File("log.txt")).exists());
+		model.addAttribute("raw_config", FileOptions.getFileLine(SettingsRepository.getConfig()));
+		model.addAttribute("eventtypes", SettingsRepository.getEvent_types());
+		model.addAttribute("reasons", SettingsRepository.getReasons_for_absences());
+		model.addAttribute("replacements", SettingsRepository.getReplacements());
 		return "admin/dashboard";
 	}
 
@@ -514,25 +518,16 @@ public class AdminController {
 		return "redirect:/admin/statsmgr?edited";
 	}
 
-	@GetMapping("/config")
-	public String config(Model model) {
-		model.addAttribute("raw_config", FileOptions.getFileLine(SettingsRepository.getConfig()));
-		model.addAttribute("eventtypes", SettingsRepository.getEvent_types());
-		model.addAttribute("reasons", SettingsRepository.getReasons_for_absences());
-		model.addAttribute("replacements", SettingsRepository.getReplacements());
-		return "admin/config/config";
-	}
-
 	@PostMapping("/config/addevent")
 	public String config_addevent(@RequestParam String name, @RequestParam String event,
 			@RequestParam String canSetReason) {
 		try {
 			SettingsRepository.addData("event_types",
 					SettingsRepository.generateEvent(event, name, Boolean.parseBoolean(canSetReason)));
-			return "redirect:/admin/config?saved";
+			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding event. ", e);
-			return "redirect:/admin/config?error_unknown";
+			return "redirect:/admin?error_unknown";
 		}
 	}
 
@@ -540,10 +535,10 @@ public class AdminController {
 	public String config_delevent(@RequestParam String event) {
 		try {
 			SettingsRepository.removeEvent(event);
-			return "redirect:/admin/config?deleted";
+			return "redirect:/admin?deleted";
 		} catch (Exception e) {
 			log.error("Error removing event. ", e);
-			return "redirect:/admin/config?error_unknown";
+			return "redirect:/admin?error_unknown";
 		}
 	}
 
@@ -551,10 +546,10 @@ public class AdminController {
 	public String config_addreason(@RequestParam String name, @RequestParam String reason) {
 		try {
 			SettingsRepository.addData("reasons_for_absences", SettingsRepository.generateReason(reason, name));
-			return "redirect:/admin/config?saved";
+			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding reason. ", e);
-			return "redirect:/admin/config?error_unknown";
+			return "redirect:/admin?error_unknown";
 		}
 	}
 
@@ -562,10 +557,10 @@ public class AdminController {
 	public String config_delreason(@RequestParam String reason) {
 		try {
 			SettingsRepository.removeReason(reason);
-			return "redirect:/admin/config?deleted";
+			return "redirect:/admin?deleted";
 		} catch (Exception e) {
 			log.error("Error removing reason. ", e);
-			return "redirect:/admin/config?error_unknown";
+			return "redirect:/admin?error_unknown";
 		}
 	}
 
@@ -573,10 +568,10 @@ public class AdminController {
 	public String config_addreplacement(@RequestParam String from, @RequestParam String to) {
 		try {
 			SettingsRepository.addData("replacements", SettingsRepository.generateReplacement(from, to));
-			return "redirect:/admin/config?saved";
+			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding replacement. ", e);
-			return "redirect:/admin/config?error_unknown";
+			return "redirect:/admin?error_unknown";
 		}
 	}
 
@@ -584,10 +579,10 @@ public class AdminController {
 	public String config_delreplacement(@RequestParam String from) {
 		try {
 			SettingsRepository.removeReplacement(from);
-			return "redirect:/admin/config?deleted";
+			return "redirect:/admin?deleted";
 		} catch (Exception e) {
 			log.error("Error removing replacement. ", e);
-			return "redirect:/admin/config?error_unknown";
+			return "redirect:/admin?error_unknown";
 		}
 	}
 
