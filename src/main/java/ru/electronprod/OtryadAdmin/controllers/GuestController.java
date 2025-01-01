@@ -1,6 +1,5 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
-import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +8,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,14 +25,12 @@ public class GuestController {
 	}
 
 	@GetMapping("/")
-	public String showMainPage(Model model) {
-		model.addAttribute("year", Year.now().getValue());
+	public String showMainPage() {
 		return "index";
 	}
 
 	@GetMapping("/public/licenses")
-	public String licenses(Model model) {
-		model.addAttribute("year", Year.now().getValue());
+	public String licenses() {
 		return "public/licenses";
 	}
 

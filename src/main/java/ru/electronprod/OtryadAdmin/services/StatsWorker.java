@@ -8,8 +8,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
@@ -52,7 +55,7 @@ public class StatsWorker {
 	 * @param personalStats - person's stats records
 	 * @param model         - Model to add data
 	 */
-	public void getMainPersonalReportModel(List<StatsRecord> personalStats, Model model) {
+	public void getMainPersonalReportModel(List<StatsRecord> personalStats, Model model, boolean processNotSquads) {
 		// Getting present and non present list
 		List<StatsRecord> present = personalStats.stream().filter(stats -> stats.isPresent()).toList();
 		List<StatsRecord> notPresent = personalStats.stream().filter(stats -> !stats.isPresent()).toList();
@@ -80,12 +83,21 @@ public class StatsWorker {
 					notPresent.stream().filter(stats -> stats.getType().equals(event)).count()));
 		});
 		model.addAttribute("squadData", squadData);
-		// For each commander event type...
-		commanderEvents.forEach(event -> {
-			// Adding stats data about this event
-			commanderData.put(event, present.stream().filter(stats -> stats.getType().equals(event)).count());
-		});
-		model.addAttribute("commanderData", commanderData);
+		if (processNotSquads) {
+			// For each commander event type...
+			for (String event : commanderEvents) {
+				Stream<StatsRecord> str = present.stream().filter(stats -> stats.getType().equals(event));
+				if (str.allMatch(stats -> stats.getGroup() != null)) {
+				}
+				// Adding stats data about this event
+				commanderData.put(event, present.stream().filter(stats -> stats.getType().equals(event)).count());
+				str.close();
+			}
+			model.addAttribute("commanderData", commanderData);
+			// Groups
+			Set<String> humanGroups = present.stream().map(StatsRecord::getGroup).collect(Collectors.toSet());
+			model.addAttribute("humanGroups", humanGroups);
+		}
 		/*
 		 * Generating table of reasons for absences
 		 */
@@ -100,13 +112,12 @@ public class StatsWorker {
 		/*
 		 * Adding a few stats records
 		 */
-		List<StatsRecord> lastRecords = personalStats.stream().limit(30).collect(Collectors.toList());
-		lastRecords.sort(Comparator.comparingInt(StatsRecord::getEvent_id).reversed());
-		model.addAttribute("lastRecords", lastRecords);
+		personalStats.sort(Comparator.comparingInt(StatsRecord::getEvent_id).reversed());
+		model.addAttribute("lastRecords", personalStats);
 	}
 
 	public List<StatsRecord> generatePresentStats(Collection<Human> humans, String event_type, String formatted_date,
-			User user, int event_id) {
+			User user, int event_id, String group) {
 		List<StatsRecord> resultArray = new ArrayList<StatsRecord>();
 		for (Human human : humans) {
 			StatsRecord stats = new StatsRecord(human);
@@ -117,13 +128,14 @@ public class StatsWorker {
 			stats.setType(event_type);
 			stats.setUser_role(user.getRole());
 			stats.setEvent_id(event_id);
+			stats.setGroup(group);
 			resultArray.add(stats);
 		}
 		return resultArray;
 	}
 
 	private StatsRecord createUnpresentStatsRecord(JSONObject data, String event, String formatted_date, User user,
-			int event_id, List<Human> humans) {
+			int event_id, List<Human> humans, String group) {
 		// Finding human to add stats record
 		Human human = humans.stream().filter(h -> h.getId() == Integer.parseInt(String.valueOf(data.get("id"))))
 				.findFirst().orElseThrow(() -> new IllegalStateException("Human not found"));
@@ -136,12 +148,13 @@ public class StatsWorker {
 		stats.setType(event);
 		stats.setUser_role(user.getRole());
 		stats.setEvent_id(event_id);
+		stats.setGroup(group);
 		humans.remove(human);
 		return stats;
 	}
 
 	@Transactional
-	public int mark_group(MarkDTO dto, User user, List<Human> humans) throws Exception {
+	public int mark_group(MarkDTO dto, User user, List<Human> humans, String group) throws Exception {
 		// Validating input
 		String date = DBService.getStringDate(dto.getDate() != null ? dto.getDate() : DBService.getStringDate());
 		String event;
@@ -156,10 +169,10 @@ public class StatsWorker {
 		// Marking unPresent humans
 		for (Object o : dto.getUnpresentPeople()) {
 			JSONObject data = (JSONObject) FileOptions.ParseJS(String.valueOf(o));
-			resultRecords.add(createUnpresentStatsRecord(data, event, date, user, event_id, humans));
+			resultRecords.add(createUnpresentStatsRecord(data, event, date, user, event_id, humans, group));
 		}
 		// Marking Present humans
-		resultRecords.addAll(generatePresentStats(humans, event, date, user, event_id));
+		resultRecords.addAll(generatePresentStats(humans, event, date, user, event_id, group));
 
 		// Saving records to database
 		if (dbservice.getStatsRepository().saveAll(resultRecords) == null)

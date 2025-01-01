@@ -37,6 +37,8 @@ public class StatsRecord {
 	// Положительное - человек пришел, иначе - нет
 	@Column
 	private boolean isPresent;
+	@Column(name="recordGroup")
+	private String group;
 
 	public StatsRecord(Human human) {
 		this.human = human;

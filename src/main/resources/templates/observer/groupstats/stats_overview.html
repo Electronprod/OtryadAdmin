@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Статистика звена</title>
+<title>Статистика группы</title>
 <link rel="stylesheet" href="/assets/default_style.css">
 <link rel="icon" href="/icon.png">
 <script defer src="/assets/navbar.js"></script>
@@ -15,11 +15,11 @@
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
-			<h2>
-				Звено, где командир <u th:text="${name}"></u>:
+			<h2 name="title">
+				Статистика группы <u th:text="${group.name}"></u>:
 			</h2>
 			<div class="card">
-				<h3>Список ребят этого звена</h3>
+				<h3>Список ребят из этой группы</h3>
 				<p>В списке ниже представлена базовая информация о ребятах. Если вам нужно узнать всю контактную информацию о
 					человеке, нажмите сверху кнопку "Список отряда" и найдите человека там. Чтобы получить статистический отчет о
 					человеке, нажмите на кнопку "Перейти" в таблице ниже.</p>
@@ -52,27 +52,47 @@
 				</details>
 			</div>
 			<div class="card">
-				<h3>Статистика посещений события</h3>
-				<p>Посмотрите, кто и сколько раз посетил выбранное событие в этом звене</p>
-				<form method="get">
-					<label for="event_name">Выберите событие:</label> <select id="event_name" name="event_name">
-						<option th:each="event : ${events}" th:value="${event}" th:text="${event}"></option>
-					</select>
-					<button id="reportbtn" type="submit">Показать</button>
-				</form>
+				<h3>Все события в группе</h3>
+				<table>
+					<thead>
+						<tr>
+							<th>Событие</th>
+							<th>Просмотр</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="event : ${group_events}">
+							<td th:text="${event}"></td>
+							<td>
+								<form th:action="@{/observer/stats/report}" method="get" style="display: inline;">
+									<input type="hidden" name="event_name" th:value="${event}" />
+									<button type="submit">Отметки</button>
+								</form>
+								<form th:action="@{/observer/stats/event_table}" method="get" style="display: inline;">
+									<input type="hidden" name="event_name" th:value="${event}" />
+									<button class="admin-button" type="submit">Таблица отметок</button>
+								</form>
+						</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 			<div class="card">
 				<h3>Просмотр отметок по дате</h3>
-				<p>Посмотрите посещения и пропуски в выбранную дату для этого звена</p>
-				<form id="date-form" method="get" onsubmit="return submitForm()">
-					<label for="date">Дата:</label> <input type="date" id="date" name="date" required> <br>
+				<p>Посмотрите посещения и пропуски в выбранную дату в этой группе</p>
+				<form method="get" th:action="@{/observer/stats/group/date}">
+					<label for="date">Дата:</label> <input type="date" id="date" name="date" required /> <input type="hidden"
+						name="groupname" th:value="${group.name}" /> <br>
 					<button type="submit">Посмотреть</button>
 				</form>
 			</div>
 			<div class="card">
 				<h3>Просмотр отметок в виде таблицы</h3>
 				<p>Просмотрите всю статистику для этого звена в виде таблицы.</p>
-				<button onclick="window.location.href=window.location+'/table'">Перейти</button>
+				<form method="get" th:action="@{/observer/stats/group/table}">
+					<input type="hidden" id="date" name="groupname" th:value="${group.name}" />
+					<button type="submit">Посмотреть</button>
+				</form>
 			</div>
 		</div>
 	</div>
@@ -80,17 +100,5 @@
 <script src="/assets/sort_table.js"></script>
 <script>
 	document.getElementById("date").valueAsDate = new Date();
-	function submitForm() {
-		const form = document.getElementById('date-form');
-		const dateInput = document.getElementById('date').value;
-		const currentUrl = window.location.href;
-		const newUrl = `${currentUrl}/date?${encodeURIComponent(dateInput)}`;
-		form.action = newUrl;
-		return true;
-	}
-	document.addEventListener("DOMContentLoaded", function() {
-		var submitButton = document.getElementById("reportbtn");
-		submitButton.setAttribute("formaction", window.location + "/report");
-	});
 </script>
 </html>

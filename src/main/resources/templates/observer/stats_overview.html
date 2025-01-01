@@ -46,23 +46,52 @@
 			</div>
 			<div class="card">
 				<h3>Звеньевая статистика</h3>
-				<p>Посмотрите статистику для конкретного звена, кликнув на кнопку "перейти"</p>
+				<p>
+					Посмотрите статистику <u>звена</u>, кликнув на кнопку "перейти"
+				</p>
 				<table>
 					<thead>
 						<tr>
-							<th>Командир</th>
 							<th>Название звена</th>
+							<th>Командир</th>
 							<th>Ребят</th>
 							<th></th>
 						</tr>
 					</thead>
 					<tbody>
 						<tr th:each="squad : ${squadList}">
-							<td th:text="${squad.commander.getName()}"></td>
 							<td th:text="${squad.squadName}"></td>
+							<td th:text="${squad.commander.name}"></td>
 							<td th:text="${squad.humans.size()}"></td>
 							<td>
 								<button th:onclick="window.location.href='/observer/stats/squad/' + [[${squad.id}]];">Перейти к
+									статистике</button>
+						</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="card">
+				<h3>Групповая статистика</h3>
+				<p>
+					Посмотрите статистику <u>группы</u>, кликнув на кнопку "перейти"
+				</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Название группы</th>
+							<th>Управляет группой</th>
+							<th>Ребят</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="group : ${groups}">
+							<td th:text="${group.name}"></td>
+							<td th:text="${group.marker.name}"></td>
+							<td th:text="${group.humans.size()}"></td>
+							<td>
+								<button th:onclick="window.location.href='/observer/stats/group/' + [[${group.id}]];">Перейти к
 									статистике</button>
 						</td>
 						</tr>

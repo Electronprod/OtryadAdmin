@@ -53,7 +53,7 @@ public class SquadCommanderController {
 	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
 		try {
 			int event_id = statsHelper.mark_group(dto, authHelper.getCurrentUser(),
-					dbservice.getSquadRepository().findByCommander(authHelper.getCurrentUser()).getHumans());
+					dbservice.getSquadRepository().findByCommander(authHelper.getCurrentUser()).getHumans(), null);
 			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
 			log.error("Mark error (squadcommander.mark):", e);
@@ -105,7 +105,7 @@ public class SquadCommanderController {
 		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
 		statsHelper.getMainPersonalReportModel(
 				dbservice.getStatsRepository().findByHumanAndAuthor(human, authHelper.getCurrentUser().getLogin()),
-				model);
+				model, false);
 		model.addAttribute("person", human.getLastname() + " " + human.getName());
 		return "squadcommander/personal_stats";
 	}
