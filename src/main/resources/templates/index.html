@@ -84,10 +84,13 @@ h1 {
 		репозиторий GitHub</a>
 	<div class="bottomPanel">
 		<h5 style="text-align: center;">
-			© <span th:text="${year}"></span> Alexander Spiridonov. All rights reserved.
+			© <span id="currentYear"></span> Alexander Spiridonov. All rights reserved.
 		</h5>
 	</div>
 
 </body>
-
+<script>
+	document.getElementById("currentYear").textContent = new Date()
+			.getFullYear();
+</script>
 </html>

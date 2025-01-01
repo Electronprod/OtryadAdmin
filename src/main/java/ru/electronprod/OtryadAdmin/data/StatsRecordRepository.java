@@ -17,10 +17,15 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 
 	List<StatsRecord> findByDate(String date);
 
+	List<StatsRecord> findByGroup(String group, Sort sort);
+
 	List<StatsRecord> findByType(String type);
 
-	@Query("SELECT DISTINCT s.type FROM StatsRecord s ORDER BY s.type")
-	List<String> findDistinctTypes();
+	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.user_role = :user_role ORDER BY s.type")
+	List<String> findDistinctTypes(@Param("user_role") String user_role);
+
+	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.group = :group ORDER BY s.type")
+	List<String> findDistinctTypesGroup(@Param("group") String group);
 
 	List<StatsRecord> findByDateAndAuthor(String date, String author);
 

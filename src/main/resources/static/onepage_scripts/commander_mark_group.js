@@ -90,7 +90,7 @@ async function send() {
 		const data_to_send = {
 			presentPeople: presentPeople,
 			unpresentPeople: unpresentPeople,
-			event: groupName + ": " + event_type.value,
+			event: event_type.value,
 			date: document.getElementById("dateField").value,
 			groupID: groupID
 		};

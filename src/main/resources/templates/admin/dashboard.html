@@ -75,7 +75,7 @@ textarea:focus {
 								<td th:text="${entry.getEvent()}"></td>
 								<td th:text="${entry.isCanSetReason() ? 'Да' : 'Нет'}"></td>
 								<td>
-									<form th:action="@{/admin/config/delevent}" method="post" style="display: inline;">
+									<form th:action="@{/admin/stats/personal/table_id}" method="post" style="display: inline;">
 										<input type="hidden" name="event" th:value="${entry.getEvent()}" />
 										<button class="admin-button" type="submit">Удалить</button>
 									</form>

@@ -10,66 +10,54 @@ import ru.electronprod.OtryadAdmin.models.Human;
  */
 public class SearchUtil {
 
-	/**
-	 * @author OpenAI ChatGPT 3.5
-	 */
-	private static int findLCSLength(String str1, String str2) {
+	private static int findLevenshteinDistance(String str1, String str2) {
 		int m = str1.length();
 		int n = str2.length();
 		int[][] dp = new int[m + 1][n + 1];
 
 		for (int i = 0; i <= m; i++) {
 			for (int j = 0; j <= n; j++) {
-				if (i == 0 || j == 0) {
-					dp[i][j] = 0;
+				if (i == 0) {
+					dp[i][j] = j;
+				} else if (j == 0) {
+					dp[i][j] = i;
 				} else if (str1.charAt(i - 1) == str2.charAt(j - 1)) {
-					dp[i][j] = dp[i - 1][j - 1] + 1;
+					dp[i][j] = dp[i - 1][j - 1];
 				} else {
-					dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+					dp[i][j] = 1 + Math.min(Math.min(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]);
 				}
 			}
 		}
 		return dp[m][n];
 	}
 
-	/**
-	 * Finds Human object from list by lastname and name
-	 * 
-	 * @param lastname_and_name - in format "lastname name"
-	 * @param humanList
-	 * @return most similar human object
-	 */
 	public static Human findMostSimilarHuman(String lastname_and_name, List<Human> humanList) {
-		Human mostSimilar = new Human();
-		int maxLCSLength = 0;
+		Human mostSimilar = null;
+		int minLevenshteinDistance = Integer.MAX_VALUE;
 
 		for (Human human : humanList) {
-			int lcsLength = findLCSLength(lastname_and_name, human.getLastname() + " " + human.getName());
-			if (lcsLength > maxLCSLength) {
-				maxLCSLength = lcsLength;
+			String fullName = human.getLastname() + " " + human.getName();
+			int levenshteinDistance = findLevenshteinDistance(lastname_and_name.toLowerCase(), fullName.toLowerCase());
+			if (levenshteinDistance < minLevenshteinDistance) {
+				minLevenshteinDistance = levenshteinDistance;
 				mostSimilar = human;
 			}
 		}
 		return mostSimilar;
 	}
 
-	/**
-	 * Finds most similar String from String collection
-	 * 
-	 * @param str
-	 * @param list
-	 * @return most similar String
-	 */
 	public static String findMostSimilarFromList(String str, Collection<String> list) {
-		String mostSimilar = "";
-		int maxLCSLength = 0;
+		String mostSimilar = null;
+		int minLevenshteinDistance = Integer.MAX_VALUE;
+
 		for (String val : list) {
-			int lcsLength = findLCSLength(str, val);
-			if (lcsLength > maxLCSLength) {
-				maxLCSLength = lcsLength;
+			int levenshteinDistance = findLevenshteinDistance(str.toLowerCase(), val.toLowerCase());
+			if (levenshteinDistance < minLevenshteinDistance) {
+				minLevenshteinDistance = levenshteinDistance;
 				mostSimilar = val;
 			}
 		}
 		return mostSimilar;
 	}
+
 }

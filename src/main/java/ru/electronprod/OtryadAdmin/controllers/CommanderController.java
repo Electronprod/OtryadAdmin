@@ -82,8 +82,9 @@ public class CommanderController {
 	public ResponseEntity<String> markGroup(@RequestBody MarkDTO dto) {
 		try {
 			User user = authHelper.getCurrentUser();
-			int event_id = statsWorker.mark_group(dto, user, dbservice.getGroupRepository().findById(dto.getGroupID())
-					.orElseThrow().getHumans().stream().collect(Collectors.toCollection(ArrayList::new)));
+			Group group = dbservice.getGroupRepository().findById(dto.getGroupID()).orElseThrow();
+			int event_id = statsWorker.mark_group(dto, user,
+					group.getHumans().stream().collect(Collectors.toCollection(ArrayList::new)), group.getName());
 			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
 			log.error("Mark error (commander.mark_group):", e);

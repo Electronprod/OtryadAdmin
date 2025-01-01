@@ -2,26 +2,30 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Персональная статистика</title>
-	<link rel="stylesheet" href="/assets/default_style.css">
-	<link rel="icon" href="/icon.png">
-	<script defer src="/assets/navbar.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Персональная статистика</title>
+<link rel="stylesheet" href="/assets/default_style.css">
+<link rel="icon" href="/icon.png">
+<script defer src="/assets/navbar.js"></script>
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-	<div id="navbar"></div>
+	<input type="hidden" id="human-id" th:value="${human_id}" />
 	<div id="dashboard">
 		<div id="content">
-			<h2>Стастистика для <span th:text="${person}"></span></h2>
+			<h2>
+				Стастистика для <span th:text="${person}"></span>
+			</h2>
 			<div class="card">
 				<h3>Пропуски и посещения</h3>
 				<h4>Суммарная статистика:</h4>
-				<p>Посещено <strong th:text="${attendance.getFirst()}"></strong> событий<br>Пропущено <strong
-						th:text="${attendance.getSecond()}"></strong> событий</p>
+				<p>
+					Посещено <strong th:text="${attendance.getFirst()}"></strong> событий<br>Пропущено <strong
+						th:text="${attendance.getSecond()}"></strong> событий
+				</p>
 				<h4>Статистика по событиям:</h4>
 				<h5>Звено:</h5>
 				<table>
@@ -57,6 +61,21 @@
 				</table>
 			</div>
 			<div class="card">
+				<h3>Группы этого человека</h3>
+				<table>
+					<thead>
+						<tr>
+							<th>Группа</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="data : ${humanGroups}">
+							<td th:text="${data}"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="card">
 				<h3>Причины пропусков</h3>
 				<table>
 					<thead>
@@ -75,10 +94,6 @@
 			</div>
 			<div class="card">
 				<h3>Последние отметки посещений</h3>
-				<p><strong>ВНИМАНИЕ:</strong> этот список ограничен 30 записями. Чтобы посмотреть все записи с
-					сортировкой
-					воспользуйтесь функцией
-					"Просмотр персональной таблицы данных"</p>
 				<table>
 					<thead>
 						<tr>
