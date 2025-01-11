@@ -50,7 +50,7 @@ public class ObserverController {
 		model.addAttribute("commanders_marked_today",
 				dbservice.getStatsRepository().countDistinctAuthorsByDate(DBService.getStringDate()));
 		model.addAttribute("events",
-				dbservice.getStatsRepository().findDistinctTypes("ROLE_SQUADCOMMANDER").stream().sorted().toList());
+				dbservice.getStatsRepository().findDistinctTypesWithoutGroups().stream().sorted().toList());
 		return "observer/stats_overview";
 	}
 
