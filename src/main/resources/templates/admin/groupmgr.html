@@ -41,28 +41,23 @@
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
-	<input type="hidden" th:name="${_csrf.parameterName}"
-		th:value="${_csrf.token}" />
+	<!--CSRF Attack Protection-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
 				<h3>Добро пожаловать в менеджер групп!</h3>
-				<p>Здесь вы можете управлять всеми группами в отряде.
-					Заместители командиров смогут видеть эти группы у себя в личных
-					кабинетах и выставлять посещения и пропуски для них.</p>
+				<p>Здесь вы можете управлять всеми группами в отряде. Заместители командиров смогут видеть эти группы у себя в
+					личных кабинетах и выставлять посещения и пропуски для них.</p>
 			</div>
 			<div class="card">
 				<h3>Создать новую группу</h3>
-				<p>Выставляйте понятное название. Например: "Хореография, группа
-					#1". Тогда в статистике будет написано "Хореография, группа #1:
-					Какое-то событие(которое написал командир)".</p>
+				<p>Название должно отображать суть группы. Например: "Хореография, группа девочек" или "Зимняя сказка". Командир
+					группы отмечает ребят в группе, и никто больше этого делать не может.</p>
 				<form th:action="@{/admin/groupmgr/add}" method="post">
-					<input placeholder="Название группы" name="name" type="text"
-						required /> <label for="marker">Выберите командира:</label> <select
-						id="marker" name="marker">
-						<option th:each="marker : ${markers}" th:value="${marker.id}"
-							th:text="${marker.name}"></option>
+					<input placeholder="Название группы" name="name" type="text" required /> <label for="marker">Выберите
+						командира:</label> <select id="marker" name="marker">
+						<option th:each="marker : ${markers}" th:value="${marker.id}" th:text="${marker.name}"></option>
 					</select>
 					<button class="greenbtn" type="submit">Добавить</button>
 				</form>
@@ -85,12 +80,10 @@
 							<td th:text="${group.humans.size()}"></td>
 							<td>
 								<div class="action-buttons">
-									<a class="button"
-										th:href="@{/admin/groupmgr/manage(id=${group.id})}">Управлять</a>
-									<button class="button delete-btn"
-										th:onclick="'remove('+${group.id}+')'">Удалить</button>
+									<a class="button" th:href="@{/admin/groupmgr/manage(id=${group.id})}">Управлять</a>
+									<button class="button delete-btn" th:onclick="'remove('+${group.id}+')'">Удалить</button>
 								</div>
-							</td>
+						</td>
 						</tr>
 					</tbody>
 				</table>
