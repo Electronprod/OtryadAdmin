@@ -20,14 +20,14 @@
 				Стастистика для <span th:text="${person}"></span>
 			</h2>
 			<div class="card">
-				<h3>Пропуски и посещения</h3>
-				<h4>Суммарная статистика:</h4>
+				<h4>Суммарная статистика</h4>
 				<p>
 					Посещено <strong th:text="${attendance.getFirst()}"></strong> событий<br>Пропущено <strong
 						th:text="${attendance.getSecond()}"></strong> событий
 				</p>
-				<h4>Статистика по событиям:</h4>
-				<h5>Звено:</h5>
+			</div>
+			<div class="card">
+				<h3>Статистика в звене</h3>
 				<table>
 					<thead>
 						<tr>
@@ -44,7 +44,28 @@
 						</tr>
 					</tbody>
 				</table>
-				<h5>Остальное:</h5>
+			</div>
+			<div class="card">
+				<h3>Статистика в группах</h3>
+				<table>
+					<thead>
+						<tr>
+							<th>Группа</th>
+							<th>Посещений</th>
+							<th>Пропусков</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="data : ${groupsData}">
+							<td th:text="${data.key}"></td>
+							<td th:text="${data.value.getFirst()}"></td>
+							<td th:text="${data.value.getSecond()}"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="card">
+				<h3>Статистика в других категориях</h3>
 				<table>
 					<thead>
 						<tr>
@@ -56,21 +77,6 @@
 						<tr th:each="data : ${commanderData}">
 							<td th:text="${data.key}">Событие</td>
 							<td th:text="${data.value}">Посещений</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<div class="card">
-				<h3>Группы этого человека</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Группа</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="data : ${humanGroups}">
-							<td th:text="${data}"></td>
 						</tr>
 					</tbody>
 				</table>
@@ -88,31 +94,6 @@
 						<tr th:each="data : ${reasons_data}">
 							<td th:text="${data.key}">-</td>
 							<td th:text="${data.value}">-</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
-			<div class="card">
-				<h3>Последние отметки посещений</h3>
-				<table>
-					<thead>
-						<tr>
-							<th>Дата</th>
-							<th>Событие</th>
-							<th>Посещено</th>
-							<th>Причина пропуска</th>
-							<th>Отметил</th>
-							<th>EventID</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="stats : ${lastRecords}">
-							<td th:text="${stats.date}">-</td>
-							<td th:text="${stats.type}">-</td>
-							<td th:text="${stats.isPresent}">-</td>
-							<td th:text="${stats.reason}">-</td>
-							<td th:text="${stats.user_role}">-</td>
-							<td th:text="${stats.event_id}">-</td>
 						</tr>
 					</tbody>
 				</table>

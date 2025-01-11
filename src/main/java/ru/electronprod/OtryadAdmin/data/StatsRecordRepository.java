@@ -21,6 +21,9 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 
 	List<StatsRecord> findByType(String type);
 
+	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.group IS NULL OR s.group = '' ORDER BY s.type")
+	List<String> findDistinctTypesWithoutGroups();
+
 	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.user_role = :user_role ORDER BY s.type")
 	List<String> findDistinctTypes(@Param("user_role") String user_role);
 

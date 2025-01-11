@@ -57,30 +57,6 @@
 					</tbody>
 				</table>
 			</div>
-			<div class="card">
-				<h3>Последние отметки посещений</h3>
-				<p><strong>ВНИМАНИЕ:</strong> этот список ограничен 30 записями.</p>
-				<table>
-					<thead>
-						<tr>
-							<th>Дата</th>
-							<th>Событие</th>
-							<th>Посещено</th>
-							<th>Причина пропуска</th>
-							<th>EventID</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="stats : ${lastRecords}">
-							<td th:text="${stats.date}">-</td>
-							<td th:text="${stats.type}">-</td>
-							<td th:text="${stats.isPresent}">-</td>
-							<td th:text="${stats.reason}">-</td>
-							<td th:text="${stats.event_id}">-</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
 		</div>
 	</div>
 </body>

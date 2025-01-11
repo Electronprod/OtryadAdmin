@@ -3,11 +3,11 @@ package ru.electronprod.OtryadAdmin.services;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -88,6 +88,7 @@ public class StatsWorker {
 			for (String event : commanderEvents) {
 				Stream<StatsRecord> str = present.stream().filter(stats -> stats.getType().equals(event));
 				if (str.allMatch(stats -> stats.getGroup() != null)) {
+					continue;
 				}
 				// Adding stats data about this event
 				commanderData.put(event, present.stream().filter(stats -> stats.getType().equals(event)).count());
@@ -96,7 +97,13 @@ public class StatsWorker {
 			model.addAttribute("commanderData", commanderData);
 			// Groups
 			Set<String> humanGroups = present.stream().map(StatsRecord::getGroup).collect(Collectors.toSet());
-			model.addAttribute("humanGroups", humanGroups);
+			Map<String, Pair<Long, Long>> groupsData = new LinkedHashMap<String, Pair<Long, Long>>();
+			humanGroups.forEach(gr -> {
+				groupsData.put(gr,
+						Pair.of(present.stream().filter(stats -> Objects.equals(stats.getGroup(), gr)).count(),
+								notPresent.stream().filter(stats -> Objects.equals(stats.getGroup(), gr)).count()));
+			});
+			model.addAttribute("groupsData", groupsData);
 		}
 		/*
 		 * Generating table of reasons for absences
@@ -109,11 +116,6 @@ public class StatsWorker {
 			reasons_data.put(reason, reasons_data.getOrDefault(reason, 0) + 1);
 		}
 		model.addAttribute("reasons_data", reasons_data);
-		/*
-		 * Adding a few stats records
-		 */
-		personalStats.sort(Comparator.comparingInt(StatsRecord::getEvent_id).reversed());
-		model.addAttribute("lastRecords", personalStats);
 	}
 
 	public List<StatsRecord> generatePresentStats(Collection<Human> humans, String event_type, String formatted_date,
