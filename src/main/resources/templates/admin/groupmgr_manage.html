@@ -12,16 +12,16 @@
 
 <body>
 	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
-	<input type="hidden" th:name="${_csrf.parameterName}"
-		th:value="${_csrf.token}" />
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<input type="hidden" id="groupid" th:value="${group.id}"></input>
 	<div class="header">
 		<h3>
 			Вы управляете группой "<u id="groupname" th:text="${group.name}"></u>":
 		</h3>
-		<p>У людей, кто не состоит в этой группе доступна кнопка
-			"Добавить". У тех, кто в группе - "Удалить"</p>
+		<p>У людей, кто не состоит в этой группе доступна кнопка "Добавить". У тех, кто в группе - "Удалить"</p>
 	</div>
+	<input style="padding: 10px; margin-bottom: 10px; width: 100%;" type="text" id="searchInput"
+		placeholder="Введите имя или фамилию для поиска..." onkeyup="search_human(0,1,'userTable')" />
 	<table id="userTable">
 		<thead>
 			<tr>
@@ -38,21 +38,17 @@
 				<td th:text="${human.squad.commander.name}"></td>
 				<td>
 					<div class="action-buttons" th:name="${human.id}">
-						<button th:style="${human.hasGroup(group)} ? 'display:none;' : ''"
-							class="button" th:onclick="'addGroup('+${human.id}+')'"
-							th:id="'add-' + ${human.id}">Добавить</button>
-						<button
-							th:style="${!human.hasGroup(group)} ? 'display:none;' : ''"
-							class="button delete-btn"
-							th:onclick="'removeGroup('+${human.id}+')'"
-							th:id="'delete-' + ${human.id}">Удалить</button>
+						<button th:style="${human.hasGroup(group)} ? 'display:none;' : ''" class="button"
+							th:onclick="'addGroup('+${human.id}+')'" th:id="'add-' + ${human.id}">Добавить</button>
+						<button th:style="${!human.hasGroup(group)} ? 'display:none;' : ''" class="button delete-btn"
+							th:onclick="'removeGroup('+${human.id}+')'" th:id="'delete-' + ${human.id}">Удалить</button>
 					</div>
-				</td>
+			</td>
 			</tr>
 		</tbody>
 	</table>
 </body>
 <script src=" /assets/manager.js"></script>
 <script defer src="/onepage_scripts/groupmgr.js"></script>
-
+<script defer src="/assets/search_table.js"></script>
 </html>
