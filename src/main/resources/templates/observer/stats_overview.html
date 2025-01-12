@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Статистика</title>
 <link rel="stylesheet" href="/assets/default_style.css">
+<link rel="stylesheet" href="/assets/markpage.css">
 <script defer src="/assets/navbar.js"></script>
 <link rel="icon" href="/icon.png">
 <script src="/public_resources/sweetalert2.js"></script>
@@ -26,6 +27,18 @@
 					<a href="/admin" class="admin-button">Вернуться в панель администратора</a>
 				</div>
 			</div>
+			<div th:if="${!groups.isEmpty()}" class="card animated-border">
+				<h3>Отметить ребят в группе</h3>
+				<P>Отмечаются как посещения, так и пропуски, с указанием причин. Вы работаете только с участниками выбранной
+					группы.</P>
+				<label for="group">Выберите группу ребят, в которой хотите выставить отметки:</label>
+				<form action="/observer/markgroup" method="get">
+					<select id="id" name="id" required>
+						<option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}"></option>
+					</select>
+					<button class="button" style="background-color: blue;" type="submit">Отметить ребят в этой группе</button>
+				</form>
+			</div>
 			<div class="cardc-container">
 				<div class="cardc">
 					<h3>Общая статистика</h3>
@@ -34,7 +47,6 @@
 							th:text="${people_missed}"></span><br> <b>Количество посещений:</b> <span th:text="${people_attended}"></span>
 					</p>
 				</div>
-
 				<div class="cardc">
 					<h3>Статистика за сегодня</h3>
 					<p>
@@ -86,7 +98,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						<tr th:each="group : ${groups}">
+						<tr th:each="group : ${all_groups}">
 							<td th:text="${group.name}"></td>
 							<td th:text="${group.marker.name}"></td>
 							<td th:text="${group.humans.size()}"></td>

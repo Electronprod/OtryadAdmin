@@ -1,6 +1,5 @@
 package ru.electronprod.OtryadAdmin.utils;
 
-import java.util.Collection;
 import java.util.List;
 
 import ru.electronprod.OtryadAdmin.models.Human;
@@ -31,6 +30,14 @@ public class SearchUtil {
 		return dp[m][n];
 	}
 
+	/**
+	 * Finds most similar Human from List given.
+	 * 
+	 * @param lastname_and_name - Humans's lastname and name in format "lastname
+	 *                          name".
+	 * @param humanList         - List to find from.
+	 * @return Human entity or null if not found
+	 */
 	public static Human findMostSimilarHuman(String lastname_and_name, List<Human> humanList) {
 		Human mostSimilar = null;
 		int minLevenshteinDistance = Integer.MAX_VALUE;
@@ -45,19 +52,4 @@ public class SearchUtil {
 		}
 		return mostSimilar;
 	}
-
-	public static String findMostSimilarFromList(String str, Collection<String> list) {
-		String mostSimilar = null;
-		int minLevenshteinDistance = Integer.MAX_VALUE;
-
-		for (String val : list) {
-			int levenshteinDistance = findLevenshteinDistance(str.toLowerCase(), val.toLowerCase());
-			if (levenshteinDistance < minLevenshteinDistance) {
-				minLevenshteinDistance = levenshteinDistance;
-				mostSimilar = val;
-			}
-		}
-		return mostSimilar;
-	}
-
 }

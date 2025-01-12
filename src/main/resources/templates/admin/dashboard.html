@@ -39,15 +39,29 @@ textarea:focus {
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
-				<h3>Добро пожаловать!</h3>
-				<p>Это ваша панель администратора. Здесь вы можете управлять вашим сайтом. Если вы хотите посмотреть статистику,
+				<h3>Вас приветствует OtryadAdmin!</h3>
+				<p>Это ваша панель администратора. Здесь вы можете управлять этим сайтом. Если вы хотите посмотреть статистику,
 					перейдите в панель наблюдателя, нажав на кнопку ниже.</p>
 				<a class="greenbtn" href="/observer">Перейти в панель наблюдателя</a>
 			</div>
-			<div class="card" th:if="${show_log == true}">
-				<h3>Просмотр лога</h3>
-				<p>Просмотрите лог приложения.</p>
-				<a class="greenbtn" href="/admin/log">Просмотреть</a>
+			<div class="card">
+				<h3>Информация о сборке</h3>
+				<p>Просмотрите информацию о сборке приложения.</p>
+				<details class="cardc">
+					<summary>Нажмите, чтобы посмотреть</summary>
+					<ul>
+						<li><b>Name:</b> <span th:text="${appInfo.getName()}"></span></li>
+						<li><b>Version:</b> <span th:text="${appInfo.getVersion()}"></span></li>
+						<li><b>Build time:</b> <span th:text="${appInfo.getTime()}"></span></li>
+						<li><b>Artifact:</b> <span th:text="${appInfo.getArtifact()}"></span></li>
+						<li><b>Group:</b> <span th:text="${appInfo.getGroup()}"></span></li>
+					</ul>
+				</details>
+				<details class="card" th:if="${show_log == true}">
+					<h3>Просмотр лога</h3>
+					<p>Просмотрите лог приложения.</p>
+					<a class="greenbtn" href="/admin/log">Просмотреть</a>
+				</details>
 			</div>
 			<div class="card">
 				<h3>Настройка конфигурации приложения</h3>

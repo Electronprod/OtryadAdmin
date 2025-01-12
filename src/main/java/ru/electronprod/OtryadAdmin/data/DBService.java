@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Class provides access to all JPA repositories
+ */
 @Slf4j
 @Service
 public class DBService {
@@ -31,12 +34,24 @@ public class DBService {
 	@Autowired
 	private GroupRepository groupRepository;
 
+	/**
+	 * @return Current date in format "yyyy.MM.dd"
+	 */
 	public static String getStringDate() {
 		Calendar calendar = Calendar.getInstance();
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
 		return dateFormat.format(calendar.getTime());
 	}
 
+	/**
+	 * Parses and converts date in other format to "yyyy.MM.dd"
+	 * 
+	 * @param unknownDate - date to parse and convert
+	 * @return date in format "yyyy.MM.dd"
+	 * @throws Exception recognition error
+	 * @apiNote Possible input date formats: "yyyy-MM-dd", "dd-MM-yyyy",
+	 *          "yyyy.MM.dd", "MM/dd/yyyy"
+	 */
 	public static String getStringDate(String unknownDate) throws Exception {
 		String[] possiblePatterns = { "yyyy-MM-dd", "dd-MM-yyyy", "yyyy.MM.dd", "MM/dd/yyyy" };
 		LocalDate parsedDate = null;
