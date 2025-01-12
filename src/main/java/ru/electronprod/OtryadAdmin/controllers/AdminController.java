@@ -45,9 +45,8 @@ public class AdminController {
 	private DBService dbservice;
 	@Autowired
 	private AuthHelper auth;
-	// TODO
 	@Autowired
-	BuildProperties appInfo;
+	private BuildProperties appInfo;
 
 	/*
 	 * Main page
@@ -59,6 +58,7 @@ public class AdminController {
 		model.addAttribute("eventtypes", SettingsRepository.getEvent_types());
 		model.addAttribute("reasons", SettingsRepository.getReasons_for_absences());
 		model.addAttribute("replacements", SettingsRepository.getReplacements());
+		model.addAttribute("appInfo", appInfo);
 		return "admin/dashboard";
 	}
 
@@ -345,7 +345,8 @@ public class AdminController {
 	 */
 	@GetMapping("/groupmgr")
 	public String groupManager(Model model) {
-		List<User> markers = dbservice.getUserRepository().findAllByRole("ROLE_COMMANDER");
+		List<User> markers = dbservice.getUserRepository().findAll().stream()
+				.filter(user -> !user.getRole().equals("ROLE_SQUADCOMMANDER")).toList();
 		model.addAttribute("markers", markers);
 		model.addAttribute("groups", dbservice.getGroupRepository().findAll());
 		return "admin/groupmgr";

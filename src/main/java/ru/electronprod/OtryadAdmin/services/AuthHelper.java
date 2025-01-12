@@ -14,6 +14,9 @@ import ru.electronprod.OtryadAdmin.data.UserRepository;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.security.UsrDetails;
 
+/**
+ * Helps to work with auth system
+ */
 @Slf4j
 @Service
 public class AuthHelper implements InitializingBean {
@@ -22,6 +25,7 @@ public class AuthHelper implements InitializingBean {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
+	// Data from application.properties
 	@Value("${security.admin.login}")
 	private String admin_login;
 	@Value("${security.admin.password}")
@@ -45,9 +49,9 @@ public class AuthHelper implements InitializingBean {
 	}
 
 	/**
-	 * Returns User object from SpringContextHolder
+	 * Extracts user from cookies using SpringContextHolder
 	 * 
-	 * @return user
+	 * @return User object
 	 */
 	public User getCurrentUser() {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -58,7 +62,10 @@ public class AuthHelper implements InitializingBean {
 	/**
 	 * It hashes password and saves user to database
 	 * 
-	 * @param person
+	 * @apiNote This method receives plain password using person.getPassword() and
+	 *          then encodes it and saves using setter.
+	 * @param person - user object to work with
+	 * @return boolean success/fail (true/false)
 	 */
 	@Transactional
 	public boolean register(User person) {

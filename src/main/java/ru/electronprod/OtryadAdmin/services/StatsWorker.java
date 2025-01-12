@@ -69,7 +69,7 @@ public class StatsWorker {
 				.filter(stats -> stats.getUser_role().equals("ROLE_SQUADCOMMANDER")).map(StatsRecord::getType)
 				.collect(Collectors.toList());
 		List<String> commanderEvents = personalStats.stream()
-				.filter(stats -> stats.getUser_role().equals("ROLE_COMMANDER")).map(StatsRecord::getType)
+				.filter(stats -> !stats.getUser_role().equals("ROLE_SQUADCOMMANDER")).map(StatsRecord::getType)
 				.collect(Collectors.toList());
 		// There should always be the same order
 		Collections.sort(squadEvents);
@@ -86,7 +86,7 @@ public class StatsWorker {
 		if (processNotSquads) {
 			// For each commander event type...
 			for (String event : commanderEvents) {
-				Stream<StatsRecord> str = present.stream().filter(stats -> stats.getType().equals(event));
+				Stream<StatsRecord> str = personalStats.stream().filter(stats -> stats.getType().equals(event));
 				if (str.allMatch(stats -> stats.getGroup() != null)) {
 					continue;
 				}
@@ -96,7 +96,7 @@ public class StatsWorker {
 			}
 			model.addAttribute("commanderData", commanderData);
 			// Groups
-			Set<String> humanGroups = present.stream().map(StatsRecord::getGroup).collect(Collectors.toSet());
+			Set<String> humanGroups = personalStats.stream().map(StatsRecord::getGroup).collect(Collectors.toSet());
 			Map<String, Pair<Long, Long>> groupsData = new LinkedHashMap<String, Pair<Long, Long>>();
 			humanGroups.forEach(gr -> {
 				groupsData.put(gr,

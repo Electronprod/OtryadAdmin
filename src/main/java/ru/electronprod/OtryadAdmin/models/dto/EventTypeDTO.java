@@ -3,6 +3,9 @@ package ru.electronprod.OtryadAdmin.models.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+/**
+ * DTO used for saving settings in text file
+ */
 @Data
 @AllArgsConstructor
 public class EventTypeDTO {

@@ -13,14 +13,11 @@ import java.util.List;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import lombok.extern.slf4j.Slf4j;
-
 /**
  * Simple methods for interaction with text file.
  * 
  * @author Electron_prod
  */
-@Slf4j
 public class FileOptions {
 	/**
 	 * Method reads data from file in UTF8
