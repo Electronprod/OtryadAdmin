@@ -24,6 +24,9 @@ public class Group {
 	private User marker;
 	@ManyToMany(mappedBy = "groups", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
 	private Set<Human> humans = new HashSet<>();
+	@Column(name = "editable")
+	@org.hibernate.annotations.ColumnDefault("true")
+	private boolean editable;
 
 	public void addHuman(Human human) {
 		humans.add(human);

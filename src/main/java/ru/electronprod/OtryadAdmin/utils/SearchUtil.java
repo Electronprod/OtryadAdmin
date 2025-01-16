@@ -1,6 +1,8 @@
 package ru.electronprod.OtryadAdmin.utils;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import ru.electronprod.OtryadAdmin.models.Human;
 
@@ -51,5 +53,23 @@ public class SearchUtil {
 			}
 		}
 		return mostSimilar;
+	}
+
+	/**
+	 * Recognizes Humans from input String
+	 * 
+	 * @param input      - String in format "lastname name" and separator "\n"
+	 * @param searchFrom - List<Human> where to search from
+	 * @return Map<String, Human> where String - original from "input", Human - most
+	 *         similar object from searchFrom list
+	 */
+	public static Map<String, Human> recognizeHumansFromString(String input, List<Human> searchFrom) {
+		Map<String, Human> result = new LinkedHashMap<String, Human>();
+		for (String FI : input.split("\n")) {
+			Human human = findMostSimilarHuman(FI, searchFrom);
+			if (human != null)
+				result.put(FI, human);
+		}
+		return result;
 	}
 }

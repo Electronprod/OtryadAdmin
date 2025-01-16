@@ -49,7 +49,7 @@ public class CommanderController {
 	public String mark(Model model) {
 		User user = dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId()).orElseThrow();
 		model.addAttribute("user", user);
-		model.addAttribute("groups", user.getGroups());
+		model.addAttribute("groups", user.getGroups().stream().filter(gr -> gr.isEditable()).toList());
 		model.addAttribute("humanList",
 				dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
 		return "commander/mark";

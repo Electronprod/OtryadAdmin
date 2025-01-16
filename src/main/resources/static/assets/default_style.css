@@ -26,8 +26,7 @@ a {
 	/* Изменено для лучшей адаптивности */
 }
 
-.card,
-.card_2 {
+.card, .card_2 {
 	background-color: #fff;
 	border-radius: 6px;
 	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -47,45 +46,39 @@ a {
 	margin-bottom: 5px;
 }
 
-@media (max-width: 768px) {
+@media ( max-width : 768px) {
 	#dashboard {
 		flex-direction: column;
 		/* Вертикальное направление на мобильных устройствах */
 	}
-
-	.card,
-	.card_2 {
+	.card, .card_2 {
 		padding: 15px;
 		/* Увеличиваем внутренние отступы для меньших экранов */
 	}
 }
 
-@media (min-width: 769px) and (max-width: 1024px) {
+@media ( min-width : 769px) and (max-width: 1024px) {
 	#content {
 		padding: 15px;
 		/* Немного уменьшаем отступы для более компактного представления */
 	}
 }
 
-@media (min-width: 1025px) {
+@media ( min-width : 1025px) {
 	#dashboard {
 		flex-direction: row;
 		/* Горизонтальное направление на больших экранах */
 	}
-
 	#content {
 		padding: 30px;
 	}
-
-	.card,
-	.card_2 {
+	.card, .card_2 {
 		margin-bottom: 25px;
 		/* Предоставляем больше пространства на больших экранах */
 	}
 }
 
 /*Шов между default.css и data.css (старые файлы)*/
-
 input[type="date"] {
 	width: 100%;
 	/* Расширяем до 100% для лучшей адаптивности на меньших экранах */
@@ -117,8 +110,7 @@ thead {
 	color: white;
 }
 
-thead th,
-tbody td {
+thead th, tbody td {
 	padding: 10px;
 	text-align: center;
 }
@@ -147,8 +139,7 @@ select {
 	/* Ограничение максимальной ширины */
 }
 
-button,
-.greenbtn {
+button, .greenbtn {
 	background-color: #4CAF50;
 	color: white;
 	padding: 10px 15px;
@@ -179,11 +170,8 @@ button:hover {
 	background-color: #45a049;
 }
 
-@media (max-width: 768px) {
-
-	input[type="date"],
-	select,
-	button {
+@media ( max-width : 768px) {
+	input[type="date"], select, button {
 		max-width: 100%;
 		/* Убираем фиксированную размерность для небольших экранов */
 		font-size: 14px;
@@ -191,13 +179,10 @@ button:hover {
 		padding: 8px;
 		/* Уменьшенные отступы */
 	}
-
-	table thead th,
-	table tbody td {
+	table thead th, table tbody td {
 		padding: 8px;
 		font-size: 14px;
 	}
-
 	button {
 		padding: 10px;
 		width: 100%;
@@ -205,10 +190,8 @@ button:hover {
 	}
 }
 
-input[type="text"],
-input[type="password"],
-input[type="date"],
-input[type="number"] {
+input[type="text"], input[type="password"], input[type="date"], input[type="number"]
+	{
 	width: 100%;
 	padding: 10px;
 	margin: 5px 0;
@@ -271,4 +254,11 @@ input[type="number"] {
 
 .form-btn:active {
 	background-color: #3e8e41;
+}
+
+button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	background-color: #ddd;
+	color: #aaa;
 }

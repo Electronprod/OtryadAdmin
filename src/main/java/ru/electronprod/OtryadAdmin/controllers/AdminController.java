@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +34,7 @@ import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
+import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 
 @Slf4j
 @Controller
@@ -359,6 +359,17 @@ public class AdminController {
 		return "redirect:/admin/groupmgr?error_unknown";
 	}
 
+	@PostMapping("/groupmgr/change_editable")
+	public ResponseEntity<String> groupManager_change_editable(@RequestParam() int id) {
+		Optional<Group> group = dbservice.getGroupRepository().findById(id);
+		if (group.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Group not found"));
+		Group gr = group.get();
+		gr.setEditable(!gr.isEditable());
+		dbservice.getGroupRepository().save(gr);
+		return ResponseEntity.accepted().body(Answer.success());
+	}
+
 	@PostMapping("/groupmgr/delete")
 	@Transactional
 	public ResponseEntity<String> groupManager_delete(@RequestParam() int id) throws InterruptedException {
@@ -597,5 +608,22 @@ public class AdminController {
 	public ResponseEntity<String> log_clear(Model model) {
 		FileOptions.writeFile("", new File("log.txt"));
 		return ResponseEntity.ok(Answer.success());
+	}
+
+	@GetMapping("/recognize")
+	public String recognize(Model model) {
+		return "public/recognize";
+	}
+
+	@PostMapping("/recognize")
+	public String recognize_result(String input, Model model) {
+		try {
+			model.addAttribute("result",
+					SearchUtil.recognizeHumansFromString(input, dbservice.getHumanRepository().findAll()));
+			model.addAttribute("groups", dbservice.getGroupRepository().findAll());
+			return "public/recognize_result";
+		} catch (Exception e) {
+			return "redirect:/admin/recognize?error_unknown&" + e.getMessage();
+		}
 	}
 }

@@ -69,3 +69,10 @@ async function remove(id) {
 		}
 	}
 }
+async function changeStatus(btn, id) {
+	const success = await sendPostData("/admin/groupmgr/change_editable?id=" + id);
+	if (success) {
+		showNotification("Статус группы обновлен", "Изменения отобразятся после перезагрузки страницы.", "success");
+		btn.disabled = true;
+	}
+}

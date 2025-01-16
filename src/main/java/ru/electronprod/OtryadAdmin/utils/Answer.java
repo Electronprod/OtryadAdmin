@@ -16,6 +16,20 @@ public class Answer {
 	}
 
 	/**
+	 * OK
+	 * 
+	 * @param message - message to send to client
+	 * @return String answer
+	 */
+	@SuppressWarnings("unchecked")
+	public static String success(String message) {
+		JSONObject o = new JSONObject();
+		o.put("result", "success");
+		o.put("message", message);
+		return o.toJSONString();
+	}
+
+	/**
 	 * FAIL
 	 * 
 	 * @param message - message to send to client
