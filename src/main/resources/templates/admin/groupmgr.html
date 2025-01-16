@@ -37,6 +37,22 @@
 .delete-btn:hover {
 	background-color: darkred;
 }
+
+.change-status-1-btn {
+	background-color: blue;
+}
+
+.change-status-1-btn:hover {
+	background-color: darkblue;
+}
+
+.change-status-2-btn {
+	background-color: orange;
+}
+
+.change-status-2-btn:hover {
+	background-color: darkorange;
+}
 </style>
 </head>
 
@@ -52,8 +68,11 @@
 			</div>
 			<div class="card">
 				<h3>Создать новую группу</h3>
-				<p>Название должно отображать суть группы. Например: "Хореография, группа девочек" или "Зимняя сказка". Командир
-					группы отмечает ребят в группе, и никто больше этого делать не может.</p>
+				<p>
+					Название должно отображать суть группы. Например: "Хореография, группа девочек" или "Зимняя сказка". Командир
+					группы отмечает ребят в группе, и никто больше этого делать не может.<br> <b>МЕНЯТЬ НАЗВАНИЕ И КОМАНДИРА
+						НЕЛЬЗЯ!!!</b>
+				</p>
 				<form th:action="@{/admin/groupmgr/add}" method="post">
 					<input placeholder="Название группы" name="name" type="text" required /> <label for="marker">Выберите
 						командира:</label> <select id="marker" name="marker">
@@ -64,12 +83,19 @@
 			</div>
 			<div class="card">
 				<h2>Все группы:</h2>
+				<p>
+					<strong>Что делают действия "Заморозить" и "Удалить"?</strong><br> <u>При заморозке группы</u> возможность
+					проставлять отметки отключается. <br> <u>При удалении группы</u> будет удалена только информация о самой
+					группе: название, члены группы, командир. Это сделает невозможным удобный просмотр статистики в панели наблюдателя,
+					однако все статистические записи этой группы не будут удалены.
+				</p>
 				<table>
 					<thead>
 						<tr>
 							<th>Управляет</th>
 							<th>Название</th>
 							<th>Ребят</th>
+							<th>Статус</th>
 							<th>Действия</th>
 						</tr>
 					</thead>
@@ -78,8 +104,13 @@
 							<td th:text="${group.marker.name}"></td>
 							<td th:text="${group.name}"></td>
 							<td th:text="${group.humans.size()}"></td>
+							<td><span th:if="${group.editable==true}">Отмечаемо</span> <span th:if="${group.editable==false}">Заморожено</span></td>
 							<td>
 								<div class="action-buttons">
+									<button th:name="${group.id}" class="button change-status-1-btn" th:if="${group.editable==true}"
+										th:onclick="'changeStatus(this,'+${group.id}+')'">Заморозить</button>
+									<button th:name="${group.id}" class="button change-status-2-btn" th:if="${group.editable==false}"
+										th:onclick="'changeStatus(this,'+${group.id}+')'">Разморозить</button>
 									<a class="button" th:href="@{/admin/groupmgr/manage(id=${group.id})}">Управлять</a>
 									<button class="button delete-btn" th:onclick="'remove('+${group.id}+')'">Удалить</button>
 								</div>

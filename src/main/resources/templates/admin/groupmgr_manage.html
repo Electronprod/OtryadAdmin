@@ -8,6 +8,18 @@
 <script src="/assets/navbar.js"></script>
 <script src="/public_resources/sweetalert2.js"></script>
 <link rel="icon" href="/icon.png">
+<style>
+textarea {
+	width: 100%;
+	height: 100px;
+	margin-top: 15px;
+	padding: 10px;
+	font-size: 1rem;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	resize: none;
+}
+</style>
 </head>
 
 <body>
@@ -47,6 +59,19 @@
 			</tr>
 		</tbody>
 	</table>
+	<div class="overlay" id="overlay">
+		<div class="modal">
+			<h2>Распознать и выполнить</h2>
+			<div class="form-group">
+				<textarea placeholder="Введите ФИ здесь... Каждое ФИ в новой строке."></textarea>
+			</div>
+			<div class="modal-buttons">
+				<button id="addbtn" class="submit-button" onclick="addSquad()">Добавить в группу</button>
+				<button id="editbtn" class="submit-button" onclick="editSquad()">Удалить из группы</button>
+				<button class="close-button" onclick="closeModal()">Закрыть</button>
+			</div>
+		</div>
+	</div>
 </body>
 <script src=" /assets/manager.js"></script>
 <script defer src="/onepage_scripts/groupmgr.js"></script>

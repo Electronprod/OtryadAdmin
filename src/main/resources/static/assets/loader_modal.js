@@ -44,7 +44,7 @@ let loader_text = document.getElementById('loader-text');
 if (!loader_text) {
 	loader_text = document.createElement('div');
 	loader_text.id = 'loader-text';
-	loader_text.textContent = 'Отправка данных';
+	loader_text.textContent = 'Выполняю';
 	document.body.insertBefore(loader_text, document.body.firstChild);
 }
 console.debug("[LOADER_MODAL]: loaded. Object: " + loader_modal);

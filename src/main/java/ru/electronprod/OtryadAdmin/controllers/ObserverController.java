@@ -60,7 +60,8 @@ public class ObserverController {
 				dbservice.getStatsRepository().countDistinctAuthorsByDate(DBService.getStringDate()));
 		model.addAttribute("events",
 				dbservice.getStatsRepository().findDistinctTypesWithoutGroups().stream().sorted().toList());
-		model.addAttribute("groups", dbservice.getGroupRepository().findByMarker(auth.getCurrentUser()));
+		model.addAttribute("groups", dbservice.getGroupRepository().findByMarker(auth.getCurrentUser()).stream()
+				.filter(gr -> gr.isEditable()).toList());
 		return "observer/stats_overview";
 	}
 
