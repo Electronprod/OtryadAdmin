@@ -34,7 +34,6 @@ import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
-import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 
 @Slf4j
 @Controller
@@ -608,22 +607,5 @@ public class AdminController {
 	public ResponseEntity<String> log_clear(Model model) {
 		FileOptions.writeFile("", new File("log.txt"));
 		return ResponseEntity.ok(Answer.success());
-	}
-
-	@GetMapping("/recognize")
-	public String recognize(Model model) {
-		return "public/recognize";
-	}
-
-	@PostMapping("/recognize")
-	public String recognize_result(String input, Model model) {
-		try {
-			model.addAttribute("result",
-					SearchUtil.recognizeHumansFromString(input, dbservice.getHumanRepository().findAll()));
-			model.addAttribute("groups", dbservice.getGroupRepository().findAll());
-			return "public/recognize_result";
-		} catch (Exception e) {
-			return "redirect:/admin/recognize?error_unknown&" + e.getMessage();
-		}
 	}
 }

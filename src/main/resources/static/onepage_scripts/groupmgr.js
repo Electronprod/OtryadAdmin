@@ -76,3 +76,44 @@ async function changeStatus(btn, id) {
 		btn.disabled = true;
 	}
 }
+async function recognize(action) {
+	const toRecognize = document.getElementById("recognize-input");
+	const linesArray = toRecognize.value.split("\n");
+	let result = [];
+	console.info("Input: ", linesArray);
+	if (linesArray[0] == "") {
+		showNotification("Ошибка распознавания", "Не найдены входные данные.", "error");
+		closeModal();
+		return;
+	}
+	linesArray.forEach(human => {
+		result.push(findMostSimiliarHuman(human, getHumansFromTable(1, 2, 0, "userTable")));
+	});
+	console.log("Recognizing result: ", result);
+	const modal = await
+		swal.fire({
+			title: 'Вы уверены?',
+			text: "Вы понимаете, что механизмы распознавания могут ошибиться? Вы проверите результат их работы?",
+			icon: 'warning',
+			showCancelButton: true,
+			confirmButtonColor: '#3085d6',
+			cancelButtonColor: '#d33',
+			confirmButtonText: 'Да, я понимаю!',
+			cancelButtonText: 'Отмена'
+		});
+	if (modal.isConfirmed) {
+		result.forEach(human => {
+			if (action) {
+				addGroup(human.id);
+			} else {
+				removeGroup(human.id);
+			}
+		});
+		Swal.fire({
+			title: "Готово!",
+			text: "Распознавание выполнило свою работу",
+			icon: "success"
+		});
+	}
+	closeModal();
+}
