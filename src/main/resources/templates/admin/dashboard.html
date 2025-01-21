@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Административная панель</title>
+<title>Панель адмистратора</title>
 <link rel="stylesheet" href="/assets/default_style.css">
 <link rel="icon" href="/icon.png">
 <script src="/assets/navbar.js"></script>
@@ -32,9 +32,8 @@ textarea:focus {
 }
 </style>
 </head>
-
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
@@ -46,7 +45,7 @@ textarea:focus {
 			</div>
 			<div class="card">
 				<h3>Информация о сборке</h3>
-				<p>Просмотрите информацию о сборке приложения.</p>
+				<p>Здесь можно посмотреть информацию об имени приложения, версии, времени сборки и т.д.</p>
 				<details class="cardc">
 					<summary>Нажмите, чтобы посмотреть</summary>
 					<ul>
@@ -57,18 +56,18 @@ textarea:focus {
 						<li><b>Group:</b> <span th:text="${appInfo.getGroup()}"></span></li>
 					</ul>
 				</details>
-				<details class="card" th:if="${show_log == true}">
-					<h3>Просмотр лога</h3>
-					<p>Просмотрите лог приложения.</p>
-					<a class="greenbtn" href="/admin/log">Просмотреть</a>
-				</details>
+			</div>
+			<div class="card" th:if="${show_log == true}">
+				<h3>Просмотр лога</h3>
+				<p>У вас включено логирование вывода приложения. Чтобы посмотреть содержимое лога, нажмите на кнопку ниже</p>
+				<a class="greenbtn" href="/admin/log">Открыть лог</a>
 			</div>
 			<div class="card">
-				<h3>Настройка конфигурации приложения</h3>
-				<p>Управляйте основными настройками приложения:</p>
+				<h3>Управлять конфигурацией приложения</h3>
+				<p>Тут вы можете управлять главными настройками приложения, например:</p>
 				<ul>
 					<li>Событиями, доступными для выбора командирами звеньев</li>
-					<li>Причинами пропусков</li>
+					<li>Возможными причинами пропусков</li>
 				</ul>
 				<details class="cardc">
 					<summary>Управлять событиями</summary>

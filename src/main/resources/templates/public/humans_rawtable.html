@@ -2,29 +2,41 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8">
-	<title>Список ребят</title>
-	<link rel="stylesheet" href="/assets/tablemgr.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-	<link rel="icon" href="/icon.png">
+<meta charset="UTF-8">
+<title>Список ребят</title>
+<link rel="stylesheet" href="/assets/tablemgr.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="icon" href="/icon.png">
 </head>
 
 <body>
 	<table id="userTable">
 		<thead>
 			<tr>
-				<th>№<br><button onclick="sortTable(0)" class="sortbtn">Сортировать</button></th>
-				<th>Фамилия<br><button onclick="sortTable(1)" class="sortbtn">Сортировать</button></th>
-				<th>Имя<br><button onclick="sortTable(2)" class="sortbtn">Сортировать</button></th>
-				<th>Отчество<br><button onclick="sortTable(3)" class="sortbtn">Сортировать</button></th>
-				<th>ДР<br><button onclick="sortTable(4)" class="sortbtn">Сортировать</button></th>
-				<th>Школа<br><button onclick="sortTable(5)" class="sortbtn">Сортировать</button></th>
-				<th>Класс<br><button onclick="sortTable(6)" class="sortbtn">Сортировать</button></th>
-				<th>Телефон<br><button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
-				<th>Звено<br><button onclick="sortTable(8)" class="sortbtn">Сортировать</button></th>
-				<th>Командир<br><button onclick="sortTable(9)" class="sortbtn">Сортировать</button></th>
-				<th>Групп<br><button onclick="sortTable(10)" class="sortbtn">Сортировать</button></th>
-				<th>ID<br><button onclick="sortTable(11)" class="sortbtn">Сортировать</button></th>
+				<th>№<br>
+					<button onclick="sortTable(0)" class="sortbtn">Сортировать</button></th>
+				<th>Фамилия<br>
+					<button onclick="sortTable(1)" class="sortbtn">Сортировать</button></th>
+				<th>Имя<br>
+					<button onclick="sortTable(2)" class="sortbtn">Сортировать</button></th>
+				<th>Отчество<br>
+					<button onclick="sortTable(3)" class="sortbtn">Сортировать</button></th>
+				<th>ДР<br>
+					<button onclick="sortTable(4)" class="sortbtn">Сортировать</button></th>
+				<th>Школа<br>
+					<button onclick="sortTable(5)" class="sortbtn">Сортировать</button></th>
+				<th>Класс<br>
+					<button onclick="sortTable(6)" class="sortbtn">Сортировать</button></th>
+				<th>Телефон<br>
+					<button onclick="sortTable(7)" class="sortbtn">Сортировать</button></th>
+				<th>Звено<br>
+					<button onclick="sortTable(8)" class="sortbtn">Сортировать</button></th>
+				<th>Командир<br>
+					<button onclick="sortTable(9)" class="sortbtn">Сортировать</button></th>
+				<th>Группы<br>
+					<button onclick="sortTable(10)" class="sortbtn">Сортировать</button></th>
+				<th>ID<br>
+					<button onclick="sortTable(11)" class="sortbtn">Сортировать</button></th>
 			</tr>
 		</thead>
 		<tbody>
@@ -39,7 +51,7 @@
 				<td th:text="${human.phone}"></td>
 				<td th:text="${human.squad.squadName}"></td>
 				<td th:text="${human.squad.commander.name}"></td>
-				<td th:text="${human.groups.size()}"></td>
+				<td th:text="${human.showGroups()}"></td>
 				<td th:text="${human.id}"></td>
 			</tr>
 		</tbody>
@@ -51,10 +63,13 @@
 </body>
 <script src="/assets/mgr.js"></script>
 <script>
-	document.getElementById("sheetjsexport").addEventListener('click', function () {
-		var wb = XLSX.utils.table_to_book(document.getElementById("userTable"));
-		XLSX.writeFile(wb, "humans.xlsx");
-	});
+	document.getElementById("sheetjsexport").addEventListener(
+			'click',
+			function() {
+				var wb = XLSX.utils.table_to_book(document
+						.getElementById("userTable"));
+				XLSX.writeFile(wb, "humans.xlsx");
+			});
 </script>
 
 </html>

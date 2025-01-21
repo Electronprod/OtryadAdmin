@@ -37,7 +37,6 @@
 				<th onclick="sortTable(1)">Имя</th>
 				<th onclick="sortTable(2)">Отчество</th>
 				<th onclick="sortTable(3)">Командир</th>
-				<th onclick="sortTable(4)">Группы</th>
 				<th>Действия</th>
 			</tr>
 		</thead>
@@ -47,7 +46,6 @@
 				<td th:text="${human.name}"></td>
 				<td th:text="${human.surname}"></td>
 				<td th:text="${human.squad.commander.name}"></td>
-				<td th:text="${human.showGroups()}"></td>
 				<td>
 					<div class="action-buttons">
 						<a class="button" th:href="@{/admin/humanmgr/fullinfo(id=${human.id})}">Подробнее</a>
