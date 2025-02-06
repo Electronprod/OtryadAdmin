@@ -8,7 +8,6 @@ const savepass = "Оставить старый";
 function showAddUser() {
 	document.getElementById('login').value = "";
 	document.getElementById('password').value = "";
-	document.getElementById('role').value = "";
 	document.getElementById('name').value = "";
 	var oldButton = document.getElementById('editbtn');
 	var newButton = document.getElementById('addbtn');

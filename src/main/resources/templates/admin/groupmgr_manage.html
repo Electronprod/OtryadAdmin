@@ -24,7 +24,7 @@ textarea {
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<input type="hidden" id="groupid" th:value="${group.id}"></input>
 	<div class="header">
@@ -34,7 +34,7 @@ textarea {
 		<p>У людей, кто не состоит в этой группе доступна кнопка "Добавить". У тех, кто в группе - "Удалить"</p>
 	</div>
 	<input style="padding: 10px; margin-bottom: 10px; width: 100%;" type="text" id="searchInput"
-		placeholder="Введите имя или фамилию для поиска..." onkeyup="search_human(0,1,'userTable')" />
+		placeholder="Введите имя или фамилию для поиска..." onkeyup="search_human(1,2,'userTable')" />
 	<table id="userTable">
 		<thead>
 			<tr>
@@ -46,7 +46,7 @@ textarea {
 		</thead>
 		<tbody>
 			<tr th:each="human : ${humans}">
-				<td th:text="${human.id}"></td>
+				<td th:text="${human.id}" style="display: none"></td>
 				<td th:text="${human.lastname}"></td>
 				<td th:text="${human.name}"></td>
 				<td th:text="${human.squad.commander.name}"></td>
@@ -63,6 +63,9 @@ textarea {
 	</table>
 	<div class="floating-button" onclick="showModal()">
 		<i class="fas fa-plus"></i>
+	</div>
+	<div class="floating-button-2" onclick="window.history.back()">
+		<i class="fas fa-backward"></i>
 	</div>
 	<div class="overlay" id="overlay">
 		<div class="modal">

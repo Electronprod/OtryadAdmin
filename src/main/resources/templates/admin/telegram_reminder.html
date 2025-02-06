@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>Управление группами</title>
+<link rel="stylesheet" href="/assets/default_style.css">
+<script src="/assets/navbar.js"></script>
+<script src="/public_resources/sweetalert2.js"></script>
+<link rel="icon" href="/icon.png">
+<link rel="stylesheet" href="/public_resources/flatpickr.min.css">
+<script src="/public_resources/flatpickr.js"></script>
+</head>
+
+<body>
+	<!--CSRF Attack Protection-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="dashboard">
+		<div id="content">
+			<div class="card">
+				<h2>Отправить напоминание</h2>
+				<form action="/admin/telegram/addremind" method="post"></form>
+			</div>
+			<div class="card">
+				<h2>Управление автоматическими напоминаниями</h2>
+			</div>
+			<div class="card">
+				<h2>Управление напоминаниями по расписанию</h2>
+				<div class="card_2">
+					<h3>Добавить расписание напоминаний</h3>
+					<p>Рекомендуется добавлять расписание раз в месяц.</p>
+					<form action="/admin/telegram/addremind" method="post">
+						<label>Выберите даты:</label> <input type="text" id="datePicker" name="selectedDates" placeholder="Выберите даты"
+							required> <label>Выберите время проверки:</label> <input type="time" id="timePicker" name="selectedTime"
+							required> <label>Выберите название события:</label> <input type="text" id="nameField" name="name"
+							placeholder="Выберите название события" required><label>Кому отправлять:</label><select id="whom"
+							name="whom">
+							<option value="0">Всем командирам звеньев</option>
+							<option value="1">Командирам звеньев, от которых не получены отметки в этот день</option>
+							<option value="2">Всем командирам</option>
+							<option value="3">Всем</option>
+						</select>
+						<button type="submit">Отправить</button>
+					</form>
+				</div>
+				<h3>Существующие правила напоминаний</h3>
+				<table>
+					<thead>
+						<tr>
+							<th>Дата</th>
+							<th>Время</th>
+							<th>Название</th>
+							<th>Кому</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="entry : ${eventtypes}">
+							<td th:text="${entry.getName()}"></td>
+							<td th:text="${entry.getEvent()}"></td>
+							<td th:text="${entry.isCanSetReason() ? 'Да' : 'Нет'}"></td>
+							<td>
+								<form th:action="@{/admin/stats/personal/table_id}" method="post" style="display: inline;">
+									<input type="hidden" name="event" th:value="${entry.getEvent()}" />
+									<button class="admin-button" type="submit">Удалить</button>
+								</form>
+						</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	flatpickr("#datePicker", {
+		mode : "multiple",
+		dateFormat : "d.m.Y",
+		locale : "ru"
+	});
+</script>
+</html>

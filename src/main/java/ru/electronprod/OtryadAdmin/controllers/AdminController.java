@@ -24,14 +24,17 @@ import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import ru.electronprod.OtryadAdmin.data.ChatRepository;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
+import ru.electronprod.OtryadAdmin.models.Chat;
 import ru.electronprod.OtryadAdmin.models.Group;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
+import ru.electronprod.OtryadAdmin.telegram.BotService;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
@@ -45,7 +48,11 @@ public class AdminController {
 	@Autowired
 	private AuthHelper auth;
 	@Autowired
+	private ChatRepository chatRep;
+	@Autowired
 	private BuildProperties appInfo;
+	@Autowired
+	private BotService botServ;
 
 	/*
 	 * Main page
@@ -604,8 +611,63 @@ public class AdminController {
 	}
 
 	@PostMapping("/log/clear")
-	public ResponseEntity<String> log_clear(Model model) {
+	public ResponseEntity<String> log_clear() {
 		FileOptions.writeFile("", new File("log.txt"));
 		return ResponseEntity.ok(Answer.success());
+	}
+
+	/*
+	 * Chats
+	 */
+	@GetMapping("/chatsmgr")
+	public String chatsManager(Model model) {
+		model.addAttribute("users",
+				dbservice.getUserRepository().findAll().stream().filter(user -> user.getTelegram() == null).toList());
+		model.addAttribute("chats", chatRep.findAll());
+		return "admin/chatsmgr";
+	}
+
+	@PostMapping("/chatsmgr/connect")
+	public ResponseEntity<String> chatsManager_connect(@RequestParam Long id, @RequestParam int userid) {
+		Optional<User> optUser = dbservice.getUserRepository().findById(userid);
+		if (optUser.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("User not found"));
+		Optional<Chat> optChat = chatRep.findById(id);
+		if (optChat.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Chat not found"));
+		User user = optUser.get();
+		Chat chat = optChat.get();
+		chat.setOwner(user);
+		chatRep.save(chat);
+		botServ.sendRegisteredGreeting(chat);
+		return ResponseEntity.ok(Answer.success());
+	}
+
+	@PostMapping("/chatsmgr/disconnect")
+	public ResponseEntity<String> chatsManager_disconnect(@RequestParam Long id) {
+		Optional<Chat> chat1 = chatRep.findById(id);
+		if (chat1.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Chat not found"));
+		Chat chat = chat1.get();
+		if (chat.getOwner() == null)
+			return ResponseEntity.status(404).body(Answer.fail("User has not been connected before"));
+		botServ.sendParting(chat);
+		User user = chat.getOwner();
+		user.setTelegram(null);
+		chat.setOwner(null);
+		chatRep.save(chat);
+		dbservice.getUserRepository().save(user);
+		return ResponseEntity.ok(Answer.success());
+	}
+
+	@PostMapping("/chatsmgr/delete")
+	public ResponseEntity<String> chatsManager_remove(@RequestParam Long id) {
+		chatRep.deleteById(id);
+		return ResponseEntity.ok(Answer.success());
+	}
+
+	@GetMapping("/telegram")
+	public String telegram() {
+		return "admin/telegram_reminder";
 	}
 }

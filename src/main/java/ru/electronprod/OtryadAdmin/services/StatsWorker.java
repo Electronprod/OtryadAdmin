@@ -26,6 +26,7 @@ import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
+import ru.electronprod.OtryadAdmin.telegram.BotService;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
 @Slf4j
@@ -33,6 +34,8 @@ import ru.electronprod.OtryadAdmin.utils.FileOptions;
 public class StatsWorker {
 	@Autowired
 	private DBService dbservice;
+	@Autowired
+	private BotService botServ;
 
 	public Map<Human, Integer> getEventReport(List<StatsRecord> typedStats) {
 		Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
@@ -181,6 +184,7 @@ public class StatsWorker {
 			throw new Exception("Error saving stats records to database!");
 		log.info("User " + user.getLogin() + " (" + user.getRole() + ") marked " + resultRecords.size()
 				+ " people. EventID: " + event_id);
+		botServ.sendMarkedNotification(user, event);
 		return event_id;
 	}
 
@@ -217,6 +221,7 @@ public class StatsWorker {
 			throw new Exception("Error saving stats records to database!");
 		log.info("User " + user.getLogin() + " (" + user.getRole() + ") marked " + resultRecords.size()
 				+ " people. EventID: " + event_id);
+		botServ.sendMarkedNotification(user, event);
 		return event_id;
 	}
 }

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>Чаты Telegram</title>
+<link rel="stylesheet" href="/assets/manager.css">
+<script src="/assets/navbar.js"></script>
+<script src="/public_resources/sweetalert2.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="icon" href="/icon.png">
+<style>
+.change-status-1-btn {
+	background-color: blue;
+}
+
+.change-status-1-btn:hover {
+	background-color: darkblue;
+}
+
+.change-status-2-btn {
+	background-color: orange;
+}
+
+.change-status-2-btn:hover {
+	background-color: darkorange;
+}
+</style>
+</head>
+
+<body>
+	<!--CSRF Attack Protection-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div class="header">
+		<h3>Пользователи Telegram-бота</h3>
+		<p>Здесь перечислены все зарегистрированные пользователи бота</p>
+	</div>
+	<input style="padding: 10px; margin-bottom: 10px; width: 100%;" type="text" id="searchInput"
+		placeholder="Поиск по фамилии или username" onkeyup="search_human(3,4,'userTable')" />
+	<table id="userTable">
+		<thead>
+			<tr>
+				<th onclick="sortTable(1)">ChatID</th>
+				<th onclick="sortTable(2)">Имя</th>
+				<th onclick="sortTable(3)">Фамилия</th>
+				<th onclick="sortTable(4)">Username</th>
+				<th onclick="sortTable(5)">Время Регистрации</th>
+				<th>Действие</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr th:each="chat : ${chats}" th:name="${chat.id}">
+				<td th:text="${chat.id}" style="display: none"></td>
+				<td th:text="${chat.chatId}"></td>
+				<td th:text="${chat.firstname}"></td>
+				<td th:text="${chat.lastname}"></td>
+				<td th:id="${chat.id}+'-username'" th:text="${chat.username}"></td>
+				<td th:text="${chat.regtime}"></td>
+				<td><div class="action-buttons">
+						<button th:name="${chat.id}" class="button change-status-1-btn" th:if="${chat.owner==null}"
+							th:onclick="'connect(' + ${chat.id} + ')'">Привязать</button>
+						<button th:name="${chat.id}" class="button change-status-2-btn" th:if="${chat.owner!=null}"
+							th:onclick="'disconnect('+${chat.id}+')'">Отключить</button>
+						<button class="button delete-btn" th:if="${chat.owner==null}" th:onclick="'remove('+${chat.id}+')'">Удалить</button>
+					</div></td>
+			</tr>
+		</tbody>
+	</table>
+	<div class="floating-button" onclick="window.history.back()">
+		<i class="fas fa-backward"></i>
+	</div>
+	<div class="overlay" id="overlay">
+		<div class="modal">
+			<h2>Укажите пользователя</h2>
+			<div class="form-group">
+				<label for="chat">Telegram</label> <input type="text" disabled id="chat_username" />
+			</div>
+			<div class="form-group">
+				<label for="chat">Пользователь</label> <select id="userid" required>
+					<option th:each="user : ${users}" th:text="${user.name}" th:value="${user.id}"></option>
+				</select>
+			</div>
+			<div class="modal-buttons">
+				<button id="addbtn" class="submit-button" onclick="add()">Добавить</button>
+				<button class="close-button" onclick="closeModal()">Закрыть</button>
+			</div>
+		</div>
+	</div>
+</body>
+<script defer src="/assets/search_table.js"></script>
+<script defer src="/assets/manager.js"></script>
+<script src="/onepage_scripts/chatsmgr.js"></script>
+</html>
