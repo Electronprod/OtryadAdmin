@@ -27,6 +27,9 @@ public class User {
 	private String name;
 	@OneToOne(mappedBy = "commander", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private Squad squad;
+	@OneToOne(mappedBy = "owner", cascade = { CascadeType.PERSIST, CascadeType.MERGE,
+			CascadeType.REMOVE }, orphanRemoval = true)
+	private Chat telegram;
 	@OneToMany(mappedBy = "marker", orphanRemoval = false)
 	private Set<Group> groups = new HashSet<Group>();
 

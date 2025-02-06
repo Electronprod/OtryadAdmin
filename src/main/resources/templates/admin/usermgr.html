@@ -20,7 +20,8 @@
 				<th onclick="sortTable(0)">Логин</th>
 				<th onclick="sortTable(1)">Имя</th>
 				<th onclick="sortTable(2)">Роль</th>
-				<th onclick="sortTable(3)">Есть звено/группа</th>
+				<th onclick="sortTable(3)">Telegram</th>
+				<th onclick="sortTable(4)">Есть звено/группа</th>
 				<th>Действия</th>
 			</tr>
 		</thead>
@@ -29,6 +30,7 @@
 				<td th:text="${user.login}"></td>
 				<td th:text="${user.name}"></td>
 				<td th:text="${user.getRoleText()}"></td>
+				<td th:text="${user.telegram != null} ? 'да' : 'нет'"></td>
 				<td><span th:if="${user.squad != null || !user.groups.isEmpty()}">+</span> <span
 					th:if="${user.squad == null && user.groups.isEmpty()}">-</span></td>
 				<td>
@@ -42,6 +44,9 @@
 	</table>
 	<div class="floating-button" onclick="showAddUser()">
 		<i class="fas fa-plus"></i>
+	</div>
+	<div class="floating-button-2" onclick="window.location.href='/admin/chatsmgr'">
+		<i class="fas fa-paper-plane"></i>
 	</div>
 	<div class="overlay" id="overlay">
 		<div class="modal">
