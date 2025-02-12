@@ -43,6 +43,8 @@ public class SettingsRepository implements InitializingBean {
 	public static final String SECTION_REASONS = "reasons_for_absences";
 	/** Section name constant **/
 	public static final String SECTION_REPLACEMENTS = "replacements";
+	/** Section name constant **/
+	private static final String SECTION_ALARM_CONFIG = "alarm_config";
 
 	/**
 	 * Checks file existence and reads data to memory at startup. If there is a
@@ -98,7 +100,7 @@ public class SettingsRepository implements InitializingBean {
 			JSONObject obj = (JSONObject) o;
 			replacements.put(String.valueOf(obj.get("from")), String.valueOf(obj.get("to")));
 		}
-		log.info("Loaded settings and saved them to memory. File: " + config.getName());
+		log.info("Loaded main settings and saved them to memory. File: " + config.getName());
 	}
 
 	/**
@@ -133,8 +135,32 @@ public class SettingsRepository implements InitializingBean {
 		repls.add(generateReplacement("true", "+"));
 		repls.add(generateReplacement("false", "-"));
 		data.put(SECTION_REPLACEMENTS, repls);
+		data.put(SECTION_ALARM_CONFIG, createAlarmCfg());
 		FileOptions.writeFile(data.toJSONString(), config);
 		log.info("Wrote defaults to " + config.getName());
+	}
+
+	@SuppressWarnings("unchecked")
+	public static JSONObject createAlarmCfg() {
+		JSONObject alarm_conf = new JSONObject();
+		alarm_conf.put("prediction_enabled", String.valueOf(true));
+		alarm_conf.put("prediction_notify_admins", String.valueOf(true));
+		alarm_conf.put("prediction_border_num", String.valueOf(4));
+		alarm_conf.put("notification_schelude_enabled", String.valueOf(false));
+		return alarm_conf;
+	}
+
+	public static JSONObject getAlarmConfig() throws ParseException {
+		JSONObject main = (JSONObject) FileOptions.ParseJS(FileOptions.getFileLine(config));
+		return (JSONObject) main.get(SECTION_ALARM_CONFIG);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void saveAlarmConfig(JSONObject alarm_config) throws ParseException {
+		JSONObject main = (JSONObject) FileOptions.ParseJS(FileOptions.getFileLine(config));
+		main.remove(SECTION_ALARM_CONFIG);
+		main.put(SECTION_ALARM_CONFIG, alarm_config);
+		FileOptions.writeFile(main.toJSONString(), config);
 	}
 
 	/**
