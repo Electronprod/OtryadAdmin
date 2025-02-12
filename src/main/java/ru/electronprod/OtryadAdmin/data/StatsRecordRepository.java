@@ -30,6 +30,12 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.group = :group ORDER BY s.type")
 	List<String> findDistinctTypesGroup(@Param("group") String group);
 
+	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.user_role = :user_role AND s.date = :date ORDER BY s.type")
+	List<String> findDistinctTypesByDate(@Param("user_role") String user_role, @Param("date") String date);
+
+	@Query("SELECT DISTINCT s.author FROM StatsRecord s WHERE s.user_role = :user_role AND s.date = :date ORDER BY s.author")
+	List<String> findDistinctAuthorsByDate(@Param("user_role") String user_role, @Param("date") String date);
+
 	List<StatsRecord> findByDateAndAuthor(String date, String author);
 
 	List<StatsRecord> findByDateAndAuthor(String date, String author, Sort sort);

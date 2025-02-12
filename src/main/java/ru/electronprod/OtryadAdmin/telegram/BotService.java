@@ -61,11 +61,31 @@ public class BotService {
 		});
 	}
 
+	public void sendMessage(String content, String author, ru.electronprod.OtryadAdmin.models.Chat chat) {
+		CompletableFuture.runAsync(() -> {
+			sendMessage(chat.getChatId(), lang.get("send").replace("%content%", content).replace("%author%", author));
+		});
+	}
+
 	public void sendMarkedNotification(ru.electronprod.OtryadAdmin.models.User user, String eventName) {
 		CompletableFuture.runAsync(() -> {
 			Optional<ru.electronprod.OtryadAdmin.models.Chat> chat = chatRep.findByOwner(user);
 			if (chat.isPresent())
 				sendMessage(chat.orElseThrow().getChatId(), lang.get("marked").replace("%event%", eventName));
+		});
+	}
+
+	public void sendRemainderAutodetect(String eventName, ru.electronprod.OtryadAdmin.models.Chat chat) {
+		CompletableFuture.runAsync(() -> {
+			sendMessage(chat.getChatId(), lang.get("remainder_autodetect").replace("%eventname%", eventName));
+		});
+	}
+
+	public void sendRemainderFrom(String title, String content, String author,
+			ru.electronprod.OtryadAdmin.models.Chat chat) {
+		CompletableFuture.runAsync(() -> {
+			sendMessage(chat.getChatId(), lang.get("remainder_authored").replace("%eventname%", title)
+					.replace("%content%", content).replace("%author%", author));
 		});
 	}
 }

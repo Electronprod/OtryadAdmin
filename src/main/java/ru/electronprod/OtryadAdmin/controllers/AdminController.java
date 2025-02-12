@@ -667,7 +667,32 @@ public class AdminController {
 	}
 
 	@GetMapping("/telegram")
-	public String telegram() {
+	public String telegram(Model model) {
+		model.addAttribute("users",
+				dbservice.getUserRepository().findAll().stream().filter(user -> user.getTelegram() != null).toList());
 		return "admin/telegram_reminder";
+	}
+
+	@PostMapping("/telegram/sendremind")
+	public ResponseEntity<String> telegram_sendremind(@RequestParam String eventname, @RequestParam String description,
+			int userid) {
+		Optional<User> optUser = dbservice.getUserRepository().findById(userid);
+		if (optUser.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("User not found"));
+		Chat chat = optUser.get().getTelegram();
+		if (chat != null)
+			botServ.sendRemainderFrom(eventname, description, auth.getCurrentUser().getName(), chat);
+		return ResponseEntity.ok(Answer.success());
+	}
+
+	@PostMapping("/telegram/sendmessage")
+	public ResponseEntity<String> telegram_sendmessage(@RequestParam String message, int userid) {
+		Optional<User> optUser = dbservice.getUserRepository().findById(userid);
+		if (optUser.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("User not found"));
+		Chat chat = optUser.get().getTelegram();
+		if (chat != null)
+			botServ.sendMessage(message, auth.getCurrentUser().getName(), chat);
+		return ResponseEntity.ok(Answer.success());
 	}
 }
