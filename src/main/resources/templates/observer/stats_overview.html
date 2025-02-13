@@ -52,7 +52,7 @@
 					<p>
 						<b>Количество пропусков:</b> <span th:text="${people_missed_today}"></span><br> <b>Количество посещений:</b>
 						<span th:text="${people_attended_today}"></span><br> <b>Сегодня ребят отметили:</b> <span
-							th:text="${commanders_marked_today}"></span> командиров. <a href="#" onclick="showWhoMarked()">Подробнее...</a>
+							th:text="${commanders_marked_today}"></span> командиров. <a href="/observer/demand">Подробнее...</a>
 					</p>
 				</div>
 			</div>
@@ -150,79 +150,4 @@
 		</div>
 	</div>
 </body>
-<script>
-document.getElementById("date").valueAsDate = new Date();
-	if (window.location.href.includes("error_notfound")) {
-		Swal.fire({
-			title: "ОШИБКА!",
-			text: "Обьект не найден в базе данных.",
-			icon: "error"
-		});
-	}
-	function showWhoMarked() {
-		Swal.fire({
-			title: 'Введите дату',
-			input: 'date',
-			inputLabel: 'Выберите дату',
-			inputValue: new Date().toISOString().split('T')[0],
-			showCancelButton: true,
-			inputValidator: (value) => {
-				if (!value) {
-					return 'Вы должны ввести дату!'
-				}
-			}
-		}).then((result) => {
-			if (result.isConfirmed) {
-				const date = result.value;
-				const url = `/api/observer/marks?date=${date}`;
-				fetch(url)
-					.then(response => response.json())
-					.then(data => {
-						let content = `
-	                            <table>
-	                                <thead>
-	                                    <tr>
-	                                        <th>Роль</th>
-	                                        <th>Имя</th>
-	                                        <th>События</th>
-	                                    </tr>
-	                                </thead>
-	                                <tbody>
-	                        `;
-						data.forEach(item => {
-							content += `
-	                                <tr>
-	                                    <td>${item.role}</td>
-	                                    <td>${item.name}</td>
-	                                    <td>${item.events.join(", ")}</td>
-	                                </tr>
-	                            `;
-						});
-						content += `
-	                                </tbody>
-	                            </table>
-	                        `;
-						Swal.fire({
-							title: 'Отметки за ' + date,
-							html: content,
-							width: 800,
-							padding: '1em',
-							background: '#fff',
-							showCloseButton: true,
-							icon: 'info'
-						});
-					})
-					.catch(error => {
-						console.log(error);
-						Swal.fire({
-							title: 'Ошибка',
-							text: 'Не удалось получить данные',
-							icon: 'error'
-						});
-					});
-			}
-		});
-	}
-</script>
-
 </html>

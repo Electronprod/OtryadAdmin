@@ -8,7 +8,6 @@ body {
 
 #userTableWrapper {
 	overflow-x: auto;
-	/* Добавляем горизонтальную прокрутку */
 	padding: 20px;
 	box-sizing: border-box;
 }
@@ -22,21 +21,17 @@ table {
 	table-layout: auto;
 }
 
-th,
-td {
+th, td {
 	padding: 10px;
 	text-align: center;
 	border-bottom: 1px solid #ccc;
 	white-space: nowrap;
-	/* Сохраняет текст внутри ячеек в одну строку */
 }
 
 th {
 	position: sticky;
 	top: 0;
-	/* Закрепляет заголовки таблицы */
 	z-index: 2;
-	/* Чтобы заголовки были поверх остальных ячеек */
 	background-color: #f2f2f2;
 }
 
@@ -74,19 +69,18 @@ tr:hover {
 	background-color: #0056b3;
 }
 
-/* Адаптивные стили для мобильных устройств */
 @media (max-width: 600px) {
-
-	th,
-	td {
-		padding: 8px;
+	.bottomPanel {
+		height: 150px;
 	}
-
 	.btn {
-		padding: 8px;
-		font-size: 14px;
+		margin: 100px 0;
+		font-size: 18px;
+		padding: 70px;
 	}
-
+	th, td {
+		padding: 8px;
+	}
 	#userTableWrapper {
 		padding: 10px;
 	}

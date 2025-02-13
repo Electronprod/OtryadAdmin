@@ -2,14 +2,15 @@ package ru.electronprod.OtryadAdmin.telegram;
 
 import java.sql.Timestamp;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
+import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
+import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
 import ru.electronprod.OtryadAdmin.data.ChatRepository;
@@ -49,43 +50,49 @@ public class BotService {
 		return chatRep.findByChatId(chatID).isPresent();
 	}
 
-	public void sendRegisteredGreeting(ru.electronprod.OtryadAdmin.models.Chat chat) {
-		CompletableFuture.runAsync(() -> {
-			sendMessage(chat.getChatId(), lang.get("registered"));
-		});
+	@Async
+	public void sendPreparedMessage(String key, ru.electronprod.OtryadAdmin.models.Chat chat) {
+		sendMessage(chat.getChatId(), lang.get(key));
 	}
 
-	public void sendParting(ru.electronprod.OtryadAdmin.models.Chat chat) {
-		CompletableFuture.runAsync(() -> {
-			sendMessage(chat.getChatId(), lang.get("parting"));
-		});
+	@Async
+	public void sendSignedMessage(String content, String author, ru.electronprod.OtryadAdmin.models.Chat chat) {
+		sendMessage(chat.getChatId(), lang.get("send").replace("%content%", content).replace("%author%", author));
 	}
 
-	public void sendMessage(String content, String author, ru.electronprod.OtryadAdmin.models.Chat chat) {
-		CompletableFuture.runAsync(() -> {
-			sendMessage(chat.getChatId(), lang.get("send").replace("%content%", content).replace("%author%", author));
-		});
-	}
-
-	public void sendMarkedNotification(ru.electronprod.OtryadAdmin.models.User user, String eventName) {
-		CompletableFuture.runAsync(() -> {
-			Optional<ru.electronprod.OtryadAdmin.models.Chat> chat = chatRep.findByOwner(user);
-			if (chat.isPresent())
-				sendMessage(chat.orElseThrow().getChatId(), lang.get("marked").replace("%event%", eventName));
-		});
-	}
-
-	public void sendRemainderAutodetect(String eventName, ru.electronprod.OtryadAdmin.models.Chat chat) {
-		CompletableFuture.runAsync(() -> {
-			sendMessage(chat.getChatId(), lang.get("remainder_autodetect").replace("%eventname%", eventName));
-		});
-	}
-
-	public void sendRemainderFrom(String title, String content, String author,
+	@Async
+	public void sendSignedReminder(String title, String content, String author,
 			ru.electronprod.OtryadAdmin.models.Chat chat) {
-		CompletableFuture.runAsync(() -> {
-			sendMessage(chat.getChatId(), lang.get("remainder_authored").replace("%eventname%", title)
-					.replace("%content%", content).replace("%author%", author));
-		});
+		sendMessage(chat.getChatId(), lang.get("reminder_authored").replace("%eventname%", title)
+				.replace("%content%", content).replace("%author%", author));
+		chat.setRemaindsCounter(chat.getRemaindsCounter() + 1);
+		chatRep.save(chat);
+	}
+
+	@Async
+	public void sendNotification_marked(ru.electronprod.OtryadAdmin.models.User user, String eventName) {
+		Optional<ru.electronprod.OtryadAdmin.models.Chat> chat = chatRep.findByOwner(user);
+		if (chat.isPresent()) {
+			if (chat.get().isSendMarkedNotification()) {
+				var msg = new SendMessage(chat.orElseThrow().getChatId(),
+						lang.get("marked").replace("%event%", eventName)).parseMode(ParseMode.HTML)
+						.replyMarkup(getNotification_marked_button(chat.orElseThrow()));
+				BotConfig.telegramBot.execute(msg);
+			}
+		}
+	}
+
+	public InlineKeyboardMarkup getNotification_marked_button(ru.electronprod.OtryadAdmin.models.Chat chat) {
+		InlineKeyboardMarkup newKeyboard;
+		if (chat.isSendMarkedNotification()) {
+			newKeyboard = new InlineKeyboardMarkup(
+					new InlineKeyboardButton[] { new InlineKeyboardButton(lang.get("switch_off_mark_notifications"))
+							.callbackData("switch_mark_notifications") });
+		} else {
+			newKeyboard = new InlineKeyboardMarkup(
+					new InlineKeyboardButton[] { new InlineKeyboardButton(lang.get("switch_on_mark_notifications"))
+							.callbackData("switch_mark_notifications") });
+		}
+		return newKeyboard;
 	}
 }

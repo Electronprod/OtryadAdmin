@@ -4,7 +4,6 @@ body {
 	margin: 0;
 	padding: 0;
 	line-height: 1.6;
-	/* Улучшенное отображение текста на разных экранах */
 }
 
 a {
@@ -14,16 +13,13 @@ a {
 #dashboard {
 	display: flex;
 	flex-wrap: wrap;
-	/* Разрешает перенос с flex-direction: row */
 }
 
 #content {
 	flex-grow: 1;
 	padding: 20px;
 	box-sizing: border-box;
-	/* Предотвращает переполнение за границы */
 	width: 100%;
-	/* Изменено для лучшей адаптивности */
 }
 
 .card, .card_2 {
@@ -49,41 +45,33 @@ a {
 @media ( max-width : 768px) {
 	#dashboard {
 		flex-direction: column;
-		/* Вертикальное направление на мобильных устройствах */
 	}
 	.card, .card_2 {
 		padding: 15px;
-		/* Увеличиваем внутренние отступы для меньших экранов */
 	}
 }
 
 @media ( min-width : 769px) and (max-width: 1024px) {
 	#content {
 		padding: 15px;
-		/* Немного уменьшаем отступы для более компактного представления */
 	}
 }
 
 @media ( min-width : 1025px) {
 	#dashboard {
 		flex-direction: row;
-		/* Горизонтальное направление на больших экранах */
 	}
 	#content {
 		padding: 30px;
 	}
 	.card, .card_2 {
 		margin-bottom: 25px;
-		/* Предоставляем больше пространства на больших экранах */
 	}
 }
 
-/*Шов между default.css и data.css (старые файлы)*/
 input[type="date"] {
 	width: 100%;
-	/* Расширяем до 100% для лучшей адаптивности на меньших экранах */
 	max-width: 250px;
-	/* Ограничиваем максимальную ширину, чтобы не занимать слишком много места */
 	padding: 10px;
 	border: 1px solid #ccc;
 	border-radius: 5px;
@@ -134,9 +122,7 @@ select {
 	border-radius: 4px;
 	border: 1px solid #ccc;
 	width: 100%;
-	/* Заполняет всю ширину */
 	max-width: 250px;
-	/* Ограничение максимальной ширины */
 }
 
 button, .greenbtn {
@@ -173,11 +159,8 @@ button:hover {
 @media ( max-width : 768px) {
 	input[type="date"], select, button {
 		max-width: 100%;
-		/* Убираем фиксированную размерность для небольших экранов */
 		font-size: 14px;
-		/* Небольшое уменьшение размера текста для компактности */
 		padding: 8px;
-		/* Уменьшенные отступы */
 	}
 	table thead th, table tbody td {
 		padding: 8px;
@@ -186,12 +169,11 @@ button:hover {
 	button {
 		padding: 10px;
 		width: 100%;
-		/* Разместить кнопку на всю ширину */
 	}
 }
 
-input[type="text"], input[type="password"], input[type="date"], input[type="number"],input[type="time"]
-	{
+input[type="text"], input[type="password"], input[type="date"], input[type="number"],
+	input[type="time"] {
 	width: 100%;
 	padding: 10px;
 	margin: 5px 0;
@@ -220,13 +202,11 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 .admin-button {
 	background-color: red;
 	color: white;
-	/* Для лучшей читаемости текста на красном фоне */
 	border: none;
-	/* Убрать рамку, если требуется */
 	padding: 10px 20px;
-	/* Добавить отступы вокруг текста */
 	cursor: pointer;
-	/* Изменить курсор на указатель при наведении */
+	border-radius: 5px;
+	transition: background-color 0.3s, transform 0.2s;
 }
 
 .admin-button:hover {
@@ -250,10 +230,12 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 
 .form-btn:hover {
 	background-color: #45a049;
+	transform: scale(1.02);
 }
 
 .form-btn:active {
 	background-color: #3e8e41;
+	transform: scale(0.98);
 }
 
 button:disabled {

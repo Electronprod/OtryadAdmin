@@ -27,6 +27,10 @@ public class Chat {
 	private Timestamp regtime;
 	private String firstname;
 	private String lastname;
+	@org.hibernate.annotations.ColumnDefault("true")
+	private boolean sendMarkedNotification;
+	@org.hibernate.annotations.ColumnDefault("0")
+	private int remaindsCounter;
 	@OneToOne
 	@JoinColumn(name = "user_id", referencedColumnName = "id")
 	private User owner;
