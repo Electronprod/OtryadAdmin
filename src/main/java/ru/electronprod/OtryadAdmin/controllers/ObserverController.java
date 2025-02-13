@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
+import ru.electronprod.OtryadAdmin.models.Chat;
 import ru.electronprod.OtryadAdmin.models.Group;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
@@ -25,6 +26,7 @@ import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
+import ru.electronprod.OtryadAdmin.telegram.BotService;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 
@@ -39,6 +41,8 @@ public class ObserverController {
 	private AuthHelper auth;
 	@Autowired
 	private StatsWorker statsWorker;
+	@Autowired
+	private BotService botServ;
 
 	@GetMapping("")
 	public String stats_overview(Model model) {
@@ -248,5 +252,39 @@ public class ObserverController {
 	public String humans_data(Model model) {
 		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
 		return "public/humans_rawtable";
+	}
+
+	@GetMapping("/demand")
+	public String telegram(Model model) {
+		model.addAttribute("users",
+				dbservice.getUserRepository().findAll().stream().filter(user -> user.getTelegram() != null).toList());
+		return "observer/demand_marks";
+	}
+
+	@PostMapping("/telegram/sendremind")
+	public ResponseEntity<String> telegram_sendremind(@RequestParam String eventname, @RequestParam String description,
+			int userid) {
+		Optional<User> optUser = dbservice.getUserRepository().findById(userid);
+		if (optUser.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("User not found"));
+		Chat chat = optUser.get().getTelegram();
+		if (chat != null) {
+			botServ.sendSignedReminder(eventname, description, auth.getCurrentUser().getName(), chat);
+			return ResponseEntity.ok(Answer.success());
+		}
+		return ResponseEntity.status(404).body(Answer.fail("Error finding user's telegram."));
+	}
+
+	@PostMapping("/telegram/sendmessage")
+	public ResponseEntity<String> telegram_sendmessage(@RequestParam String message, int userid) {
+		Optional<User> optUser = dbservice.getUserRepository().findById(userid);
+		if (optUser.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("User not found"));
+		Chat chat = optUser.get().getTelegram();
+		if (chat != null) {
+			botServ.sendSignedMessage(message, auth.getCurrentUser().getName(), chat);
+			return ResponseEntity.ok(Answer.success());
+		}
+		return ResponseEntity.status(404).body(Answer.fail("Error finding user's telegram."));
 	}
 }

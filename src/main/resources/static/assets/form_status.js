@@ -2,7 +2,10 @@ loadScript("/assets/loader_modal.js", null);
 if ((typeof Swal === "function") == false) {
 	loadScript("/public_resources/sweetalert2.js", null);
 }
-
+let small = false;
+function setSmall(val) {
+	small = val;
+}
 async function sendData(formElement) {
 	try {
 		showLoader();
@@ -41,6 +44,10 @@ async function sendData(formElement) {
 	}
 }
 function showSuccess(message) {
+	if (small) {
+		showNotification("Успех!", message, "success");
+		return;
+	}
 	Swal.fire({
 		title: "Успех!",
 		text: message,
@@ -55,6 +62,10 @@ function showError(message) {
 	});
 }
 function showError(title, message) {
+	if (small) {
+		showNotification(title, message, "error");
+		return;
+	}
 	Swal.fire({
 		title: title,
 		text: message,
@@ -65,11 +76,21 @@ function handleError(error) {
 	console.error('mark error:', error);
 	showError(`Ошибка при обработке:\n${error}`);
 }
-document.getElementById('sendremaind').addEventListener('submit', function(event) {
-	event.preventDefault();
-	sendData(this);
-});
-document.getElementById('sendmessage').addEventListener('submit', function(event) {
-	event.preventDefault();
-	sendData(this);
-});
+function showNotification(title, text, icon) {
+	Swal.fire({
+		title: title,
+		text: text,
+		icon: icon,
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 3000,
+		timerProgressBar: true,
+		showClass: {
+			popup: 'swal2-show'
+		},
+		hideClass: {
+			popup: 'swal2-hide'
+		}
+	});
+}

@@ -42,15 +42,12 @@ th, td {
 	text-align: center;
 	border-bottom: 1px solid #ccc;
 	white-space: nowrap;
-	/* Сохраняет текст внутри ячеек в одну строку */
 }
 
 th {
 	position: sticky;
 	top: 0;
-	/* Закрепляет заголовки таблицы */
 	z-index: 2;
-	/* Чтобы заголовки были поверх остальных ячеек */
 	background-color: #f2f2f2;
 }
 
@@ -208,8 +205,6 @@ tr:hover {
 	justify-content: center;
 	z-index: 1000;
 }
-
-/* Стили для модальной формы */
 .modal {
 	background-color: white;
 	padding: 20px;

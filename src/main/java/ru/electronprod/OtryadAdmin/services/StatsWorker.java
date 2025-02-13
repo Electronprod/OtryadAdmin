@@ -184,7 +184,7 @@ public class StatsWorker {
 			throw new Exception("Error saving stats records to database!");
 		log.info("User " + user.getLogin() + " (" + user.getRole() + ") marked " + resultRecords.size()
 				+ " people. EventID: " + event_id);
-		botServ.sendMarkedNotification(user, event);
+		botServ.sendNotification_marked(user, event);
 		return event_id;
 	}
 
@@ -221,7 +221,7 @@ public class StatsWorker {
 			throw new Exception("Error saving stats records to database!");
 		log.info("User " + user.getLogin() + " (" + user.getRole() + ") marked " + resultRecords.size()
 				+ " people. EventID: " + event_id);
-		botServ.sendMarkedNotification(user, event);
+		botServ.sendNotification_marked(user, event);
 		return event_id;
 	}
 }
