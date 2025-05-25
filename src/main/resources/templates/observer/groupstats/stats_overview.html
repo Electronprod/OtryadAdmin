@@ -89,11 +89,15 @@
 				</form>
 			</div>
 			<div class="card">
-				<h3>Просмотр отметок в виде таблицы</h3>
-				<p>Просмотрите всю статистику для этого звена в виде таблицы.</p>
-				<form method="get" th:action="@{/observer/stats/group/table}">
+				<h3>Просмотр отметок за все события</h3>
+				<p>Вся статистика, касающаяся этой группы находится здесь.</p>
+				<form th:action="@{/observer/stats/group/report}" method="get" style="display: inline;">
 					<input type="hidden" id="date" name="groupname" th:value="${group.name}" />
-					<button type="submit">Посмотреть</button>
+					<button type="submit">Отметки</button>
+				</form>
+				<form th:action="@{/observer/stats/group/table}" method="get" style="display: inline;">
+					<input type="hidden" id="date" name="groupname" th:value="${group.name}" />
+					<button class="admin-button" type="submit">Таблица отметок</button>
 				</form>
 			</div>
 		</div>

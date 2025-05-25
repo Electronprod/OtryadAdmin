@@ -23,7 +23,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<input type="hidden" id="groupid" th:value="${group.id}" />
 	<input type="hidden" id="groupname" th:value="${group.name}" />

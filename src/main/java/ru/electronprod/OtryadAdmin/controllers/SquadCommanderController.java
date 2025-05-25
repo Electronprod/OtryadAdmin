@@ -19,6 +19,7 @@ import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
 import ru.electronprod.OtryadAdmin.utils.Answer;
+import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 
 @Slf4j
 @Controller
@@ -82,6 +83,13 @@ public class SquadCommanderController {
 		return "public/event_stats";
 	}
 
+	@GetMapping("/stats/event_table")
+	public String stats_eventTable(@RequestParam String event_name, Model model) {
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByTypeAndAuthor(event_name, authHelper.getCurrentUser().getLogin()));
+		return "public/statsview_rawtable";
+	}
+
 	@GetMapping("/stats/date")
 	public String stats_byDateTable(@RequestParam String date, Model model) {
 		try {
@@ -108,6 +116,23 @@ public class SquadCommanderController {
 				model, false);
 		model.addAttribute("person", human.getLastname() + " " + human.getName());
 		return "squadcommander/personal_stats";
+	}
+
+	@GetMapping("/stats/personal_full")
+	public String stats_personal_full(@RequestParam int id, Model model) {
+		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
+		statsHelper.getMainPersonalReportModel(dbservice.getStatsRepository().findByHuman(human), model, true);
+		model.addAttribute("person", human.getLastname() + " " + human.getName());
+		model.addAttribute("human_id", human.getId());
+		return "observer/personal_stats";
+	}
+
+	@GetMapping("/stats/personal_full/table")
+	public String stats_personalTable_full(@RequestParam int id, Model model) {
+		Human human = dbservice.getHumanRepository().findById(id).orElseThrow();
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByHuman(human, Sort.by(Sort.Direction.DESC, "id")));
+		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/personal/table")

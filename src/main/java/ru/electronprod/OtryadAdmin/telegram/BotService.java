@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
@@ -16,6 +15,9 @@ import com.pengrad.telegrambot.request.SendMessage;
 import ru.electronprod.OtryadAdmin.data.ChatRepository;
 import ru.electronprod.OtryadAdmin.data.filesystem.TelegramLanguage;
 
+/**
+ * Provides methods to interact with telegram bot easily
+ */
 @Service
 public class BotService {
 	@Autowired
@@ -23,15 +25,34 @@ public class BotService {
 	@Autowired
 	private ChatRepository chatRep;
 
+	/**
+	 * Sends text message with HTML markup support
+	 * 
+	 * @param chatId  - chat id to send message to
+	 * @param message - message to send
+	 */
 	public void sendMessage(Long chatId, String message) {
 		var msg = new SendMessage(chatId, message).parseMode(ParseMode.HTML);
 		BotConfig.telegramBot.execute(msg);
 	}
 
+	/**
+	 * Returns text message object prepared for sending using telegram with HTML
+	 * markup support
+	 * 
+	 * @param chatId  - chat id to send message to
+	 * @param message - message to send
+	 */
 	public SendMessage sendMessageObject(Long chatId, String message) {
 		return new SendMessage(chatId, message).parseMode(ParseMode.HTML);
 	}
 
+	/**
+	 * Saves information required about chat and user to database
+	 * 
+	 * @param user - User to register
+	 * @param chat - Chat to register
+	 */
 	@Transactional
 	public void registerChat(User user, Chat chat) {
 		if (chatRep.findByChatId(chat.id()).isEmpty()) {
@@ -46,10 +67,23 @@ public class BotService {
 		}
 	}
 
+	/**
+	 * Is this chatID saved to database?
+	 * 
+	 * @param chatID - chat id to check
+	 * @return true/false (found/not found)
+	 */
 	public boolean isRegistered(Long chatID) {
 		return chatRep.findByChatId(chatID).isPresent();
 	}
 
+	/**
+	 * Sends message got by the key from
+	 * {@link ru.electronprod.OtryadAdmin.data.filesystem.TelegramLanguage}
+	 * 
+	 * @param key  - message key
+	 * @param chat - chat to send to
+	 */
 	@Async
 	public void sendPreparedMessage(String key, ru.electronprod.OtryadAdmin.models.Chat chat) {
 		sendMessage(chat.getChatId(), lang.get(key));

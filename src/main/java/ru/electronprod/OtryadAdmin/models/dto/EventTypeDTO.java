@@ -4,7 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
- * DTO used for saving settings in text file
+ * DTO used for saving settings in
+ * {@link ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository}
  */
 @Data
 @AllArgsConstructor

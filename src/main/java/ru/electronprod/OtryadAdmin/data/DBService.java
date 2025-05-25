@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Class provides access to all JPA repositories
+ * Class provides access to master JPA repositories
  */
 @Slf4j
 @Service

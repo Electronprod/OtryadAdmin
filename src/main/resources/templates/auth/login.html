@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -171,7 +170,6 @@ input[type='submit'] {
 }
 </style>
 </head>
-
 <body class="align">
 	<div class="grid">
 		<form method="post" class="form login" action="/process_login">
@@ -179,7 +177,6 @@ input[type='submit'] {
 			<header class="login__header">
 				<h3 class="login__title">Авторизация</h3>
 			</header>
-
 			<div class="login__body">
 				<div class="form__field">
 					<input type="login" name="username" id="username" placeholder="Логин" required />
@@ -188,10 +185,8 @@ input[type='submit'] {
 					<input type="password" name="password" id="password" placeholder="Пароль" required />
 				</div>
 			</div>
-
 			<footer class="login__footer">
 				<input type="submit" value="Войти">
-
 				<p class="error" th:if="${param.error}">Неверный логин или пароль.</p>
 			</footer>
 		</form>

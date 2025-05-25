@@ -1,7 +1,6 @@
 package ru.electronprod.OtryadAdmin.models;
 
 import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.*;
 
