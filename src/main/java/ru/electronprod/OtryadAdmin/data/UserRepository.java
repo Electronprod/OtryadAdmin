@@ -9,6 +9,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+/**
+ * Spring Data JPA repository for
+ * {@link ru.electronprod.OtryadAdmin.models.User}
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 	Optional<User> findByLogin(String login);

@@ -2,7 +2,6 @@ package ru.electronprod.OtryadAdmin.models;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import jakarta.persistence.*;
 import lombok.*;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
@@ -33,6 +32,9 @@ public class User {
 	@OneToMany(mappedBy = "marker", orphanRemoval = false)
 	private Set<Group> groups = new HashSet<Group>();
 
+	/**
+	 * Is used in thymeleaf
+	 */
 	public String getRoleText() {
 		return SettingsRepository.getRoles().get(role);
 	}

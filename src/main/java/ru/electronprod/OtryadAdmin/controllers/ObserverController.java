@@ -241,6 +241,14 @@ public class ObserverController {
 		return "public/statsview_rawtable";
 	}
 
+	@GetMapping("/stats/group/report")
+	public String stats_group_report(@RequestParam String groupname, Model model) {
+		model.addAttribute("data", statsWorker.getEventReport(
+				dbservice.getStatsRepository().findByGroup(groupname, Sort.by(Sort.Direction.DESC, "date"))));
+		model.addAttribute("eventName", groupname);
+		return "public/event_stats";
+	}
+
 	@GetMapping("/stats/group/table")
 	public String stats_group_allTable(@RequestParam String groupname, Model model) {
 		model.addAttribute("statss",

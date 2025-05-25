@@ -4,12 +4,18 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 
+/**
+ * Spring Data JPA repository for
+ * {@link ru.electronprod.OtryadAdmin.models.StatsRecord}
+ */
+@Repository
 public interface StatsRecordRepository extends JpaRepository<StatsRecord, Integer> {
 	List<StatsRecord> findByAuthor(String author);
 
@@ -24,19 +30,14 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.group IS NULL OR s.group = '' ORDER BY s.type")
 	List<String> findDistinctTypesWithoutGroups();
 
-	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.user_role = :user_role ORDER BY s.type")
-	List<String> findDistinctTypes(@Param("user_role") String user_role);
-
 	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.group = :group ORDER BY s.type")
 	List<String> findDistinctTypesGroup(@Param("group") String group);
 
-	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.user_role = :user_role AND s.date = :date ORDER BY s.type")
-	List<String> findDistinctTypesByDate(@Param("user_role") String user_role, @Param("date") String date);
+	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.author = :author ORDER BY s.type")
+	List<String> findDistinctTypesAuthor(@Param("author") String author);
 
-	@Query("SELECT DISTINCT s.author FROM StatsRecord s WHERE s.user_role = :user_role AND s.date = :date ORDER BY s.author")
-	List<String> findDistinctAuthorsByDate(@Param("user_role") String user_role, @Param("date") String date);
-
-	List<StatsRecord> findByDateAndAuthor(String date, String author);
+	@Query("SELECT DISTINCT s.human FROM StatsRecord s WHERE s.author = :author ORDER BY s.human.lastname")
+	List<Human> findDistinctHumansAuthor(@Param("author") String author);
 
 	List<StatsRecord> findByDateAndAuthor(String date, String author, Sort sort);
 

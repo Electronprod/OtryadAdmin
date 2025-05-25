@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
-
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.ChatRepository;
@@ -38,6 +37,10 @@ import ru.electronprod.OtryadAdmin.telegram.BotService;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
+/**
+ * Spring MVC Controller object. Receives and processes HTTP requests in
+ * "/admin" section of site.
+ */
 @Slf4j
 @Controller
 @RequestMapping("/admin")
@@ -50,9 +53,9 @@ public class AdminController {
 	@Autowired
 	private ChatRepository chatRep;
 	@Autowired
-	private BuildProperties appInfo;
-	@Autowired
 	private BotService botServ;
+	@Autowired
+	private BuildProperties appInfo;
 
 	/*
 	 * Main page

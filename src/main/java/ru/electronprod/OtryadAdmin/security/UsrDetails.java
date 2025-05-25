@@ -9,6 +9,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import ru.electronprod.OtryadAdmin.models.User;
 
+/**
+ * Spring Security user DTO
+ */
+@SuppressWarnings("serial")
 public class UsrDetails implements UserDetails {
 	private final User person;
 
@@ -34,5 +38,4 @@ public class UsrDetails implements UserDetails {
 	public User getUser() {
 		return person;
 	}
-
 }

@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Статистика</title>
+<title>Просмотр статистики</title>
 <link rel="stylesheet" href="/assets/default_style.css">
 <link rel="icon" href="/icon.png">
 <script defer src="/assets/navbar.js"></script>
@@ -40,31 +39,44 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
-				<h3>Посмотреть все отметки</h3>
-				<p>Посмотрите все отметки, нажав на кнопку ниже.</p>
-				<a class="greenbtn" href="/commander/stats/alltable">Посмотреть</a>
+				<h3>Просмотр по событию</h3>
+				<p>Посмотрите, кто и сколько раз посетил выбранное событие или таблицу отметок для этого события</p>
+				<form method="get">
+					<label for="event_name">Выберите событие:</label> <select id="event_name" name="event_name">
+						<option th:each="event : ${events}" th:value="${event}" th:text="${event}"></option>
+					</select>
+					<button class="form-btn" type="submit" formaction="/commander/stats/report">Показать</button>
+					<button class="form-btn" type="submit" formaction="/commander/stats/event_table">Посмотреть таблицу</button>
+				</form>
 			</div>
 			<div class="card">
-				<h3>Посмотрите отметки по дате</h3>
-				<p>Посмотрите отметки, которые вы выставили в конкретную дату.</p>
+				<h3>Просмотр персональной статистики</h3>
+				<p>Посмотрите информацию о человеке. Введите его ФИ в строку ниже и нажмите кнопку "найти"</p>
+				<form method="get">
+					<input placeholder="Введите ФИ" name="name" type="text" required />
+					<!--<button class="form-btn" type="submit" formaction="/commander/stats/personal">Посмотреть</button>-->
+					<button class="form-btn" type="submit" formaction="/commander/stats/personal/table">Посмотреть в виде
+						таблицы</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Просмотр отметок по дате</h3>
+				<p>Показывает ваши отметки, которые вы выставляли в выбранную дату.</p>
 				<form id="date-form" action="/commander/stats/date">
 					<label for="date">Дата:</label> <input type="date" id="date" name="date" required> <br>
 					<button type="submit">Посмотреть</button>
 				</form>
 			</div>
 			<div class="card">
-				<h3>Просмотр персональной статистики</h3>
-				<p>Посмотрите таблицу данных для человека. Введите его ФИ в строку ниже и нажмите кнопку "найти"</p>
-				<form th:action="@{/commander/stats/personal}" method="get">
-					<input placeholder="Введите ФИ" name="name" type="text" required />
-					<button type="submit">Найти</button>
-				</form>
+				<h3>Просмотр всех отметок</h3>
+				<p>Показывает все ваши отметки за все время в виде таблицы</p>
+				<a class="greenbtn" href="/commander/stats/alltable">Посмотреть</a>
 			</div>
 		</div>
 	</div>

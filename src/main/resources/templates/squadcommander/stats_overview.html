@@ -11,7 +11,7 @@
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="navbar"></div>
 	<div id="dashboard">
@@ -27,16 +27,17 @@
 			<div class="card">
 				<h3>Статистика посещений события</h3>
 				<p>Посмотрите, кто и сколько раз посетил выбранное событие.</p>
-				<form method="get" th:action="@{/squadcommander/stats/report}">
+				<form method="get">
 					<label for="event_name">Выберите событие:</label> <select id="event_name" name="event_name">
 						<option th:each="event : ${events}" th:value="${event}" th:text="${event}"></option>
 					</select>
-					<button type="submit">Показать</button>
+					<button class="form-btn" type="submit" formaction="/squadcommander/stats/report">Показать</button>
+					<button class="form-btn" type="submit" formaction="/squadcommander/stats/event_table">Посмотреть таблицу</button>
 				</form>
 			</div>
 			<div class="card">
-				<h3>Персональная статистика</h3>
-				<p>Посмотрите подробную статистику для любого члена вашего звена.</p>
+				<h3>Персональная статистика в звене</h3>
+				<p>Посмотрите подробную статистику для любого члена вашего звена по вашему звену.</p>
 				<form method="get">
 					<select name="id">
 						<option th:each="human: ${humans}" th:value="${human.id}" th:text="${human.lastname} + ' ' + ${human.name}">
@@ -45,6 +46,19 @@
 					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal">Посмотреть</button>
 					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal/table">Посмотреть в виде
 						таблицы</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Персональная статистика в отряде</h3>
+				<p>Посмотрите подробную статистику для любого члена вашего звена по всему отряду.</p>
+				<form method="get">
+					<select name="id">
+						<option th:each="human: ${humans}" th:value="${human.id}" th:text="${human.lastname} + ' ' + ${human.name}">
+						</option>
+					</select>
+					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal_full">Посмотреть</button>
+					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal_full/table">Посмотреть в
+						виде таблицы</button>
 				</form>
 			</div>
 			<div class="card">

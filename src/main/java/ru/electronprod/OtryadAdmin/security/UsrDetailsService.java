@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import ru.electronprod.OtryadAdmin.data.UserRepository;
 import ru.electronprod.OtryadAdmin.models.User;
 
+/**
+ * Spring Security auth service
+ */
 @Service
 public class UsrDetailsService implements UserDetailsService {
 	@Autowired
@@ -19,11 +22,8 @@ public class UsrDetailsService implements UserDetailsService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Optional<User> user = urp.findByLogin(username);
-
 		if (user.isEmpty())
 			throw new UsernameNotFoundException("User not found");
-
 		return new UsrDetails(user.get());
 	}
-
 }

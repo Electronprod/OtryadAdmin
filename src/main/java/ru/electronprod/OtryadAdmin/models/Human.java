@@ -3,7 +3,6 @@ package ru.electronprod.OtryadAdmin.models;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -19,10 +18,8 @@ public class Human {
 	@ManyToOne
 	@JoinColumn(name = "squad_id")
 	private Squad squad;
-
 	@OneToMany(mappedBy = "human", cascade = CascadeType.REMOVE, orphanRemoval = true)
 	private List<StatsRecord> stats;
-
 	@Column
 	private String name;
 	@Column
@@ -41,10 +38,16 @@ public class Human {
 	@JoinTable(name = "human_group", joinColumns = @JoinColumn(name = "human_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
 	private Set<Group> groups = new HashSet<>();
 
+	/**
+	 * Is used in thymeleaf
+	 **/
 	public boolean hasGroup(Group group) {
 		return groups.contains(group);
 	}
 
+	/**
+	 * Is used in thymeleaf
+	 **/
 	public String showGroups() {
 		String result = "[";
 		for (Group group : groups) {

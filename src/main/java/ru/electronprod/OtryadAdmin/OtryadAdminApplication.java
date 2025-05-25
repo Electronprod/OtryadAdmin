@@ -5,6 +5,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+/**
+ * OtryadAdmin project
+ * 
+ * @author Electron_prod
+ * @see <a href="https://github.com/Electronprod/OtryadAdmin">GitHub page</a>
+ */
 @SpringBootApplication
 @EnableAsync
 @EnableScheduling

@@ -12,14 +12,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
-
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.Human;
@@ -37,6 +35,12 @@ public class StatsWorker {
 	@Autowired
 	private BotService botServ;
 
+	/**
+	 * Generates report for event
+	 * 
+	 * @param typedStats - event's statsRecords
+	 * @return Map<Human, Integer>, where Integer is number of visits
+	 */
 	public Map<Human, Integer> getEventReport(List<StatsRecord> typedStats) {
 		Map<Human, Integer> typedStatsMap = new HashMap<Human, Integer>();
 		for (StatsRecord stats : typedStats) {
@@ -55,8 +59,11 @@ public class StatsWorker {
 	/**
 	 * Generates personal stats report from the List given
 	 * 
-	 * @param personalStats - person's stats records
-	 * @param model         - Model to add data
+	 * @param personalStats    - person's stats records
+	 * @param model            - Model to add data
+	 * @param processNotSquads - Shell we use data from all commanders (true) or we
+	 *                         should use only information given by squadcommander
+	 *                         (false)
 	 */
 	public void getMainPersonalReportModel(List<StatsRecord> personalStats, Model model, boolean processNotSquads) {
 		// Getting present and non present list

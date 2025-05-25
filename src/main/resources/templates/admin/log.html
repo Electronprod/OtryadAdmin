@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Лог приложения</title>
+<title>Лог</title>
 <link rel="stylesheet" href="/assets/default_style.css">
 <link rel="icon" href="/icon.png">
 <script src="/assets/navbar.js"></script>
@@ -93,23 +92,19 @@ textarea:focus {
 }
 </style>
 </head>
-
 <body>
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div class="log-container">
 		<div class="log-header">
 			<h1>Лог приложения</h1>
 			<div class="log-actions">
-				<button class="blue-button" onclick="refreshLog()">Обновить</button>
+				<button class="blue-button" onclick="location.reload()">Обновить</button>
 				<button class="red-button" onclick="clearLog()">Очистить</button>
 			</div>
 		</div>
 		<textarea readonly th:text="${log}"></textarea>
 	</div>
 	<script>
-    function refreshLog() {
-      location.reload();
-    }
     function clearLog() {
       const confirmed = confirm("Вы уверены, что хотите очистить лог?");
       if (confirmed) {
@@ -127,5 +122,4 @@ textarea:focus {
     }
   </script>
 </body>
-
 </html>

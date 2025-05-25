@@ -1,7 +1,6 @@
 package ru.electronprod.OtryadAdmin.models;
 
 import java.sql.Timestamp;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

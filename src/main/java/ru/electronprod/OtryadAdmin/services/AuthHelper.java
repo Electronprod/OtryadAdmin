@@ -8,7 +8,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.UserRepository;
 import ru.electronprod.OtryadAdmin.models.User;
@@ -32,7 +31,7 @@ public class AuthHelper implements InitializingBean {
 	private String admin_password;
 
 	/**
-	 * Checks the existence of ADMIN account
+	 * Checks for ADMIN account on startup
 	 */
 	@Override
 	public void afterPropertiesSet() {
