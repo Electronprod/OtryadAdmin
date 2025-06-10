@@ -11,12 +11,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
-import ru.electronprod.OtryadAdmin.models.dto.EventTypeDTO;
 
 @RestController
 public class APIController {
@@ -24,43 +22,10 @@ public class APIController {
 	private DBService dbservice;
 
 	@SuppressWarnings("unchecked")
-	@GetMapping("/api/get_event_types_with_reasons")
-	public String getEventTypesForReasons() {
-		JSONArray arr = new JSONArray();
-		List<EventTypeDTO> data = SettingsRepository.getEvent_types().stream()
-				.filter(dto -> dto.isCanSetReason() == true).toList();
-		data.forEach(e -> {
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("event", e.getEvent());
-			jsonObject.put("name", e.getName());
-			arr.add(jsonObject);
-		});
-		return arr.toJSONString();
-	}
-
-	@SuppressWarnings("unchecked")
-	@GetMapping("/api/get_event_types")
-	public String getEventTypes() {
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.putAll(SettingsRepository.convertEventTypeDTOs());
-		return jsonObject.toJSONString();
-	}
-
-	@SuppressWarnings("unchecked")
-	@GetMapping("/api/get_reasons_for_absences")
-	public String getReasons_for_absences() {
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.putAll(SettingsRepository.getReasons_for_absences());
-		return jsonObject.toJSONString();
-	}
-
-	@SuppressWarnings("unchecked")
 	@GetMapping("/api/getrenamerdata")
 	public String getRenamerData() {
 		JSONObject jsonObject = new JSONObject();
 		Map<String, String> map = new HashMap<String, String>();
-		map.putAll(SettingsRepository.convertEventTypeDTOs());
-		map.putAll(SettingsRepository.getReasons_for_absences());
 		map.putAll(SettingsRepository.getReplacements());
 		map.putAll(SettingsRepository.getRoles());
 		jsonObject.putAll(map);

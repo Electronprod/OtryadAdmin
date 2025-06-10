@@ -45,19 +45,19 @@ public class GuestController {
 		}
 		// Redirecting to home page
 		if (roles.contains("ROLE_ADMIN")) {
-			log.info("Authed admin: " + auth.getCurrentUser().getLogin());
+			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (ADMIN)");
 			return "redirect:/admin";
 		} else if (roles.contains("ROLE_SQUADCOMMANDER")) {
-			log.info("Authed squadcommander: " + auth.getCurrentUser().getLogin());
+			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (SQUADCOMMANDER)");
 			return "redirect:/squadcommander";
 		} else if (roles.contains("ROLE_OBSERVER")) {
-			log.info("Authed observer: " + auth.getCurrentUser().getLogin());
+			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (OBSERVER)");
 			return "redirect:/observer";
 		} else if (roles.contains("ROLE_COMMANDER")) {
-			log.info("Authed commander: " + auth.getCurrentUser().getLogin());
+			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (COMMANDER)");
 			return "redirect:/commander";
 		} else {
-			// If user is guest
+			// If user is a guest
 			return "index";
 		}
 	}

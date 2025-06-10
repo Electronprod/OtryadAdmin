@@ -1,0 +1,94 @@
+.floating-button {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	width: 60px;
+	height: 60px;
+	background-color: #ff9800;
+	color: #fff;
+	border-radius: 50%;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 24px;
+	transition: background-color 0.3s ease;
+	cursor: pointer;
+}
+
+.floating-button:hover {
+	background-color: #e68900;
+}
+
+.floating-button-2 {
+	position: fixed;
+	bottom: 100px;
+	right: 20px;
+	width: 60px;
+	height: 60px;
+	background-color: #ff9800;
+	color: #fff;
+	border-radius: 50%;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 24px;
+	transition: background-color 0.3s ease;
+	cursor: pointer;
+}
+
+.floating-button-2:hover {
+	background-color: #e68900;
+}
+
+.double-arrow {
+	display: inline-block;
+	width: 34px;
+	height: 24px;
+	position: relative;
+}
+
+.double-arrow::before, .double-arrow::after {
+	content: "";
+	display: block;
+	position: absolute;
+	left: 0;
+	width: 0;
+	height: 0;
+	border-top: 12px solid transparent;
+	border-bottom: 12px solid transparent;
+	border-right: 16px solid white;
+}
+
+.double-arrow::after {
+	left: 12px;
+}
+
+.plus-sign {
+	display: block;
+	position: relative;
+	width: 32px;
+	height: 32px;
+}
+
+.plus-sign::before, .plus-sign::after {
+	content: '';
+	position: absolute;
+	background: #fff;
+	border-radius: 4px;
+}
+
+.plus-sign::before {
+	top: 14px;
+	left: 3px;
+	width: 26px;
+	height: 4px;
+}
+
+.plus-sign::after {
+	left: 14px;
+	top: 3px;
+	width: 4px;
+	height: 26px;
+}

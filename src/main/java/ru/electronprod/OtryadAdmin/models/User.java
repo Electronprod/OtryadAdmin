@@ -24,7 +24,7 @@ public class User {
 	private String role;
 	@Column(name = "name")
 	private String name;
-	@OneToOne(mappedBy = "commander", cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@OneToOne(mappedBy = "commander", orphanRemoval = true)
 	private Squad squad;
 	@OneToOne(mappedBy = "owner", cascade = { CascadeType.PERSIST, CascadeType.MERGE,
 			CascadeType.REMOVE }, orphanRemoval = true)

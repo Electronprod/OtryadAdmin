@@ -3,11 +3,11 @@
 
 <head>
 <meta charset="UTF-8">
-<title>Чаты Telegram</title>
+<title>Аккаунты Telegram</title>
 <link rel="stylesheet" href="/assets/manager.css">
 <script src="/assets/navbar.js"></script>
 <script src="/public_resources/sweetalert2.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="/assets/buttons.css">
 <link rel="icon" href="/icon.png">
 <style>
 .change-status-1-btn {
@@ -33,7 +33,7 @@
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div class="header">
 		<h3>Пользователи Telegram-бота</h3>
-		<p>Здесь перечислены все зарегистрированные пользователи бота</p>
+		<p>С помощью кнопки "Привязать" подключайте аккаунты Telegram к аккаунтам на сайте</p>
 	</div>
 	<input style="padding: 10px; margin-bottom: 10px; width: 100%;" type="text" id="searchInput"
 		placeholder="Поиск по фамилии или username" onkeyup="search_human(3,4,'userTable')" />
@@ -67,7 +67,7 @@
 		</tbody>
 	</table>
 	<div class="floating-button" onclick="window.history.back()">
-		<i class="fas fa-backward"></i>
+		<span class="double-arrow"></span>
 	</div>
 	<div class="overlay" id="overlay">
 		<div class="modal">

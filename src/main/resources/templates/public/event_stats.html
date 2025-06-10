@@ -2,13 +2,13 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Статистика события</title>
-	<link rel="stylesheet" href="/assets/default_style.css">
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-	<link rel="icon" href="/icon.png">
-	<script defer src="/assets/navbar.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Статистика события</title>
+<link rel="stylesheet" href="/assets/default_style.css">
+<script src="/public_resources/xlsx.full.min.js"></script>
+<link rel="icon" href="/icon.png">
+<script defer src="/assets/navbar.js"></script>
 </head>
 
 <body>
@@ -18,11 +18,14 @@
 	<div id="dashboard">
 		<div id="content">
 			<div class="card">
-				<h3>Статистика посещаемости события <u th:text="${eventName}"></u>:</h3>
-				<p>Отсортировано в порядке от меньшего к большему.<br></p>
+				<h3>
+					Статистика посещаемости события <u th:text="${eventName}"></u>:
+				</h3>
+				<p>
+					Отсортировано в порядке от меньшего к большему.<br>
+				</p>
 				<button class="greenbtn" id="sheetjsexport">Экспортировать как XLSX</button>
-				<br>
-				<br>
+				<br> <br>
 				<table id="dataTable">
 					<thead>
 						<tr>
@@ -44,10 +47,13 @@
 	</div>
 </body>
 <script>
-	document.getElementById("sheetjsexport").addEventListener('click', function () {
-		var wb = XLSX.utils.table_to_book(document.getElementById("dataTable"));
-		XLSX.writeFile(wb, "event_stats.xlsx");
-	});
+	document.getElementById("sheetjsexport").addEventListener(
+			'click',
+			function() {
+				var wb = XLSX.utils.table_to_book(document
+						.getElementById("dataTable"));
+				XLSX.writeFile(wb, "event_stats.xlsx");
+			});
 </script>
 
 </html>

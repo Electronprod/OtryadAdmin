@@ -39,9 +39,6 @@ function getHumansFromTable(lastnamecol, namecol, idcol, tableId) {
 
 	return humans;
 }
-//getHumansFromTable(1,2,0,"userTable")
-//findMostSimiliarHuman("Дорошева Ульяна",getHumansFromTable(1,2,0,"userTable"))
-
 function findMostSimiliarHuman(lastnameAndName, humans) {
 	let mostSimilar = null;
 	let minLevenshteinDistance = Number.MAX_VALUE;

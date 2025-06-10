@@ -3,10 +3,10 @@
 
 <head>
 <meta charset="UTF-8">
-<title>Статистика пользователей</title>
+<title>Статистика</title>
 <link rel="stylesheet" href="/assets/tablemgr.css">
 <link rel="icon" href="/icon.png">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="/public_resources/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -50,20 +50,32 @@
 			</tr>
 		</tbody>
 	</table>
-	<div class="bottomPanel">
-		<button class="btn" onclick="window.history.back();">Вернуться</button>
+	<div class="bottomPanel" id="bp1">
+		<button class="btn" onclick="document.getElementById('bp2').style.display='inline'">Подсветить</button>
 		<button class="btn" id="sheetjsexport">Экспортировать как XLSX</button>
+		<button style="background-color: green" class="btn" onclick="window.history.back();">Вернуться</button>
+	</div>
+	<div class="bottomPanel" id="bp2" style="display: none">
+		<button class="btn" onclick="highlightRows('userTable', 4);">Посещения</button>
+		<button class="btn" onclick="highlightRows('userTable', 3);">События</button>
+		<button class="btn" onclick="highlightRows('userTable', 8);">EventID</button>
+		<button class="btn" onclick="highlightRows('userTable', 5);">Причины</button>
+		<button class="btn" onclick="highlightRows('userTable', 7);">Группы</button>
+		<button class="btn" onclick="highlightRows('userTable', 6);">Автора</button>
+		<button class="btn" style="background-color: orange" onclick="resetHighlightRows('userTable');">Сбросить</button>
+		<button class="btn" style="background-color: green" onclick="document.getElementById('bp2').style.display='none'">Вернуться</button>
 	</div>
 </body>
 <script src="/assets/mgr.js"></script>
 <script src="/assets/stats_renamer.js"></script>
+<script src="/assets/highlight_similar_rows.js"></script>
 <script>
 	document.getElementById("sheetjsexport").addEventListener(
 			'click',
 			function() {
 				var wb = XLSX.utils.table_to_book(document
 						.getElementById("userTable"));
-				XLSX.writeFile(wb, "stats.xlsx");
+				XLSX.writeFile(wb, "stats_table.xlsx");
 			});
 </script>
 

@@ -64,7 +64,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 								<td th:text="${human.name}">Имя</td>
 								<td><select class="details-input" th:name="'details[' + ${human.id} + ']'"
 									th:id="'details-' + ${iterStat.index}">
-										<option th:each="entry : ${reasons}" th:value="${entry.key}" th:text="${entry.value}"></option>
+										<option th:each="entry : ${reasons}" th:value="${entry}" th:text="${entry}"></option>
 								</select></td>
 							</tr>
 						</tbody>

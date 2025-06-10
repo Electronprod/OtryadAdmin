@@ -7,7 +7,6 @@ if (window.location.href.includes("edited_squad")) {
 async function addSquad() {
 	const name = document.getElementById('name').value;
 	const commander = document.getElementById('commander').value;
-
 	if (!name || !commander) {
 		alert('Пожалуйста, заполните обязательные поля.');
 		return;
@@ -20,19 +19,19 @@ async function addSquad() {
 }
 async function editSquad() {
 	const name = document.getElementById('name').value;
-	const commander = document.getElementById('commander').value;
 	const sid = document.getElementById('squadid').value;
-	if (!name || !sid || !commander) {
+	if (!name || !sid) {
 		alert('Пожалуйста, заполните обязательные поля.');
 		return;
 	}
-	let success = await sendPostData("/admin/squadmgr/edit?id=" + sid + "&name=" + name + "&user=" + commander);
+	let success = await sendPostData("/admin/squadmgr/edit?id=" + sid + "&name=" + name);
 	if (success) {
 		window.location.href = "/admin/squadmgr?edited_squad"
 	}
 	closeModal();
 }
 function add() {
+	document.getElementById('commander_edit').hidden = false;
 	var oldButton = document.getElementById('editbtn');
 	var newButton = document.getElementById('addbtn');
 	oldButton.style.display = 'none';
@@ -42,6 +41,7 @@ function add() {
 	showModal();
 }
 async function edit(id) {
+	document.getElementById('commander_edit').hidden = true;
 	var oldButton = document.getElementById('addbtn');
 	var newButton = document.getElementById('editbtn');
 	oldButton.style.display = 'none';
@@ -49,22 +49,18 @@ async function edit(id) {
 	const data = await fetchData("/admin/squadmgr/edit?id=" + id);
 	if (data == null) {
 		console.log("Error editing: unable to get data from server.");
+		alert('Error editing: unable to get data from server.');
 		return;
 	}
 	document.getElementById('squadid').value = id;
 	document.getElementById('name').value = data.name;
-	const select = document.getElementById('commander');
-	const newOption = document.createElement('option');
-	newOption.text = 'Не менять';
-	newOption.value = data.commander;
-	select.appendChild(newOption);
 	document.getElementById('commander').value = data.commander;
 	showModal();
 }
 async function remove(id) {
 	const result = await swal.fire({
 		title: 'Вы уверены?',
-		text: "Это действие нельзя будет отменить!",
+		text: "Все люди из звена будут удалены тоже, как и их статистика!",
 		icon: 'warning',
 		showCancelButton: true,
 		confirmButtonColor: '#3085d6',

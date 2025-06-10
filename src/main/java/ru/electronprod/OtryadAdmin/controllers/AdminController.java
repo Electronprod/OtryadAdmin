@@ -3,9 +3,12 @@ package ru.electronprod.OtryadAdmin.controllers;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,11 +120,10 @@ public class AdminController {
 		if (user1.isEmpty())
 			return ResponseEntity.status(404).body(Answer.fail("User not found"));
 		User user = user1.get();
-		user.setLogin(login);
 		user.setName(name);
 		if ((user.getSquad() != null || !user.getGroups().isEmpty()) && !user.getRole().equals(role))
 			return ResponseEntity.badRequest()
-					.body(Answer.fail("You can't change roles if you have a squad or group."));
+					.body(Answer.fail("You can't change roles if you have a squad or a group."));
 		user.setRole(role);
 		boolean result = false;
 		if (password.equals("not_changed")) {
@@ -179,34 +181,31 @@ public class AdminController {
 		Optional<Squad> squad1 = dbservice.getSquadRepository().findById(id);
 		if (squad1.isEmpty())
 			return ResponseEntity.status(404).body(Answer.fail("Squad not found"));
-		Squad squad = squad1.get();
 		JSONObject data = new JSONObject();
-		data.put("name", squad.getSquadName());
-		data.put("commander", squad.getCommander().getId());
+		data.put("name", squad1.get().getSquadName());
 		return ResponseEntity.ok(data.toJSONString());
 	}
 
 	@PostMapping("/squadmgr/edit")
-	public ResponseEntity<String> squadManager_editAction(@RequestParam int id, @RequestParam String name,
-			@RequestParam int user) {
+	public ResponseEntity<String> squadManager_editAction(@RequestParam int id, @RequestParam String name) {
 		Optional<Squad> squad1 = dbservice.getSquadRepository().findById(id);
-		Optional<User> commander = dbservice.getUserRepository().findById(user);
-		if (squad1.isEmpty() || commander.isEmpty())
-			ResponseEntity.status(404).body(Answer.fail("Squad or User not found"));
+		if (squad1.isEmpty())
+			ResponseEntity.status(404).body(Answer.fail("Squad not found"));
 		Squad squad = squad1.get();
-		squad.setSquadName(name);
-		squad.setCommander(commander.get());
-		boolean result = dbservice.getSquadRepository().save(squad) != null;
-		if (result)
+		squad1.get().setSquadName(name);
+		if (dbservice.getSquadRepository().save(squad) != null)
 			return ResponseEntity.ok(Answer.success());
 		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save squad to DB"));
 	}
 
 	@PostMapping("/squadmgr/delete")
 	public ResponseEntity<String> squadManager_delete(@RequestParam() int id) {
-		if (dbservice.getSquadRepository().findById(id).isEmpty()) {
+		var sq = dbservice.getSquadRepository().findById(id);
+		if (sq.isEmpty()) {
 			return ResponseEntity.status(404).body(Answer.fail("Squad not found"));
 		}
+		User user = sq.get().getCommander();
+		user.setSquad(null);
 		dbservice.getSquadRepository().deleteById(id);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
@@ -220,40 +219,6 @@ public class AdminController {
 		model.addAttribute("humans", humans);
 		model.addAttribute("squads", dbservice.getSquadRepository().findAll());
 		return "admin/humanmgr";
-	}
-
-	// TODO replace with something better
-	@Deprecated
-	@PostMapping("/humanmgr/addlist")
-	public String handleFileUpload(@RequestParam("file") MultipartFile file, Model model) {
-		List<Human> records = new ArrayList<Human>();
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				try {
-					String[] data = line.split(";");
-					Human result = new Human();
-					Squad squad = dbservice.getSquadRepository().findById(Integer.parseInt(data[0])).orElseThrow();
-					result.setSquad(squad);
-					result.setLastname(data[1]);
-					result.setName(data[2]);
-					result.setSurname(data[3]);
-					result.setBirthday(data[4]);
-					result.setSchool(data[5]);
-					result.setClassnum(data[6]);
-					result.setPhone(data[7]);
-					records.add(result);
-				} catch (Exception e) {
-					log.error("Error parsing line: " + line);
-					return "redirect:/admin/humanmgr?error&" + e.getMessage() + "&line" + line;
-				}
-			}
-			dbservice.getHumanRepository().saveAll(records);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return "redirect:/admin/humanmgr?error&" + e.getMessage();
-		}
-		return "redirect:/admin/humanmgr?saved";
 	}
 
 	@PostMapping("/humanmgr/add")
@@ -272,8 +237,7 @@ public class AdminController {
 		human.setClassnum(classnum);
 		human.setPhone(phone);
 		human.setSquad(squadO.get());
-		boolean result = dbservice.getHumanRepository().save(human) != null;
-		if (result)
+		if (dbservice.getHumanRepository().save(human) != null)
 			return ResponseEntity.ok(Answer.success());
 		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save human to DB"));
 	}
@@ -301,6 +265,14 @@ public class AdminController {
 			return ResponseEntity.status(404).body(Answer.fail("Human not found"));
 		dbservice.getHumanRepository().deleteById(id);
 		return ResponseEntity.accepted().body(Answer.success());
+	}
+
+	@GetMapping("/humanmgr/deleteall")
+	public String humanManager_deleteAll(@RequestParam() long c) {
+		if (dbservice.getHumanRepository().count() != c)
+			return "redirect:/admin/humanmgr?deleteall_incorrect_number";
+		dbservice.getHumanRepository().deleteAll();
+		return "redirect:/admin/humanmgr?deleted_all";
 	}
 
 	@SuppressWarnings("unchecked")
@@ -343,10 +315,52 @@ public class AdminController {
 		human.setClassnum(classnum);
 		human.setPhone(phone);
 		human.setSquad(squadO.get());
-		boolean result = dbservice.getHumanRepository().save(human) != null;
-		if (result)
+		if (dbservice.getHumanRepository().save(human) != null)
 			return ResponseEntity.ok(Answer.success());
 		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save human to DB"));
+	}
+
+	@GetMapping("/humanmgr/upload")
+	public String humanmgr_upload(Model model) {
+		return "admin/humanmgr_upload";
+	}
+
+	@PostMapping("/humanmgr/upload/csv")
+	public String humanmgr_upload_csv(@RequestParam("file") MultipartFile file, Model model) {
+		List<Human> records = new ArrayList<Human>();
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream(), "UTF-8"))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				try {
+					String[] data = line.split(";");
+					Human result = new Human();
+					Squad squad = dbservice.getSquadRepository().findById(Integer.parseInt(data[0]))
+							.orElseThrow(() -> new Exception("Squad not found"));
+					result.setSquad(squad);
+					result.setLastname(data[1]);
+					result.setName(data[2]);
+					result.setSurname(data[3]);
+					result.setBirthday(data[4]);
+					result.setSchool(data[5]);
+					result.setClassnum(data[6]);
+					result.setPhone(data[7]);
+					records.add(result);
+				} catch (Exception e) {
+					return "redirect:/admin/humanmgr/upload?error=" + URLEncoder.encode(e.getMessage(), "UTF-8")
+							+ "&line=" + URLEncoder.encode(line, "UTF-8");
+				}
+			}
+			dbservice.getHumanRepository().saveAll(records);
+		} catch (Exception e) {
+			e.printStackTrace();
+			try {
+				return "redirect:/admin/humanmgr/upload?error=" + URLEncoder.encode(e.getMessage(), "UTF-8")
+						+ "&line=''";
+			} catch (UnsupportedEncodingException e1) {
+				return "redirect:/admin/humanmgr/upload?error=error_encoding_trace&line=''";
+			}
+		}
+		return "redirect:/admin/humanmgr/upload?saved";
 	}
 
 	/*
@@ -354,8 +368,9 @@ public class AdminController {
 	 */
 	@GetMapping("/groupmgr")
 	public String groupManager(Model model) {
-		List<User> markers = dbservice.getUserRepository().findAll().stream()
-				.filter(user -> !user.getRole().equals("ROLE_SQUADCOMMANDER")).toList();
+		List<User> markers = dbservice.getUserRepository().findAll().stream().filter(
+				user -> !user.getRole().equals("ROLE_SQUADCOMMANDER") && !user.getRole().equals("ROLE_OBSERVER"))
+				.toList();
 		model.addAttribute("markers", markers);
 		model.addAttribute("groups", dbservice.getGroupRepository().findAll());
 		return "admin/groupmgr";
@@ -436,115 +451,116 @@ public class AdminController {
 		return "admin/statsmgr";
 	}
 
-	@GetMapping("/statsmgr/table")
-	public String statsManager_table(Model model) {
-		return "forward:/observer/stats/table";
+	@SuppressWarnings("unchecked")
+	@GetMapping("/statsmgr/data")
+	public ResponseEntity<String> statsManager_getData(@RequestParam int number) {
+		JSONArray arr = new JSONArray();
+		dbservice.getStatsRepository().findLastRecords(number, 100).forEach(stats -> {
+			JSONObject temp = new JSONObject();
+			temp.put("date", stats.getDate());
+			temp.put("lastname", stats.getHuman().getLastname());
+			temp.put("name", stats.getHuman().getName());
+			temp.put("type", stats.getType());
+			temp.put("isPresent", stats.isPresent());
+			temp.put("reason", stats.getReason());
+			temp.put("author", stats.getAuthor());
+			temp.put("group", stats.getGroup());
+			temp.put("event_id", stats.getEvent_id());
+			temp.put("id", stats.getId());
+			arr.add(temp);
+		});
+		return ResponseEntity.ok(arr.toJSONString());
 	}
 
-	@GetMapping("/statsmgr/delete_event")
-	public String statsManager_delete_byEventID(@RequestParam int id) {
+	@SuppressWarnings("unchecked")
+	@GetMapping("/statsmgr/edit")
+	public ResponseEntity<String> statsManager_editRecord(@RequestParam int id) {
+		Optional<StatsRecord> stats1 = dbservice.getStatsRepository().findById(id);
+		if (stats1.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Record not found"));
+		StatsRecord stats = stats1.get();
+		JSONObject temp = new JSONObject();
+		temp.put("date", stats.getDate());
+		temp.put("type", stats.getType());
+		temp.put("isPresent", stats.isPresent());
+		temp.put("reason", stats.getReason());
+		temp.put("author", stats.getAuthor());
+		temp.put("event_id", stats.getEvent_id());
+		temp.put("id", stats.getId());
+		return ResponseEntity.ok(temp.toJSONString());
+	}
+
+	@PostMapping("/statsmgr/edit")
+	public ResponseEntity<String> statsManager_editRecordAction(@RequestParam int id, @RequestParam String date,
+			@RequestParam String type, @RequestParam boolean visit, @RequestParam String reason,
+			@RequestParam String author) {
+		Optional<StatsRecord> stats1 = dbservice.getStatsRepository().findById(id);
+		if (stats1.isEmpty())
+			ResponseEntity.status(404).body(Answer.fail("Record not found"));
+		StatsRecord stats = stats1.get();
+		stats.setDate(date);
+		stats.setType(type);
+		stats.setReason(reason);
+		stats.setAuthor(author);
+		stats.setPresent(visit);
+		if (dbservice.getStatsRepository().save(stats) != null)
+			return ResponseEntity.ok(Answer.success());
+		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save stats record to DB"));
+	}
+
+	@PostMapping("/statsmgr/delete_event")
+	public ResponseEntity<String> statsManager_delete_byEventID(@RequestParam int id) {
 		List<StatsRecord> stats = dbservice.getStatsRepository().findByEventId(id);
 		if (stats.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
+			return ResponseEntity.status(404).body(Answer.fail("Event not found"));
 		}
 		dbservice.getStatsRepository().deleteAll(stats);
-		return "redirect:/admin/statsmgr?deleted";
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
-	@GetMapping("/statsmgr/delete")
-	public String statsManager_delete_byID(@RequestParam int id) {
+	@PostMapping("/statsmgr/delete")
+	public ResponseEntity<String> statsManager_delete_byID(@RequestParam int id) {
 		Optional<StatsRecord> stats = dbservice.getStatsRepository().findById(id);
 		if (stats.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
+			return ResponseEntity.status(404).body(Answer.fail("Record not found"));
 		}
 		dbservice.getStatsRepository().delete(stats.get());
-		return "redirect:/admin/statsmgr?deleted";
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	@PostMapping("/statsmgr/edit_type")
-	public String statsManager_edit_type(@RequestParam int eventid, @RequestParam String statsType) {
+	public ResponseEntity<String> statsManager_edit_type(@RequestParam int eventid, @RequestParam String value) {
 		List<StatsRecord> stats = dbservice.getStatsRepository().findByEventId(eventid);
 		if (stats.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
+			return ResponseEntity.status(404).body(Answer.fail("Event not found"));
 		}
-		stats.stream().forEach(stat -> stat.setType(statsType));
+		stats.stream().forEach(stat -> stat.setType(value));
 		dbservice.getStatsRepository().saveAll(stats);
-		return "redirect:/admin/statsmgr?edited";
-	}
-
-	@PostMapping("/statsmgr/edit_type_single")
-	public String statsManager_edit_type_single(@RequestParam int id, @RequestParam String statsType) {
-		Optional<StatsRecord> stats = dbservice.getStatsRepository().findById(id);
-		if (stats.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
-		}
-		stats.get().setType(statsType);
-		dbservice.getStatsRepository().save(stats.get());
-		return "redirect:/admin/statsmgr?edited";
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	@PostMapping("/statsmgr/edit_date")
-	public String statsManager_edit_date(@RequestParam int eventid, @RequestParam String date) {
+	public ResponseEntity<String> statsManager_edit_date(@RequestParam int eventid, @RequestParam String value) {
 		List<StatsRecord> stats = dbservice.getStatsRepository().findByEventId(eventid);
 		if (stats.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
+			return ResponseEntity.status(404).body(Answer.fail("Event not found"));
 		}
-		stats.stream().forEach(stat -> stat.setDate(date.replaceAll("-", ".")));
+		stats.stream().forEach(stat -> stat.setDate(value.replaceAll("-", ".")));
 		dbservice.getStatsRepository().saveAll(stats);
-		return "redirect:/admin/statsmgr?edited";
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
-	@PostMapping("/statsmgr/edit_date_single")
-	public String statsManager_edit_date_single(@RequestParam int id, @RequestParam String date) {
-		Optional<StatsRecord> stats = dbservice.getStatsRepository().findById(id);
-		if (stats.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
-		}
-		stats.get().setDate(date.replaceAll("-", "."));
-		dbservice.getStatsRepository().save(stats.get());
-		return "redirect:/admin/statsmgr?edited";
-	}
-
-	@PostMapping("/statsmgr/edit_reason")
-	public String statsManager_edit_reason(@RequestParam int eventid, @RequestParam String reason) {
-		List<StatsRecord> statsList = dbservice.getStatsRepository().findByEventId(eventid);
-		statsList.removeIf(stats -> stats.isPresent());
-		if (statsList.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
-		}
-		statsList.stream().forEach(stat -> stat.setReason(reason));
-		dbservice.getStatsRepository().saveAll(statsList);
-		return "redirect:/admin/statsmgr?edited";
-	}
-
-	@PostMapping("/statsmgr/edit_reason_single")
-	public String statsManager_edit_reason_single(@RequestParam int id, @RequestParam String reason) {
-		Optional<StatsRecord> stats = dbservice.getStatsRepository().findById(id);
-		if (stats.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
-		}
-		stats.get().setReason(reason);
-		dbservice.getStatsRepository().save(stats.get());
-		return "redirect:/admin/statsmgr?edited";
-	}
-
-	@PostMapping("/statsmgr/edit_type_all")
-	public String statsManager_edit_type_all(@RequestParam String from, @RequestParam String to) {
-		List<StatsRecord> statsList = dbservice.getStatsRepository().findByType(from);
-		if (statsList.isEmpty()) {
-			return "redirect:/admin/statsmgr?error_notfound";
-		}
-		statsList.stream().forEach(stat -> stat.setType(to));
-		dbservice.getStatsRepository().saveAll(statsList);
-		return "redirect:/admin/statsmgr?edited";
+	@GetMapping("/statsmgr/table")
+	public String statsmgr_allTable(Model model) {
+		model.addAttribute("statss", dbservice.getStatsRepository().findAll(Sort.by(Sort.Direction.DESC, "id")));
+		return "public/statsview_rawtable";
 	}
 
 	@PostMapping("/config/addevent")
-	public String config_addevent(@RequestParam String name, @RequestParam String event,
-			@RequestParam String canSetReason) {
+	public String config_addevent(@RequestParam String event, @RequestParam String canSetReason) {
 		try {
-			SettingsRepository.addData("event_types",
-					SettingsRepository.generateEvent(event, name, Boolean.parseBoolean(canSetReason)));
+			SettingsRepository.addData(SettingsRepository.SECTION_EVENT_TYPES,
+					SettingsRepository.generateEvent(event, Boolean.parseBoolean(canSetReason)));
 			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding event. ", e);
@@ -564,9 +580,9 @@ public class AdminController {
 	}
 
 	@PostMapping("/config/addreason")
-	public String config_addreason(@RequestParam String name, @RequestParam String reason) {
+	public String config_addreason(@RequestParam String reason) {
 		try {
-			SettingsRepository.addData("reasons_for_absences", SettingsRepository.generateReason(reason, name));
+			SettingsRepository.addData(SettingsRepository.SECTION_REASONS, SettingsRepository.generateReason(reason));
 			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding reason. ", e);
@@ -588,7 +604,8 @@ public class AdminController {
 	@PostMapping("/config/addreplacement")
 	public String config_addreplacement(@RequestParam String from, @RequestParam String to) {
 		try {
-			SettingsRepository.addData("replacements", SettingsRepository.generateReplacement(from, to));
+			SettingsRepository.addData(SettingsRepository.SECTION_REPLACEMENTS,
+					SettingsRepository.generateReplacement(from, to));
 			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding replacement. ", e);
@@ -620,7 +637,7 @@ public class AdminController {
 	}
 
 	/*
-	 * Chats
+	 * Telegram
 	 */
 	@GetMapping("/chatsmgr")
 	public String chatsManager(Model model) {
@@ -642,7 +659,7 @@ public class AdminController {
 		Chat chat = optChat.get();
 		chat.setOwner(user);
 		chatRep.save(chat);
-		botServ.sendPreparedMessage("greeting", chat);
+		botServ.sendPreparedMessage("registered", chat);
 		return ResponseEntity.ok(Answer.success());
 	}
 

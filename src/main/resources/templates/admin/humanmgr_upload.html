@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Массовое добавление информации о ребятах</title>
+<link rel="stylesheet" href="/assets/default_style.css">
+<link rel="stylesheet" href="/assets/buttons.css">
+<link rel="icon" href="/icon.png">
+<script src="/assets/navbar.js"></script>
+<script src="/public_resources/sweetalert2.js"></script>
+<script src="/public_resources/xlsx.full.min.js"></script>
+<style>
+details[open] summary {
+	color: #0056b3;
+}
+
+details[open] {
+	background-color: #e0f7fa;
+	border-color: #0056b3;
+}
+
+.uploadForm {
+	display: flex;
+	align-items: left;
+	gap: 14px;
+}
+
+input[type="file"]::file-selector-button {
+	border-radius: 4px;
+	padding: 0 16px;
+	height: 40px;
+	cursor: pointer;
+	background-color: white;
+	border: 1px solid rgba(0, 0, 0, 0.16);
+	box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+	margin-right: 16px;
+	transition: background-color 200ms;
+}
+
+input[type="file"]::file-selector-button:hover {
+	background-color: #f3f4f6;
+}
+
+input[type="file"]::file-selector-button:active {
+	background-color: #e5e7eb;
+}
+</style>
+</head>
+<body>
+	<!--CSRF Attack Protection-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="dashboard">
+		<div id="content">
+			<div class="header">
+				<h3>Массовое добавление информации о ребятах</h3>
+				<p>На странице представлены способы загрузки информации. Выберите среди них подходящий вам.</p>
+			</div>
+			<div class="card">
+				<h3>Импорт из .XLSX или .XLS файла</h3>
+				<p>Импорт информации из файла в формате .XLSX или XLS (Формат Microsoft Excel)</p>
+				<details class="cardc">
+					<summary>Требования</summary>
+					<p></p>
+					<ul>
+						<li>Информация и ее порядок должны быть: ID звена(см. <a style="font-weight: bold;" href="/admin/squadmgr">тут</a>);Фамилия;Имя;Отчество;Дата
+							рождения;Школа;Класс;Номер телефона
+						</li>
+					</ul>
+				</details>
+				<form class="uploadForm" id="csv-upload-form" method="post" action="/admin/humanmgr/upload/csv"
+					enctype="multipart/form-data">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> <input type="file"
+						id="input-excel" accept=".xlsx, .xls" required> <input type="file" name="file" id="hidden-csv-input"
+						style="display: none">
+					<button type="submit">Загрузить данные из файла</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Импорт из .CSV файла</h3>
+				<p>Импорт информации из файла в формате .CSV</p>
+				<details class="cardc">
+					<summary>Требования</summary>
+					<p></p>
+					<ul>
+						<li>Информация и ее порядок должны быть: ID звена(см. <a style="font-weight: bold;" href="/admin/squadmgr">тут</a>);Фамилия;Имя;Отчество;Дата
+							рождения;Школа;Класс;Номер телефона
+						</li>
+						<li>Разделитель - ';'</li>
+						<li>Кодировка файла - UTF8</li>
+					</ul>
+				</details>
+				<form class="uploadForm" method="post" action="/admin/humanmgr/upload/csv" enctype="multipart/form-data">
+					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> <input type="file" name="file"
+						accept=".csv" required>
+					<button type="submit">Загрузить данные из файла</button>
+				</form>
+			</div>
+		</div>
+		<div class="floating-button" onclick="window.location.href='/admin/humanmgr'">
+			<span class="double-arrow"></span>
+		</div>
+	</div>
+</body>
+<script>
+	if (window.location.href.includes("saved")) {
+		Swal.fire({
+			title : "УСПЕХ!",
+			text : "Данные добавлены.",
+			icon : "success"
+		});
+	}
+	const params = new URLSearchParams(window.location.search);
+	const errorPart = params.get('error') || '';
+	const linePart = params.get('line') || '';
+	if (window.location.href.includes("error")) {
+		Swal.fire({
+			title : "Что-то пошло не так!",
+			html : "Сообщение: " + errorPart + "<br>Линия: " + linePart,
+			icon : "error"
+		});
+	}
+	//XLSX to CSV converter
+	const excelInput = document.getElementById('input-excel');
+	const csvInput = document.getElementById('hidden-csv-input');
+	const form = document.getElementById('csv-upload-form');
+	let csvBlob = null;
+	excelInput.addEventListener('change', function(event) {
+	  const file = event.target.files[0];
+	  if (!file) return;
+	  const reader = new FileReader();
+	  reader.onload = function(e) {
+	    const data = new Uint8Array(e.target.result);
+	    const workbook = XLSX.read(data, { type: 'array' });
+	    const firstSheetName = workbook.SheetNames[0];
+	    const worksheet = workbook.Sheets[firstSheetName];
+	    // Преобразуем все ячейки в текстовый формат
+	    Object.keys(worksheet).forEach(cell => {
+	      if (cell[0] === '!') return;
+	      worksheet[cell].t = 's';
+	      worksheet[cell].z = '@';
+	      worksheet[cell].w = worksheet[cell].v ? String(worksheet[cell].v) : '';
+	    });
+	    // Генерируем CSV
+	    let csv = XLSX.utils.sheet_to_csv(worksheet, { FS: ';' });
+	    csv = csv.replace(/"/g, ''); // Удалить все двойные кавычки
+	    csvBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+	    const csvFile = new File([csvBlob], 'converted.csv', { type: 'text/csv' });
+	    const dataTransfer = new DataTransfer();
+	    dataTransfer.items.add(csvFile);
+	    csvInput.files = dataTransfer.files;
+	  };
+	  reader.readAsArrayBuffer(file);
+	});
+	form.addEventListener('submit', function(e) {
+	  if (!csvInput.files.length) {
+	    e.preventDefault();
+	    alert('Сначала выберите xlsx/xls файл!');
+	    return;
+	  }
+	});
+</script>
+</html>

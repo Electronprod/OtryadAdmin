@@ -5,9 +5,9 @@
 <meta charset="UTF-8">
 <title>Управление звеньями</title>
 <link rel="stylesheet" href="/assets/manager.css">
+<link rel="stylesheet" href="/assets/buttons.css">
 <script src="/public_resources/sweetalert2.js"></script>
 <script src="/assets/navbar.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="icon" href="/icon.png">
 </head>
 
@@ -17,14 +17,16 @@
 	<table id="userTable">
 		<thead>
 			<tr>
-				<th onclick="sortTable(0)">Название</th>
-				<th onclick="sortTable(1)">Имя командира</th>
-				<th onclick="sortTable(2)">Кол-во ребят</th>
+				<th onclick="sortTable(0)">ID</th>
+				<th onclick="sortTable(1)">Название</th>
+				<th onclick="sortTable(2)">Имя командира</th>
+				<th onclick="sortTable(3)">Кол-во ребят</th>
 				<th>Действия</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr th:each="squad : ${squads}" th:name="${squad.id}">
+				<td th:text="${squad.id}"></td>
 				<td th:text="${squad.squadName}"></td>
 				<td th:text="${squad.commander.name}"></td>
 				<td th:text="${squad.humans.size()}"></td>
@@ -38,7 +40,7 @@
 		</tbody>
 	</table>
 	<div class="floating-button" onclick="add()">
-		<i class="fas fa-plus"></i>
+		<i class="plus-sign"></i>
 	</div>
 	<div class="overlay" id="overlay">
 		<div class="modal">
@@ -47,10 +49,11 @@
 			<div class="form-group">
 				<label for="name">Название</label> <input type="text" id="name" required>
 			</div>
-			<div class="form-group">
-				<label for="commander">Выберите командира</label> <select id="commander" required>
+			<div id="commander_edit" class="form-group">
+				<label for="commander">Выберите командира:</label> <select id="commander" required>
 					<option th:each="user : ${users}" th:value="${user.id}" th:text="${user.name}"></option>
 				</select>
+				<p>Командир не может быть изменен в будущем!</p>
 			</div>
 			<div class="modal-buttons">
 				<button id="addbtn" class="submit-button" onclick="addSquad()">Добавить</button>

@@ -1,5 +1,7 @@
 package ru.electronprod.OtryadAdmin.data;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -70,4 +72,11 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 	List<StatsRecord> findByDate(String replaceAll, Sort by);
 
 	List<StatsRecord> findByType(String event_name, Sort by);
+
+	@Query("SELECT s FROM StatsRecord s ORDER BY s.id DESC")
+	List<StatsRecord> findPagedRecords(Pageable pageable);
+
+	default List<StatsRecord> findLastRecords(int page, int size) {
+		return findPagedRecords(PageRequest.of(page, size));
+	}
 }

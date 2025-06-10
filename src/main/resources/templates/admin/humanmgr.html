@@ -35,7 +35,7 @@
 			<tr>
 				<th onclick="sortTable(0)">Фамилия</th>
 				<th onclick="sortTable(1)">Имя</th>
-				<th onclick="sortTable(2)">Отчество</th>
+				<th onclick="sortTable(2)">Класс</th>
 				<th onclick="sortTable(3)">Командир</th>
 				<th>Действия</th>
 			</tr>
@@ -44,7 +44,7 @@
 			<tr th:each="human : ${humans}" th:name="${human.id}">
 				<td th:text="${human.lastname}"></td>
 				<td th:text="${human.name}"></td>
-				<td th:text="${human.surname}"></td>
+				<td th:text="${human.classnum}"></td>
 				<td th:text="${human.squad.commander.name}"></td>
 				<td>
 					<div class="action-buttons">
@@ -78,8 +78,9 @@
 	</div>
 	<div class="bottomPanel">
 		<button class="btn" onclick="addHumanAction()">Добавить</button>
-		<button class="btn" onclick="addList()">Массовое добавление</button>
+		<button class="btn" onclick="window.location.href='/admin/humanmgr/upload'">Массовое добавление</button>
 		<button class="btn" onclick="window.location.href='/admin/humanmgr/fullinfo'">Подробная информация</button>
+		<button class="btn" style="background-color: red" onclick="deleteAll()">Удалить всех</button>
 	</div>
 </body>
 <script src="/assets/manager.js"></script>

@@ -44,26 +44,12 @@ textarea:focus {
 				<a class="greenbtn" href="/observer">Перейти в панель наблюдателя</a>
 			</div>
 			<div class="card">
-				<h3>Информация о сборке</h3>
-				<p>Здесь можно посмотреть информацию об имени приложения, версии, времени сборки и т.д.</p>
-				<details class="cardc">
-					<summary>Нажмите, чтобы посмотреть</summary>
-					<ul>
-						<li><b>Name:</b> <span th:text="${appInfo.getName()}"></span></li>
-						<li><b>Version:</b> <span th:text="${appInfo.getVersion()}"></span></li>
-						<li><b>Build time:</b> <span th:text="${appInfo.getTime()}"></span></li>
-						<li><b>Artifact:</b> <span th:text="${appInfo.getArtifact()}"></span></li>
-						<li><b>Group:</b> <span th:text="${appInfo.getGroup()}"></span></li>
-					</ul>
-				</details>
-			</div>
-			<div class="card" th:if="${show_log == true}">
-				<h3>Просмотр лога</h3>
-				<p>У вас включено логирование вывода приложения. Чтобы посмотреть содержимое лога, нажмите на кнопку ниже</p>
-				<a class="greenbtn" href="/admin/log">Открыть лог</a>
+				<h3>Контроль отметок</h3>
+				<p>Посмотрите, кто и когда выставил отметки. Если кто-то этого не сделал - потребуйте через Telegram-бота!</p>
+				<a class="greenbtn" href="/observer/demand">Перейти в панель</a>
 			</div>
 			<div class="card">
-				<h3>Управлять конфигурацией приложения</h3>
+				<h3>Настройки приложения</h3>
 				<p>Тут вы можете управлять главными настройками приложения, например:</p>
 				<ul>
 					<li>Событиями, доступными для выбора командирами звеньев</li>
@@ -73,23 +59,23 @@ textarea:focus {
 					<summary>Управлять событиями</summary>
 					<br>
 					<h3>Зарегистрированные события</h3>
+					<p>События, доступные для удобного выбора командирами звеньев. Используется в случае, если несколько одинаковых
+						событий должны быть отмечены.</p>
 					<table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
 						<thead>
 							<tr>
 								<th>Название события</th>
-								<th>Название в БД</th>
 								<th>Выбор причины</th>
-								<th>Действия</th>
+								<th>Действие</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr th:each="entry : ${eventtypes}">
-								<td th:text="${entry.getName()}"></td>
-								<td th:text="${entry.getEvent()}"></td>
-								<td th:text="${entry.isCanSetReason() ? 'Да' : 'Нет'}"></td>
+								<td th:text="${entry.key}"></td>
+								<td th:text="${entry.value ? 'Да' : 'Нет'}"></td>
 								<td>
 									<form th:action="@{/admin/config/delevent}" method="post" style="display: inline;">
-										<input type="hidden" name="event" th:value="${entry.getEvent()}" />
+										<input type="hidden" name="event" th:value="${entry.key}" />
 										<button class="admin-button" type="submit">Удалить</button>
 									</form>
 							</td>
@@ -98,8 +84,7 @@ textarea:focus {
 					</table>
 					<form th:action="@{/admin/config/addevent}" method="post" class="card_2" style="background-color: #d1cdcd;">
 						<h4>Добавить новое событие</h4>
-						<input placeholder="Название события" name="name" type="text" required /> <input
-							placeholder="Название события в базе данных" name="event" type="text" required /> <label for="canSetReason">
+						<input placeholder="Название события" name="event" type="text" required /> <label for="canSetReason">
 							Нужно указывать причины пропуска?</label> <select name="canSetReason">
 							<option value="false">Нет</option>
 							<option value="true">Да</option>
@@ -110,22 +95,21 @@ textarea:focus {
 				<details class="cardc">
 					<summary>Управлять причинами отсутствия</summary>
 					<br>
-					<h3>Зарегистрированные причины отсутствия</h3>
+					<h3>Возможные причины отсутствия</h3>
+					<p>Список причин отсутствия из которых командир выбирает при выставлении отметок.</p>
 					<table>
 						<thead>
 							<tr>
 								<th>Причина</th>
-								<th>Название в БД</th>
-								<th>Действия</th>
+								<th>Действие</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr th:each="entry : ${reasons}">
-								<td th:text="${entry.value}"></td>
-								<td th:text="${entry.key}"></td>
+								<td th:text="${entry}"></td>
 								<td>
 									<form th:action="@{/admin/config/delreason}" method="post" style="display: inline;">
-										<input type="hidden" th:name="reason" th:value="${entry.key}" />
+										<input type="hidden" th:name="reason" th:value="${entry}" />
 										<button class="admin-button" type="submit">Удалить</button>
 									</form>
 							</td>
@@ -135,9 +119,8 @@ textarea:focus {
 					<div class="card_2" style="background-color: #d1cdcd;">
 						<h3>Добавить причину отсутствия</h3>
 						<form th:action="@{/admin/config/addreason}" method="post">
-							<input placeholder="Название причины" name="name" type="text" required /> <input
-								placeholder="Название в базе данных" name="reason" type="text" required />
-							<button type="submit">Добавить</button>
+							<input placeholder="Название причины" name="reason" type="text" required />
+							<button type="submit">Добавить причину</button>
 						</form>
 					</div>
 				</details>
@@ -151,7 +134,7 @@ textarea:focus {
 							<tr>
 								<th>Заменить</th>
 								<th>На</th>
-								<th>Действия</th>
+								<th>Действие</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -183,6 +166,25 @@ textarea:focus {
 					</div>
 				</details>
 			</div>
+			<div class="card">
+				<h3>Информация о сборке</h3>
+				<p>Здесь можно посмотреть техническую информацию о приложении.</p>
+				<details class="cardc">
+					<summary>Нажмите, чтобы посмотреть</summary>
+					<ul>
+						<li><b>Name:</b> <span th:text="${appInfo.getName()}"></span></li>
+						<li><b>Version:</b> <span th:text="${appInfo.getVersion()}"></span></li>
+						<li><b>Build time:</b> <span th:text="${appInfo.getTime()}"></span></li>
+						<li><b>Artifact:</b> <span th:text="${appInfo.getArtifact()}"></span></li>
+						<li><b>Group:</b> <span th:text="${appInfo.getGroup()}"></span></li>
+					</ul>
+				</details>
+			</div>
+			<div class="card" th:if="${show_log == true}">
+				<h3>Просмотр лога</h3>
+				<p>У вас включено логирование вывода приложения. Чтобы посмотреть содержимое лога, нажмите на кнопку ниже.</p>
+				<a class="greenbtn" href="/admin/log">Открыть лог</a>
+			</div>
 		</div>
 	</div>
 </body>
@@ -211,6 +213,15 @@ textarea:focus {
 			text : "Удалено.",
 			icon : "success"
 		});
+	}
+	if (window.innerWidth <= 768 && !localStorage.getItem('mobileAlertShown')) {
+		Swal
+				.fire({
+					title : "Неподдерживаемое устройство!",
+					html : "<p>Панель администратора и ее функционал были расчитаны для работы на больших экранах. Может наблюдаться некорректное отображение web-страниц.<br><br>Это не касается страниц других пользователей.</p>",
+					icon : "warning"
+				});
+		localStorage.setItem('mobileAlertShown', 'true');
 	}
 </script>
 </html>

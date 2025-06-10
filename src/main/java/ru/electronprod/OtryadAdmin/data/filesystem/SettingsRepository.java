@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import ru.electronprod.OtryadAdmin.models.dto.EventTypeDTO;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
 /**
@@ -25,30 +24,26 @@ import ru.electronprod.OtryadAdmin.utils.FileOptions;
 @Slf4j
 public class SettingsRepository implements InitializingBean {
 	@Getter
-	private static List<EventTypeDTO> event_types = new ArrayList<EventTypeDTO>();
+	private static File config = new File("settings.txt");
 	@Getter
-	private static Map<String, String> reasons_for_absences = new LinkedHashMap<String, String>();
+	private static Map<String, Boolean> event_types = new LinkedHashMap<String, Boolean>();
+	@Getter
+	private static List<String> reasons_for_absences = new ArrayList<String>();;
 	@Getter
 	private static Map<String, String> replacements = new LinkedHashMap<String, String>();
 	@Getter
 	private static final Map<String, String> roles = Map.of("ROLE_ADMIN", "ADMIN", "ROLE_SQUADCOMMANDER",
 			"КОМАНДИР ЗВЕНА", "ROLE_COMMANDER", "ЗАМ. КОМАНДИРА ОТРЯДА", "ROLE_OBSERVER", "НАБЛЮДАТЕЛЬ");
-
-	@Getter
-	private static File config = new File("settings.txt");
-
 	/** Section name constant **/
 	public static final String SECTION_EVENT_TYPES = "event_types";
 	/** Section name constant **/
 	public static final String SECTION_REASONS = "reasons_for_absences";
 	/** Section name constant **/
 	public static final String SECTION_REPLACEMENTS = "replacements";
-	/** Section name constant **/
-	private static final String SECTION_ALARM_CONFIG = "alarm_config";
 
 	/**
-	 * Checks file existence and reads data to memory at startup. If there is a
-	 * problem in this method the program will stop
+	 * Checks file existence and reads data to memory at startup. If an exception
+	 * occurs in this method, the program will stop.
 	 */
 	@Override
 	public void afterPropertiesSet() {
@@ -58,14 +53,14 @@ public class SettingsRepository implements InitializingBean {
 				writeDefaults(config);
 			}
 		} catch (IOException e) {
-			log.error("Error loading settings file.", e);
+			log.error("An exception occurred while preparing the settings file:", e);
 			System.exit(1);
 		}
 		// Loading data from file
 		try {
 			loadData(config);
 		} catch (ParseException e) {
-			log.error("Error loading settings.", e);
+			log.error("An exception occurred while parsing the settings file:", e);
 			System.exit(1);
 		}
 	}
@@ -85,14 +80,14 @@ public class SettingsRepository implements InitializingBean {
 		JSONArray eventtypes = (JSONArray) data.get(SECTION_EVENT_TYPES);
 		for (Object o : eventtypes) {
 			JSONObject obj = (JSONObject) o;
-			event_types.add(new EventTypeDTO(String.valueOf(obj.get("event")), String.valueOf(obj.get("name")),
-					Boolean.parseBoolean(String.valueOf(obj.get("canSetReason")))));
+			event_types.put(String.valueOf(obj.get("event")),
+					Boolean.parseBoolean(String.valueOf(obj.get("canSetReason"))));
 		}
 		// Adding reasons for absences
 		JSONArray reasons = (JSONArray) data.get(SECTION_REASONS);
 		for (Object o : reasons) {
 			JSONObject obj = (JSONObject) o;
-			reasons_for_absences.put(String.valueOf(obj.get("reason")), String.valueOf(obj.get("name")));
+			reasons_for_absences.add(String.valueOf(obj.get("reason")));
 		}
 		// Adding replacements
 		JSONArray repls = (JSONArray) data.get(SECTION_REPLACEMENTS);
@@ -100,13 +95,12 @@ public class SettingsRepository implements InitializingBean {
 			JSONObject obj = (JSONObject) o;
 			replacements.put(String.valueOf(obj.get("from")), String.valueOf(obj.get("to")));
 		}
-		log.info("Loaded main settings and saved them to memory. File: " + config.getName());
+		log.info("Settings loaded successfully!");
 	}
 
 	/**
 	 * Writes default settings to file
 	 * 
-	 * @deprecated Needs to be redone soon
 	 * @param config - File to write to
 	 * @throws IOException
 	 */
@@ -115,18 +109,18 @@ public class SettingsRepository implements InitializingBean {
 		JSONObject data = new JSONObject();
 		// Adding event types
 		JSONArray eventtypes = new JSONArray();
-		eventtypes.add(generateEvent("Общий сбор", "Общий сбор", true));
-		eventtypes.add(generateEvent("Дежурство", "Дежурство (вызвался дежурить в кабинете)", false));
-		eventtypes.add(generateEvent("Звеньевое событие", "Звеньевое событие", false));
+		eventtypes.add(generateEvent("Общий сбор", true));
+		eventtypes.add(generateEvent("Дежурство", false));
+		eventtypes.add(generateEvent("Звеньевое событие", false));
 		data.put(SECTION_EVENT_TYPES, eventtypes);
 		// Adding reasons for absences
 		JSONArray reasons = new JSONArray();
-		reasons.add(generateReason("unknown_reason", "Неизвестно"));
-		reasons.add(generateReason("ill", "Заболел(а)"));
-		reasons.add(generateReason("away", "Уехал(а)"));
-		reasons.add(generateReason("study", "Учеба"));
-		reasons.add(generateReason("respect", "Уважительная причина"));
-		reasons.add(generateReason("disrespect", "Неуважительная причина"));
+		reasons.add(generateReason("Неизвестно"));
+		reasons.add(generateReason("Заболел(а)"));
+		reasons.add(generateReason("Уехал(а)"));
+		reasons.add(generateReason("Учеба"));
+		reasons.add(generateReason("Уважительная причина"));
+		reasons.add(generateReason("Неуважительная причина"));
 		data.put(SECTION_REASONS, reasons);
 		// Adding replacements
 		JSONArray repls = new JSONArray();
@@ -135,32 +129,8 @@ public class SettingsRepository implements InitializingBean {
 		repls.add(generateReplacement("true", "+"));
 		repls.add(generateReplacement("false", "-"));
 		data.put(SECTION_REPLACEMENTS, repls);
-		data.put(SECTION_ALARM_CONFIG, createAlarmCfg());
 		FileOptions.writeFile(data.toJSONString(), config);
 		log.info("Wrote defaults to " + config.getName());
-	}
-
-	@SuppressWarnings("unchecked")
-	public static JSONObject createAlarmCfg() {
-		JSONObject alarm_conf = new JSONObject();
-		alarm_conf.put("prediction_enabled", String.valueOf(true));
-		alarm_conf.put("prediction_notify_admins", String.valueOf(true));
-		alarm_conf.put("prediction_border_num", String.valueOf(4));
-		alarm_conf.put("notification_schelude_enabled", String.valueOf(false));
-		return alarm_conf;
-	}
-
-	public static JSONObject getAlarmConfig() throws ParseException {
-		JSONObject main = (JSONObject) FileOptions.ParseJS(FileOptions.getFileLine(config));
-		return (JSONObject) main.get(SECTION_ALARM_CONFIG);
-	}
-
-	@SuppressWarnings("unchecked")
-	public static void saveAlarmConfig(JSONObject alarm_config) throws ParseException {
-		JSONObject main = (JSONObject) FileOptions.ParseJS(FileOptions.getFileLine(config));
-		main.remove(SECTION_ALARM_CONFIG);
-		main.put(SECTION_ALARM_CONFIG, alarm_config);
-		FileOptions.writeFile(main.toJSONString(), config);
 	}
 
 	/**
@@ -233,16 +203,14 @@ public class SettingsRepository implements InitializingBean {
 	 * Generates event's JSONObject
 	 * 
 	 * @param event - event appearance in the database
-	 * @param name  - event's name (it's visible for user)
 	 * @param mark  - Can a commander indicate reasons for absence? (true - yes,
 	 *              false - no)
 	 * @return JSONObject
 	 */
 	@SuppressWarnings("unchecked")
-	public static JSONObject generateEvent(String event, String name, boolean mark) {
+	public static JSONObject generateEvent(String event, boolean mark) {
 		JSONObject o = new JSONObject();
 		o.put("event", event);
-		o.put("name", name);
 		o.put("canSetReason", mark);
 		return o;
 	}
@@ -251,14 +219,12 @@ public class SettingsRepository implements InitializingBean {
 	 * Generates reason's JSONObject
 	 * 
 	 * @param reason - reason appearance in the database
-	 * @param name   - reason's name (it's visible for user)
 	 * @return JSONObject
 	 */
 	@SuppressWarnings("unchecked")
-	public static JSONObject generateReason(String reason, String name) {
+	public static JSONObject generateReason(String reason) {
 		JSONObject o = new JSONObject();
 		o.put("reason", reason);
-		o.put("name", name);
 		return o;
 	}
 
@@ -291,29 +257,5 @@ public class SettingsRepository implements InitializingBean {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Converts all event data
-	 * 
-	 * @see public static Map<String, String>
-	 *      convertEventTypeDTOs(List<EventTypeDTO> list)
-	 */
-	public static Map<String, String> convertEventTypeDTOs() {
-		return convertEventTypeDTOs(event_types);
-	}
-
-	/**
-	 * Converts given EventTypeDTOs to Map(String,String).
-	 * 
-	 * @param list - List EventTypeDTOs
-	 * @return Map(String,String)
-	 */
-	public static Map<String, String> convertEventTypeDTOs(List<EventTypeDTO> list) {
-		Map<String, String> result = new LinkedHashMap<String, String>();
-		list.forEach(obj -> {
-			result.put(obj.getEvent(), obj.getName());
-		});
-		return result;
 	}
 }
