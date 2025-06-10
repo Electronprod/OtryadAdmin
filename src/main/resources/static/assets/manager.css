@@ -6,6 +6,11 @@ body {
 	padding-bottom: 60px;
 }
 
+#userTableWrapper {
+	overflow-x: auto;
+	padding: 20px;
+	box-sizing: border-box;
+}
 .header {
 	background-color: #f0f0f0;
 	border-radius: 8px;
@@ -20,12 +25,6 @@ body {
 
 .header span {
 	color: #007bff;
-}
-
-#userTableWrapper {
-	overflow-x: auto;
-	padding: 20px;
-	box-sizing: border-box;
 }
 
 table {
@@ -234,6 +233,18 @@ tr:hover {
 	border: 1px solid #ccc;
 	border-radius: 4px;
 	box-sizing: border-box;
+}
+.form-group button {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+	background-color: #4CAF50;
+	color: white;
+}
+.form-group button:hover{
+	background-color: #45a049;
 }
 
 .form-group textarea {

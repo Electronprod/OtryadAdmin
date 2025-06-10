@@ -109,9 +109,9 @@ async function recognize(action) {
 				removeGroup(human.id);
 			}
 		});
-		Swal.fire({
+		await Swal.fire({
 			title: "Готово!",
-			text: "Распознавание выполнило свою работу",
+			text: "Распознавание выполнило свою работу. Не забудьте проверить правильность выполнения!",
 			icon: "success"
 		});
 	}

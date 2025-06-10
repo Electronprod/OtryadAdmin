@@ -6,6 +6,7 @@ if (window.location.href.includes("edited_user")) {
 }
 const savepass = "Оставить старый";
 function showAddUser() {
+	document.getElementById('login').disabled = false;
 	document.getElementById('login').value = "";
 	document.getElementById('password').value = "";
 	document.getElementById('name').value = "";
@@ -39,10 +40,12 @@ async function edit(id) {
 	const data = await fetchData("/admin/usermgr/edit?id=" + id);
 	if (data == null) {
 		console.log("Error editing: unable to get data from server.");
+		alert('Error editing: unable to get data from server.');
 		return;
 	}
 	document.getElementById('userid').value = id;
 	document.getElementById('login').value = data.login;
+	document.getElementById('login').disabled = true;
 	document.getElementById('password').value = savepass;
 	document.getElementById('role').value = data.role;
 	document.getElementById('name').value = data.name;
@@ -54,13 +57,14 @@ async function editUser() {
 	const role = document.getElementById('role').value;
 	const name = document.getElementById('name').value;
 	const userid = document.getElementById('userid').value;
-	if (!login || !password || !role || !userid || !name) {
+	if (!password || !role || !userid || !name) {
 		alert('Пожалуйста, заполните обязательные поля.');
 		return;
 	}
 	if (password == savepass) {
 		password = "not_changed";
 	}
+	document.getElementById('login').disabled = false;
 	const success = await sendPostData("/admin/usermgr/edit?login=" + login + "&password=" + password + "&role=" + role + "&name=" + name + "&id=" + userid);
 	if (success) {
 		window.location.href = "/admin/usermgr?edited_user"
@@ -70,7 +74,7 @@ async function editUser() {
 async function remove(id) {
 	const result = await swal.fire({
 		title: 'Вы уверены?',
-		text: "Данное действие приведет к удалению пользователя.",
+		text: "Данное действие приведет к удалению пользователя и связанных с ним данных.",
 		icon: 'warning',
 		showCancelButton: true,
 		confirmButtonColor: '#3085d6',

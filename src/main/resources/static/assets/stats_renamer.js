@@ -1,40 +1,38 @@
-// Функция для получения данных с указанного URL
 async function fetchData(url) {
 	try {
 		const response = await fetch(url);
 		if (!response.ok) {
-			throw new Error(`Ошибка HTTP: ${response.status}`);
+			throw new Error(`HTTP error code: ${response.status}`);
 		}
 		return await response.json();
 	} catch (error) {
-		console.error('Ошибка при получении данных:', error);
-		return null; // Возвращаем null в случае ошибки
+		console.error('Exception while retrieving data:', error);
+		return null;
 	}
 }
-
-// Функция для замены текста в ячейках таблицы
 function replaceText(replacements) {
 	document.querySelectorAll('table td').forEach(function(td) {
+		let originalText = td.textContent;
 		Object.keys(replacements).forEach(key => {
-			const regex = new RegExp(key, 'g'); // Создаем регулярное выражение для замены
-			td.textContent = td.textContent.replace(regex, replacements[key].replace(/\(.*?\)/g, '').trim());
+			const regex = new RegExp(key, 'g');
+			const newText = originalText.replace(regex, replacements[key].replace(/\(.*?\)/g, '').trim());
+			if (newText !== originalText) {
+				td.textContent = newText;
+			}
 		});
 	});
 }
-
-// Пример URL для GET-запроса
 const url = window.location.origin + '/api/getrenamerdata';
-
-// Основная функция для выполнения GET-запроса и замены текста
+let replacements = null;
 async function main() {
 	if (window.location.href.includes("stop_renamer")) {
-		console.log('Stopped renamer with url argument.');
+		console.log('Renamer stopped due to URL argument.');
 		return;
 	}
-	const replacements = await fetchData(url);
+	if (replacements == null)
+		replacements = await fetchData(url);
 	if (replacements) {
 		replaceText(replacements);
 	}
 }
-// Вызываем функцию при загрузке окна
 window.onload = main;
