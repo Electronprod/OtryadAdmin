@@ -1,9 +1,10 @@
 // Loading dependencies
 loadScript("/assets/mark_engine.js", null);
+loadScript("/assets/search_table.js", null);
 // Setting current date
 document.getElementById("dateField").valueAsDate = new Date()
 // -------------Event listeners-------------
-// Checkbox worker
+// Set each checkbox logic
 document.addEventListener('DOMContentLoaded', function() {
 	const checkboxes = document.querySelectorAll('.custom-checkbox');
 	checkboxes.forEach(checkbox => {
@@ -16,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 	});
 });
-// Check all checkboxes
+// Logic of the checkbox, which checks all other checkboxes
 document.getElementById('select_all_humans_checkbox').addEventListener('change', function() {
 	const checkboxes = document.querySelectorAll('input[name="select"]');
 	checkboxes.forEach((checkbox) => {
@@ -28,79 +29,67 @@ document.getElementById('select_all_humans_checkbox').addEventListener('change',
 		}
 	});
 });
-//Search
-function filterTable() {
-	const input = document.getElementById('searchInput');
-	const filter = input.value.toLowerCase();
-	const table = document.getElementById('markTable');
-	const tbody = table.getElementsByTagName('tbody')[0];
-	const rows = tbody.getElementsByTagName('tr');
-
-	for (let i = 0; i < rows.length; i++) {
-		const lastname = rows[i].getElementsByTagName('td')[1];
-		const firstname = rows[i].getElementsByTagName('td')[2];
-
-		if (lastname || firstname) {
-			const lastnameText = lastname.textContent.toLowerCase();
-			const firstnameText = firstname.textContent.toLowerCase();
-
-			if (lastnameText.indexOf(filter) > -1 || firstnameText.indexOf(filter) > -1) {
-				rows[i].style.display = '';
-			} else {
-				rows[i].style.display = 'none';
-			}
-		}
-	}
-}
-//Search
-document.getElementById("searchInput").addEventListener("keypress", function() {
-	this.scrollIntoView(true);
-});
 // Checks whether to show the reason column. Allows you to create your own event.
 let eventTypesWithReasons = "";
+let showEvents = [];
 async function handleEventChange(selectElement) {
+	if (eventTypesWithReasons === "") {
+		eventTypesWithReasons = await getData("/api/get_event_types_with_reasons");
+	}
 	const selectedValue = selectElement.value;
 	if (selectElement.value == "unknown-event") {
 		console.log("Creating custom event...");
 		Swal.fire({
 			title: 'Введите название события',
-			text: "Так, чтобы можно было понять, что это.",
 			input: 'text',
+			html: `
+		    <label for="checkbox">
+		      <input type="checkbox" id="checkbox"/>
+		      Указывать причины отсутствия
+		    </label>
+		  `,
 			showCancelButton: true,
 			confirmButtonText: 'Сохранить',
 		}).then((result) => {
 			if (result.value) {
-				console.log('Event: ', result.value);
+				const checkbox = Swal.getPopup().querySelector('#checkbox');
+				console.log('Event: ', result.value, 'Checkbox:', checkbox.checked);
+				if (eventTypesWithReasons.some(event => event.event === result.value)) {
+					showError("Событие уже существует!", "Данное событие уже есть в селекторе. Посмотрите внимательнее.");
+					return;
+				}
+				if (checkbox.checked) {
+					showColumn("markTable", 3);
+					showEvents.push(result.value);
+				} else {
+					hideColumn("markTable", 3);
+				}
 				const option = document.createElement('option');
 				option.value = result.value;
-				option.text = result.value;
+				option.textContent = result.value;
 				selectElement.add(option);
 				selectElement.value = result.value;
-				selectElement.disabled = true;
 				Swal.fire({
-					title: "Готово!",
-					text: "Событие указано. Если вы хотите выбрать другое, перезагрузите страницу.",
+					title: "Ваше событие добавлено!",
+					text: "Обратите внимание, что событие пропадет после перезагрузки страницы",
 					icon: "success"
 				});
 			}
 		});
-		showColumn("markTable", 3);
 		return;
 	}
-	if (eventTypesWithReasons === "") {
-		eventTypesWithReasons = await getData("/api/get_event_types_with_reasons");
-	}
 	if (!eventTypesWithReasons.some(event => event.event === selectedValue)) {
-		hideColumn("markTable", 3);
-	} else {
-		showColumn("markTable", 3);
+		if (!showEvents.some(event => event === String(selectedValue))) {
+			hideColumn("markTable", 3);
+			return;
+		}
 	}
+	showColumn("markTable", 3);
 }
 // -------------Send data-------------
 async function send() {
 	try {
 		const unpresentPeople = [];
-		// For every checkbox...
 		const checkboxes = document.querySelectorAll('.custom-checkbox');
 		checkboxes.forEach(checkbox => {
 			if (!checkbox.checked) {
@@ -127,7 +116,6 @@ async function send() {
 				}
 			}
 		});
-		// Finding event type
 		var event_type = document.getElementById('event_type');
 		if (!event_type) {
 			showError("Не найден тип события!");
@@ -140,6 +128,6 @@ async function send() {
 		};
 		sendData("/squadcommander/mark", data_to_send);
 	} catch (error) {
-		showError("Произошла неизвестная ошибка!");
+		showError("Произошла неизвестная ошибка!", String(error));
 	}
 }

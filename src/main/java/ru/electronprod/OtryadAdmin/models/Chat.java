@@ -27,7 +27,7 @@ public class Chat {
 	private String firstname;
 	private String lastname;
 	@org.hibernate.annotations.ColumnDefault("true")
-	private boolean sendMarkedNotification;
+	private boolean sendMarkedNotification = true;
 	@org.hibernate.annotations.ColumnDefault("0")
 	private int remaindsCounter;
 	@OneToOne

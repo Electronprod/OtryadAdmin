@@ -30,7 +30,7 @@ async function sendData(address, bodyData) {
 			return false;
 		}
 		const data = await response.json();
-		showSuccess("Ребята отмечены!");
+		showSuccess("Отметки выставлены!");
 		console.log('mark success:', data);
 		return true;
 	} catch (error) {

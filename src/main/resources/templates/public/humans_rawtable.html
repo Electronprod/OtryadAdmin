@@ -13,8 +13,7 @@
 	<table id="userTable">
 		<thead>
 			<tr>
-				<th>№<br>
-					<button onclick="sortTable(0)" class="sortbtn">Сортировать</button></th>
+				<th>№</th>
 				<th>Фамилия<br>
 					<button onclick="sortTable(1)" class="sortbtn">Сортировать</button></th>
 				<th>Имя<br>
@@ -57,8 +56,8 @@
 		</tbody>
 	</table>
 	<div class="bottomPanel">
-		<button class="btn" onclick="window.history.back();">Вернуться</button>
 		<button class="btn" id="sheetjsexport">Экспорт как XLSX</button>
+		<button class="btn" style="background-color: green" onclick="window.history.back();">Вернуться</button>
 	</div>
 </body>
 <script src="/assets/mgr.js"></script>
@@ -71,5 +70,4 @@
 				XLSX.writeFile(wb, "humans.xlsx");
 			});
 </script>
-
 </html>

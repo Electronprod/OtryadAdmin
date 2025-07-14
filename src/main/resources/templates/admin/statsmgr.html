@@ -32,11 +32,11 @@
 		</tbody>
 	</table>
 	<div class="bottomPanel" id="bp1">
+		<button class="btn" onclick="document.getElementById('bp2').style.display='inline'">Подсветить</button>
+		<button class="btn" onclick="window.location.href='/admin/statsmgr/table'">Таблица</button>
 		<button class="btn" style="background-color: green"
 			onclick="document.getElementById('overlay-2').style.display = 'flex';">Редактировать событие</button>
 		<button class="btn" style="background-color: red" onclick="removeEvent()">Удалить событие</button>
-		<button class="btn" onclick="document.getElementById('bp2').style.display='inline'">Подсветить</button>
-		<button class="btn" onclick="window.location.href='/admin/statsmgr/table'">Таблица</button>
 	</div>
 	<div class="bottomPanel" id="bp2" style="display: none">
 		<button class="btn" onclick="highlightRows('userTable', 4);">Посещения</button>

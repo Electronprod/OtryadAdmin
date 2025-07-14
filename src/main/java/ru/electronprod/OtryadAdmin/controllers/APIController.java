@@ -1,11 +1,14 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,11 +18,14 @@ import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.services.AuthHelper;
 
 @RestController
 public class APIController {
 	@Autowired
 	private DBService dbservice;
+	@Autowired
+	private AuthHelper auth;
 
 	@SuppressWarnings("unchecked")
 	@GetMapping("/api/getrenamerdata")
@@ -58,5 +64,43 @@ public class APIController {
 			answer.add(o);
 		});
 		return answer.toJSONString();
+	}
+
+	@SuppressWarnings("unchecked")
+	@GetMapping("/api/get_event_types_with_reasons")
+	@PreAuthorize("hasAuthority('ROLE_SQUADCOMMANDER')")
+	public String getEventTypesForReasons() {
+		JSONArray arr = new JSONArray();
+		Map<String, Boolean> data = SettingsRepository.getEvent_types();
+		for (Map.Entry<String, Boolean> e : data.entrySet()) {
+			if (!e.getValue())
+				continue;
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("event", e.getKey());
+			arr.add(jsonObject);
+		}
+		return arr.toJSONString();
+	}
+
+	@SuppressWarnings("unchecked")
+	@GetMapping("/api/line_calendar")
+	@PreAuthorize("isAuthenticated()")
+	public String get_line_calendar_data() {
+		JSONArray arr = new JSONArray();
+		var data = dbservice.getStatsRepository().findByAuthor(auth.getCurrentUser().getLogin(),
+				Sort.by(Sort.Direction.ASC, "id"));
+		Collection<StatsRecord> stats = data.stream().collect(
+				Collectors.toMap(StatsRecord::getEvent_id, record -> record, (existing, replacement) -> existing))
+				.values();
+		stats.forEach(e -> {
+			JSONObject o = new JSONObject();
+			o.put("date", e.getDate());
+			o.put("event", e.getType());
+			o.put("eventid", e.getEvent_id());
+			o.put("absent", data.stream().filter(e1 -> e1.getEvent_id() == e.getEvent_id() & !e1.isPresent()).count());
+			o.put("present", data.stream().filter(e1 -> e1.getEvent_id() == e.getEvent_id() & e1.isPresent()).count());
+			arr.add(o);
+		});
+		return arr.toJSONString();
 	}
 }

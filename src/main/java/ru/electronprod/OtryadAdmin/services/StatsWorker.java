@@ -128,6 +128,7 @@ public class StatsWorker {
 		model.addAttribute("reasons_data", reasons_data);
 	}
 
+	@Transactional(readOnly = true)
 	public List<StatsRecord> generatePresentStats(Collection<Human> humans, String event_type, String formatted_date,
 			User user, int event_id, String group) {
 		List<StatsRecord> resultArray = new ArrayList<StatsRecord>();
@@ -146,11 +147,12 @@ public class StatsWorker {
 		return resultArray;
 	}
 
+	@Transactional(readOnly = true)
 	private StatsRecord createUnpresentStatsRecord(JSONObject data, String event, String formatted_date, User user,
 			int event_id, List<Human> humans, String group) {
 		// Finding human to add stats record
 		Human human = humans.stream().filter(h -> h.getId() == Integer.parseInt(String.valueOf(data.get("id"))))
-				.findFirst().orElseThrow(() -> new IllegalStateException("Human not found"));
+				.findFirst().orElseThrow(() -> new IllegalStateException("Human not found: " + data.get("id")));
 		// Creating stats record
 		StatsRecord stats = new StatsRecord(human);
 		stats.setAuthor(user.getLogin());
@@ -165,7 +167,7 @@ public class StatsWorker {
 		return stats;
 	}
 
-	@Transactional
+	@Transactional()
 	public int mark_group(MarkDTO dto, User user, List<Human> humans, String group) throws Exception {
 		// Validating input
 		String date = DBService.getStringDate(dto.getDate() != null ? dto.getDate() : DBService.getStringDate());
@@ -195,7 +197,7 @@ public class StatsWorker {
 		return event_id;
 	}
 
-	@Transactional
+	@Transactional()
 	public int mark_only_present(MarkDTO dto, User user) throws Exception {
 		// Validating input
 		String date = DBService.getStringDate(dto.getDate() != null ? dto.getDate() : DBService.getStringDate());

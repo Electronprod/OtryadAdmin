@@ -12,7 +12,7 @@
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
@@ -20,30 +20,30 @@
 				<h3>
 					Добро пожаловать, <span th:text="${user_name}"></span>!
 				</h3>
-				<p>Это ваша панель командира. Сверху вы можете перейти в другой раздел сайта. Ниже вы можете отметить ребят.
-					Приятного пользования!</p>
+				<p>Вы находитесь в панели командира звена. Здесь вы можете отметить ребят, посмотреть их статистику и данные.</p>
 			</div>
 			<div class="card">
-				<h3>
-					<b>КАК ПРАВИЛЬНО ОТМЕТИТЬ???</b>
-				</h3>
-				<p>
-					В форме ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии, остальным укажите причины
-					отсутствия. Выберите событие и дату в селекторе над таблицей и нажмите "Отправить".<br> <strong>Отправленные
-						данные изменить нельзя!</strong>
-				</p>
-			</div>
-			<div class="card">
-				<h3>Отметьте ПРИСУТСТВОВАВШИХ ребят:</h3>
+				<h2 style="height: 0.375px; transform: translate(0px, -29px);">Выставить отметки</h2>
+				<div class="card_2">
+					<h4>
+						<b>КАК ПРАВИЛЬНО ОТМЕТИТЬ???</b>
+					</h4>
+					<p>
+						Выберите событие и дату. В таблице ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии,
+						остальным укажите причины отсутствия, если соответствующая колонка появится. Наконец, нажмите кнопку "Отправить"
+						снизу таблицы.<br> <strong>Отправленные данные изменить нельзя!</strong>
+					</p>
+				</div>
 				<form id="markForm">
 					<div class="event-data-container">
 						<label for="event_type">Выберите событие:</label> <select id="event_type" onchange="handleEventChange(this)"
 							required>
-							<option th:each="entry : ${event_types_map}" th:value="${entry.getEvent()}" th:text="${entry.getName()}"></option>
+							<option th:each="entry : ${event_types_map}" th:value="${entry.key}" th:text="${entry.key}"></option>
 							<option value="unknown-event">Другое событие...</option>
 						</select><br> <label for="dateField">Выберите дату:</label> <input id="dateField" type="date" required /><br>
 					</div>
-					<input type="text" id="searchInput" placeholder="Введите имя или фамилию для поиска..." onkeyup="filterTable()" />
+					<input type="text" id="searchInput" placeholder="Введите имя или фамилию для поиска..."
+						onkeyup="search_human('1','2','markTable')" />
 					<table id="markTable">
 						<thead>
 							<tr>
@@ -61,7 +61,7 @@
 								<td th:text="${human.name}">Имя</td>
 								<td><select class="details-input" th:name="'details[' + ${human.id} + ']'"
 									th:id="'details-' + ${iterStat.index}">
-										<option th:each="entry : ${reasons_for_absences_map}" th:value="${entry.key}" th:text="${entry.value}"></option>
+										<option th:each="entry : ${reasons_for_absences_map}" th:value="${entry}" th:text="${entry}"></option>
 								</select></td>
 							</tr>
 						</tbody>
@@ -74,5 +74,5 @@
 	<!--Search space-->
 	<div style="height: 50vh"></div>
 </body>
-<script defer src="/onepage_scripts/squadcommander.js"></script>
+<script src="/onepage_scripts/squadcommander.js"></script>
 </html>
