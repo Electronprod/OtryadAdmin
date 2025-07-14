@@ -74,6 +74,11 @@ public class AdminController {
 		return "admin/dashboard";
 	}
 
+	@GetMapping("/demand")
+	public String demand() {
+		return "forward:/observer/demand";
+	}
+
 	/*
 	 * User manager
 	 */

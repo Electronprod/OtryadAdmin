@@ -19,7 +19,6 @@ import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
 import ru.electronprod.OtryadAdmin.utils.Answer;
-import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 
 @Slf4j
 @Controller
@@ -53,8 +52,8 @@ public class SquadCommanderController {
 	@PostMapping("/mark")
 	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
 		try {
-			int event_id = statsHelper.mark_group(dto, authHelper.getCurrentUser(),
-					dbservice.getSquadRepository().findByCommander(authHelper.getCurrentUser()).getHumans(), null);
+			var humans = dbservice.getSquadRepository().findByCommander(authHelper.getCurrentUser()).getHumans();
+			int event_id = statsHelper.mark_group(dto, authHelper.getCurrentUser(), humans, null);
 			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
 			log.error("Mark error (squadcommander.mark):", e);
@@ -69,8 +68,13 @@ public class SquadCommanderController {
 				dbservice.getUserRepository().findById(authHelper.getCurrentUser().getId()).orElseThrow().getSquad()
 						.getHumans().stream().sorted(Comparator.comparing(Human::getLastname))
 						.collect(Collectors.toList()));
-		model.addAttribute("events", dbservice.getStatsRepository().findByAuthor(user.getLogin()).stream()
-				.map(StatsRecord::getType).distinct().sorted().collect(Collectors.toList()));
+		var stats = dbservice.getStatsRepository().findByAuthor(user.getLogin());
+		model.addAttribute("reasons",
+				stats.stream().map(StatsRecord::getReason)
+						.filter(reason -> !SettingsRepository.getReplacements().containsKey(reason))
+						.collect(Collectors.groupingBy(reason -> reason, Collectors.counting())));
+		model.addAttribute("events",
+				stats.stream().map(StatsRecord::getType).distinct().sorted().collect(Collectors.toList()));
 		return "squadcommander/stats_overview";
 	}
 
@@ -91,11 +95,13 @@ public class SquadCommanderController {
 	}
 
 	@GetMapping("/stats/date")
-	public String stats_byDateTable(@RequestParam String date, Model model) {
+	public String stats_byDateTable(@RequestParam String date, @RequestParam Optional<String> eventid, Model model) {
 		try {
-			model.addAttribute("statss",
-					dbservice.getStatsRepository().findByDateAndAuthor(DBService.getStringDate(date),
-							authHelper.getCurrentUser().getLogin(), Sort.by(Sort.Direction.DESC, "id")));
+			var data = dbservice.getStatsRepository().findByDateAndAuthor(DBService.getStringDate(date),
+					authHelper.getCurrentUser().getLogin(), Sort.by(Sort.Direction.DESC, "id"));
+			if (eventid.isPresent())
+				data = data.stream().filter(e -> String.valueOf(e.getEvent_id()).equals(eventid.get())).toList();
+			model.addAttribute("statss", data);
 		} catch (Exception e) {
 		}
 		return "public/statsview_rawtable";
