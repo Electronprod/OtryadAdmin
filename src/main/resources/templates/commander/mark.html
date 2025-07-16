@@ -32,6 +32,11 @@ details[open] {
 	background-color: #e0f7fa;
 	border-color: #0056b3;
 }
+
+.non_marking {
+	color: red;
+	background-color: orange;
+}
 </style>
 </head>
 <body>
@@ -43,9 +48,8 @@ details[open] {
 				<h3>
 					Добро пожаловать, <span th:text="${user.name}"></span>!
 				</h3>
-				<p>Вы находитесь в панели командира. Здесь у вас есть возможность отмечать посещения и пропуски ребят. Сверху вы
-					можете перейти на страницы просмотра информации о них в разделе "Список отряда", а также ознакомиться с вашими
-					отметками в разделе "Статистика".</p>
+				<p>Вы находитесь в панели заместителя командира отряда. Здесь вы можете отметить ребят, посмотреть их статистику
+					и данные.</p>
 			</div>
 			<div th:if="${user.groups.isEmpty()==false}" class="card animated-border">
 				<h3>Отметить ребят в группе</h3>
@@ -73,9 +77,15 @@ details[open] {
 			</div>
 			<div class="card">
 				<h3>Отметить ребят</h3>
-				<p>
-					Данная форма <u>выставляет только положительные отметки</u>, пропуски НЕ ВЫСТАВЛЯЮТСЯ.
-				</p>
+				<p>Сценарии...</p>
+				<details class="cardc">
+					<summary>Примеры использования</summary>
+					<ul>
+						<li>Отметить ребят, кто БЫЛ НА НЕОБЯЗАТЕЛЬНОЙ ВСТРЕЧЕ</li>
+						<li>Отметить ПРИШЕДШИХ НА РАБОТЫ (пример: уборка снега)</li>
+						<li>Отметить ребят, ПОУЧАСТВОВАВШИХ В КОНКУРСЕ</li>
+					</ul>
+				</details>
 				<div class="card_2">
 					<h4>
 						<b>КАК ПРАВИЛЬНО ОТМЕТИТЬ???</b>
@@ -86,24 +96,19 @@ details[open] {
 							данные изменить нельзя!</strong>
 					</p>
 				</div>
-				<details class="cardc">
-					<summary>Примеры использования</summary>
-					<ul>
-						<li>Отметить ребят, кто БЫЛ НА НЕОБЯЗАТЕЛЬНОЙ ВСТРЕЧЕ</li>
-						<li>Отметить ПРИШЕДШИХ НА РАБОТЫ (пример: уборка снега)</li>
-						<li>Отметить ребят, ПОУЧАСТВОВАВШИХ В КОНКУРСЕ</li>
-					</ul>
-				</details>
 				<form id="markForm">
 					<label>Введите название события:</label> <input id="event_type" type="text" required /> <label>Выберите
-						дату:</label> <input id="dateField" type="date" required /> <input type="text" id="searchInput"
-						placeholder="Введите имя или фамилию для поиска..." onkeyup="filterTable()" />
+						дату:</label> <input id="dateField" type="date" required /><label>Указывать причины отсутствия:</label><select
+						id="toggle_reasons_column" onclick="toggleColumn(this)"><option value="false">Нет</option>
+						<option value="true">Да</option></select> <input type="text" id="searchInput"
+						placeholder="Введите имя или фамилию для поиска..." onkeyup="search_human('1','2','markTable')" />
 					<table id="markTable">
 						<thead>
 							<tr>
 								<th><input class="all-checkbox" type="checkbox" id="select_all_humans_checkbox" /></th>
 								<th>Фамилия</th>
 								<th>Имя</th>
+								<th>Причина</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -112,6 +117,11 @@ details[open] {
 									th:id="'checkbox-' + ${iterStat.index}" /></td>
 								<td th:text="${human.lastname}">Фамилия</td>
 								<td th:text="${human.name}">Имя</td>
+								<td><select class="details-input" th:name="'details[' + ${human.id} + ']'"
+									th:id="'details-' + ${iterStat.index}">
+										<option class="non_marking" value="do_not_mark_user">Не отмечается</option>
+										<option th:each="entry : ${reasons_for_absences_map}" th:value="${entry}" th:text="${entry}"></option>
+								</select></td>
 							</tr>
 						</tbody>
 					</table>
@@ -124,4 +134,5 @@ details[open] {
 	<div style="height: 50vh"></div>
 </body>
 <script src="/onepage_scripts/commander.js"></script>
+<script src="/assets/mark_engine.js"></script>
 </html>

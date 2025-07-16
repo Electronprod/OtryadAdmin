@@ -153,3 +153,15 @@ function loadScript(url, callback) {
 	};
 	document.body.appendChild(script);
 }
+// Перехват всех неотловленных ошибок
+window.onerror = function(message, source, lineno, colno, error) {
+	alert('Произошла ошибка: ' + message + '\n' +
+		'Файл: ' + source + '\n' +
+		'Строка: ' + lineno + ', столбец: ' + colno + '\n' +
+		(error && error.stack ? 'Стек: ' + error.stack : ''));
+	return false;
+};
+// Перехват неотловленных ошибок в промисах
+window.addEventListener('unhandledrejection', function(event) {
+	alert('Ошибка в промисе: ' + event.reason);
+});
