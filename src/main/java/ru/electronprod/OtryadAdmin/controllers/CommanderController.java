@@ -5,7 +5,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +28,6 @@ import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.StatsWorker;
 import ru.electronprod.OtryadAdmin.utils.Answer;
-import ru.electronprod.OtryadAdmin.utils.SearchUtil;
 
 @Slf4j
 @Controller
@@ -53,93 +52,90 @@ public class CommanderController {
 		return "commander/mark";
 	}
 
-	@GetMapping("/mark")
-	public String mark(Model model) {
-		return "forward:/commander/mark";
-	}
-
 	@PostMapping("/mark")
 	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
 		try {
-			int event_id = statsWorker.mark_only_present(dto, authHelper.getCurrentUser());
+			Optional<Group> group = dbservice.getGroupRepository().findById(dto.getGroupID());
+			List<Human> people = null;
+			if (group.isPresent()) {
+				people = group.get().getHumans().stream().collect(Collectors.toCollection(ArrayList::new));
+			} else {
+				people = dbservice.getHumanRepository().findAll();
+			}
+			int event_id = statsWorker.mark_group(dto, authHelper.getCurrentUser(), people,
+					group.isPresent() ? group.get().getName() : null);
 			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
-			log.error("Error in marking (commander.mark):", e);
-			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
-		}
-	}
-
-	@GetMapping("/markgroup")
-	public String markGroup(Model model, @RequestParam int id) {
-		Optional<Group> group1 = dbservice.getGroupRepository().findById(id);
-		if (group1.isEmpty())
-			return "forward:/commander/mark";
-		model.addAttribute("humansList", group1.get().getHumans().stream()
-				.sorted(Comparator.comparing(Human::getLastname)).collect(Collectors.toList()));
-		model.addAttribute("group", group1.get());
-		model.addAttribute("reasons", SettingsRepository.getReasons_for_absences());
-		return "commander/mark_group";
-	}
-
-	@PostMapping("/mark_group")
-	public ResponseEntity<String> markGroup(@RequestBody MarkDTO dto) {
-		try {
-			User user = authHelper.getCurrentUser();
-			Group group = dbservice.getGroupRepository().findById(dto.getGroupID()).orElseThrow();
-			int event_id = statsWorker.mark_group(dto, user,
-					group.getHumans().stream().collect(Collectors.toCollection(ArrayList::new)), group.getName());
-			return ResponseEntity.accepted().body(Answer.marked(event_id));
-		} catch (Exception e) {
-			log.error("Error in marking (commander.mark_group):", e);
+			log.error("Mark error (commander.mark):", e);
 			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
 		}
 	}
 
 	@GetMapping("/stats")
 	public String stats_overview(Model model) {
+		var user = authHelper.getCurrentUser();
+		model.addAttribute("groups", dbservice.getGroupRepository().findByMarker(user));
+		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
 		model.addAttribute("events", dbservice.getStatsRepository()
-				.findDistinctTypesAuthor(authHelper.getCurrentUser().getLogin()).stream().sorted().toList());
+				.findDistinctTypesAuthorWithoutGroups(user.getLogin()).stream().sorted().toList());
+		var stats = dbservice.getStatsRepository().findByAuthor(user.getLogin());
+		model.addAttribute("reasons",
+				stats.stream().map(StatsRecord::getReason)
+						.filter(reason -> !SettingsRepository.getReplacements().containsKey(reason))
+						.collect(Collectors.groupingBy(reason -> reason, Collectors.counting())));
 		return "commander/stats_overview";
 	}
 
 	@GetMapping("/stats/date")
-	public String stats_byDateTable(@RequestParam String date, Model model) {
-		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss", dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."),
-				user.getLogin(), Sort.by(Sort.Direction.DESC, "id")));
+	public String stats_byDateTable(@RequestParam String date, @RequestParam Optional<String> eventid,
+			@RequestParam Optional<String> group, Model model) {
+		try {
+			var data = dbservice.getStatsRepository().findByDateAndAuthor(DBService.getStringDate(date),
+					authHelper.getCurrentUser().getLogin(), Sort.by(Sort.Direction.DESC, "id"));
+			if (eventid.isPresent())
+				data = data.stream().filter(e -> String.valueOf(e.getEvent_id()).equals(eventid.get())).toList();
+			if (group.isPresent())
+				data = data.stream().filter(e -> String.valueOf(e.getGroup()).equals(group.get())).toList();
+			model.addAttribute("statss", data);
+		} catch (Exception e) {
+		}
 		return "public/statsview_rawtable";
 	}
 
-	@GetMapping("/stats/alltable")
+	@GetMapping("/stats/table")
 	public String stats_allTable(Model model) {
-		User user = authHelper.getCurrentUser();
-		model.addAttribute("statss",
-				dbservice.getStatsRepository().findByAuthor(user.getLogin(), Sort.by(Sort.Direction.DESC, "id")));
+		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(authHelper.getCurrentUser().getLogin(),
+				Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
 
 	@GetMapping("/stats/personal")
-	public String stats_personal(@RequestParam String name, Model model) {
-		Human human = SearchUtil.findMostSimilarHuman(name, dbservice.getHumanRepository().findAll());
-		if (human == null || human.getStats() == null) {
-			return "redirect:/commander/stats?error_notfound";
-		}
-		statsWorker.getMainPersonalReportModel(dbservice.getStatsRepository().findByHuman(human), model, true);
-		model.addAttribute("person", human.getLastname() + " " + human.getName());
-		model.addAttribute("human_id", human.getId());
-		return "observer/personal_stats";
+	public String stats_personal() {
+		return "forward:/commander/stats/personal_id";
 	}
 
 	@GetMapping("/stats/personal/table")
-	public String personalStatsTable(@RequestParam String name, Model model) {
+	public String personalStatsTable(@RequestParam int id, Model model) {
 		User user = authHelper.getCurrentUser();
-		Human human = SearchUtil.findMostSimilarHuman(name, dbservice.getHumanRepository().findAll());
-		if (human == null || human.getStats() == null) {
+		Optional<Human> human = dbservice.getHumanRepository().findById(id);
+		if (human.isEmpty()) {
 			return "redirect:/commander/stats?error_notfound";
 		}
-		model.addAttribute("statss", dbservice.getStatsRepository().findByHumanAndAuthor(human, user.getLogin(),
+		model.addAttribute("statss", dbservice.getStatsRepository().findByHumanAndAuthor(human.get(), user.getLogin(),
 				Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/stats/personal_id")
+	public String stats_personal(@RequestParam int id, Model model) {
+		Optional<Human> human = dbservice.getHumanRepository().findById(id);
+		if (human.isEmpty()) {
+			return "redirect:/commander/stats?error_notfound";
+		}
+		statsWorker.getMainPersonalReportModel(dbservice.getStatsRepository().findByHuman(human.get()), model, true);
+		model.addAttribute("person", human.get().getLastname() + " " + human.get().getName());
+		model.addAttribute("human_id", human.get().getId());
+		return "commander/personal_stats";
 	}
 
 	@GetMapping("/stats/report")
@@ -151,24 +147,82 @@ public class CommanderController {
 		return "public/event_stats";
 	}
 
-	@GetMapping("/stats/event_table")
+	@GetMapping("/stats/report/table")
 	public String stats_eventTable(@RequestParam String event_name, Model model) {
 		model.addAttribute("statss",
 				dbservice.getStatsRepository().findByTypeAndAuthor(event_name, authHelper.getCurrentUser().getLogin()));
 		return "public/statsview_rawtable";
 	}
 
-	@GetMapping("/humans")
-	public String getHumansData(Model model) {
-		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
-		return "public/humans_rawtable";
+	@GetMapping("/stats/group/{id}")
+	public String stats_group_overview(@PathVariable("id") int id, Model model) {
+		Optional<Group> group = dbservice.getGroupRepository().findById(id);
+		if (group.isEmpty())
+			return "redirect:/commander/stats?error_notfound";
+		model.addAttribute("group", group.get());
+		model.addAttribute("humans",
+				group.get().getHumans().stream().sorted(Comparator.comparing(obj -> obj.getLastname())).toList());
+		model.addAttribute("group_events",
+				dbservice.getStatsRepository().findDistinctTypesGroup(group.get().getName()));
+		model.addAttribute("reasons",
+				dbservice.getStatsRepository().findByGroup(group.get().getName(), Sort.by(Sort.Direction.ASC, "reason"))
+						.stream().map(StatsRecord::getReason)
+						.filter(reason -> !SettingsRepository.getReplacements().containsKey(reason))
+						.collect(Collectors.groupingBy(reason -> reason, Collectors.counting())));
+		return "commander/groupstats/stats_overview";
 	}
 
-	@GetMapping("/show_never_marked")
+	@GetMapping("/stats/group/report")
+	public String stats_group_report(@RequestParam String eventname, @RequestParam String groupname, Model model) {
+		model.addAttribute("data", statsWorker.getEventReport(dbservice.getStatsRepository()
+				.findByTypeAndGroup(eventname, groupname, Sort.by(Sort.Direction.DESC, "date"))));
+		model.addAttribute("eventName", eventname);
+		return "public/event_stats";
+	}
+
+	@GetMapping("/stats/group/report/table")
+	public String stats_group_report_table(@RequestParam String eventname, @RequestParam String groupname,
+			Model model) {
+		model.addAttribute("statss", dbservice.getStatsRepository().findByTypeAndGroup(eventname, groupname,
+				Sort.by(Sort.Direction.DESC, "date")));
+		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/stats/group/all_report")
+	public String stats_group_report(@RequestParam String groupname, Model model) {
+		model.addAttribute("data", statsWorker.getEventReport(
+				dbservice.getStatsRepository().findByGroup(groupname, Sort.by(Sort.Direction.DESC, "date"))));
+		model.addAttribute("eventName", groupname);
+		return "public/event_stats";
+	}
+
+	@GetMapping("/stats/group/all_table")
+	public String stats_group_allTable(@RequestParam String groupname, Model model) {
+		model.addAttribute("statss",
+				dbservice.getStatsRepository().findByGroup(groupname, Sort.by(Sort.Direction.DESC, "date")));
+		return "public/statsview_rawtable";
+	}
+
+	@GetMapping("/stats/show_never_marked")
 	public String shownevm(Model model) {
 		List<Human> h = dbservice.getHumanRepository().findAll();
 		h.removeAll(dbservice.getStatsRepository().findDistinctHumansAuthor(authHelper.getCurrentUser().getLogin()));
 		model.addAttribute("humans", h);
+		return "public/humans_rawtable";
+	}
+
+	@GetMapping("/stats/report_me")
+	public String stats_report_me(Model model) {
+		var user = authHelper.getCurrentUser();
+		model.addAttribute("data",
+				statsWorker.getEventReport(dbservice.getStatsRepository().findByAuthor(user.getLogin())));
+		model.addAttribute("eventName", user.getName());
+		return "public/event_stats";
+	}
+
+	@GetMapping("/humans")
+	public String getHumansData(Model model) {
+		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
 		return "public/humans_rawtable";
 	}
 }

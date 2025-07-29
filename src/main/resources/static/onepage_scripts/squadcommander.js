@@ -90,20 +90,14 @@ async function handleEventChange(selectElement) {
 async function send() {
 	try {
 		const unpresentPeople = [];
+		const presentPeople = [];
 		const checkboxes = document.querySelectorAll('.custom-checkbox');
 		checkboxes.forEach(checkbox => {
 			if (!checkbox.checked) {
 				const row = checkbox.closest('tr');
 				const reasonSelect = row ? row.querySelector('.details-input') : null;
 				if (reasonSelect) {
-					if (isAnyColumnHidden) {
-						unpresentPeople.push(JSON.stringify(
-							{
-								id: checkbox.value,
-								reason: "error:unsupported_event"
-							}
-						));
-					} else {
+					if (!isAnyColumnHidden) {
 						unpresentPeople.push(JSON.stringify(
 							{
 								id: checkbox.value,
@@ -114,6 +108,8 @@ async function send() {
 				} else {
 					console.warn(`Error finding 'details-input' for id: ${checkbox.value}`);
 				}
+			} else {
+				presentPeople.push(checkbox.value);
 			}
 		});
 		var event_type = document.getElementById('event_type');
@@ -123,6 +119,7 @@ async function send() {
 		}
 		const data_to_send = {
 			unpresentPeople: unpresentPeople,
+			presentPeople: presentPeople,
 			event: event_type.value,
 			date: document.getElementById("dateField").value
 		};

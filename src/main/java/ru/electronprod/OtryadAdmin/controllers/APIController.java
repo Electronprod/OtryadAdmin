@@ -10,7 +10,6 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,6 +18,7 @@ import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
+import ru.electronprod.OtryadAdmin.utils.Answer;
 
 @RestController
 public class APIController {
@@ -27,6 +27,9 @@ public class APIController {
 	@Autowired
 	private AuthHelper auth;
 
+	/**
+	 * @see stats_renamer.js
+	 */
 	@SuppressWarnings("unchecked")
 	@GetMapping("/api/getrenamerdata")
 	public String getRenamerData() {
@@ -38,10 +41,13 @@ public class APIController {
 		return jsonObject.toJSONString();
 	}
 
+	/**
+	 * Required for observer overview page
+	 */
 	@SuppressWarnings("unchecked")
 	@GetMapping("/api/observer/marks")
 	@PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_OBSERVER')")
-	public String whomarked(@RequestParam(required = false) String date, Model model) {
+	public String whomarked(@RequestParam(required = false) String date) {
 		if (date == null || date.isEmpty())
 			date = DBService.getStringDate();
 		JSONArray answer = new JSONArray();
@@ -82,6 +88,9 @@ public class APIController {
 		return arr.toJSONString();
 	}
 
+	/**
+	 * Required for Squadcommander and Commander stats pages
+	 */
 	@SuppressWarnings("unchecked")
 	@GetMapping("/api/line_calendar")
 	@PreAuthorize("isAuthenticated()")
@@ -102,5 +111,24 @@ public class APIController {
 			arr.add(o);
 		});
 		return arr.toJSONString();
+	}
+
+	/**
+	 * Required for Commander mark page
+	 */
+	@GetMapping("/api/get_group_members")
+	@PreAuthorize("isAuthenticated()")
+	public String get_group_members(@RequestParam String group) {
+		try {
+			if (group.equals("null"))
+				return "[\"" + dbservice.getHumanRepository().findAll().stream()
+						.map(human -> String.valueOf(human.getId())).collect(Collectors.joining("\", \"")) + "\"]";
+			var realGroup = dbservice.getGroupRepository().findById(Integer.parseInt(group));
+			return "[\"" + realGroup.get().getHumans().stream().map(human -> String.valueOf(human.getId()))
+					.collect(Collectors.joining("\", \"")) + "\"]";
+		} catch (Exception e) {
+			return Answer
+					.fail("Could not retrieve infomation about people in the group. Error message: " + e.getMessage());
+		}
 	}
 }
