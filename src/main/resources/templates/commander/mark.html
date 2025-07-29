@@ -51,57 +51,29 @@ details[open] {
 				<p>Вы находитесь в панели заместителя командира отряда. Здесь вы можете отметить ребят, посмотреть их статистику
 					и данные.</p>
 			</div>
-			<div th:if="${user.groups.isEmpty()==false}" class="card animated-border">
-				<h3>Отметить ребят в группе</h3>
-				<P>
-					<b>Отмечаются как посещения, так и пропуски, с указанием причин.</b> В этой форме вы работаете только с участниками
-					выбранной группы.
-				</P>
-				<details class="cardc">
-					<summary>Примеры использования</summary>
-					<ul>
-						<li>Отметить ребят, кто <b>БЫЛ НА ОБЯЗАТЕЛЬНОЙ ВСТРЕЧЕ</b>
-						</li>
-						<li>Отметить <b>ПРИШЕДШИХ НА ВАЖНОЕ СОБЫТИЕ</b> (Репетиция, строевая подготовка...)
-						</li>
-						<li>Отметить ребят, <b>ПОУЧАСТВОВАВШИХ В КОНКУРСЕ</b></li>
-					</ul>
-				</details>
-				<label for="group">Выберите группу ребят, в которой хотите выставить отметки:</label>
-				<form action="/commander/markgroup" method="get">
-					<select id="id" name="id" required>
-						<option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}"></option>
-					</select>
-					<button class="button" style="background-color: blue;" type="submit">Отметить ребят в этой группе</button>
-				</form>
-			</div>
 			<div class="card">
 				<h3>Отметить ребят</h3>
-				<p>Сценарии...</p>
-				<details class="cardc">
-					<summary>Примеры использования</summary>
-					<ul>
-						<li>Отметить ребят, кто БЫЛ НА НЕОБЯЗАТЕЛЬНОЙ ВСТРЕЧЕ</li>
-						<li>Отметить ПРИШЕДШИХ НА РАБОТЫ (пример: уборка снега)</li>
-						<li>Отметить ребят, ПОУЧАСТВОВАВШИХ В КОНКУРСЕ</li>
-					</ul>
-				</details>
 				<div class="card_2">
 					<h4>
 						<b>КАК ПРАВИЛЬНО ОТМЕТИТЬ???</b>
 					</h4>
 					<p>
-						В форме ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии. Введите название события над
-						таблицей и убедитесь, что указана правильная дата. После этого нажмите "Отправить".<br> <strong>Отправленные
+						Выберите группу ребят, в которой хотите выставить отметки. Введите название события и убедитесь, что указана
+						правильная дата. В таблице ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии. Остальным
+						укажите причины отсутствия, если необходимо. После этого нажмите "Отправить".<br> <strong>Отправленные
 							данные изменить нельзя!</strong>
 					</p>
 				</div>
 				<form id="markForm">
+					<div>
+						<label for="group">Выберите группу, в которой хотите выставить отметки:</label><br> <select id="group"
+							name="group" onclick="groupSelect()" required>
+							<option value="all_people">Все ребята (группа не выбрана)</option>
+							<option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}"></option>
+						</select>
+					</div>
 					<label>Введите название события:</label> <input id="event_type" type="text" required /> <label>Выберите
-						дату:</label> <input id="dateField" type="date" required /><label>Указывать причины отсутствия:</label><select
-						id="toggle_reasons_column" onclick="toggleColumn(this)"><option value="false">Нет</option>
-						<option value="true">Да</option></select> <input type="text" id="searchInput"
-						placeholder="Введите имя или фамилию для поиска..." onkeyup="search_human('1','2','markTable')" />
+						дату:</label> <input id="dateField" type="date" required /><br>
 					<table id="markTable">
 						<thead>
 							<tr>
@@ -112,7 +84,7 @@ details[open] {
 							</tr>
 						</thead>
 						<tbody>
-							<tr th:each="human, iterStat : ${humanList}">
+							<tr th:each="human, iterStat : ${humanList}" th:name="${human.id}">
 								<td><input class="custom-checkbox" type="checkbox" name="select" th:value="${human.id}"
 									th:id="'checkbox-' + ${iterStat.index}" /></td>
 								<td th:text="${human.lastname}">Фамилия</td>

@@ -16,7 +16,7 @@ async function onResize() {
 	}
 }
 function calendar_button(date, event) {
-	window.location.href = `/squadcommander/stats/date?date=${date}&eventid=${event}`;
+	window.location.href = `/commander/stats/date?date=${date}&eventid=${event}`;
 }
 function showAllEvents() {
 	insertTable("showAllEvents", calendar_data.slice().reverse());
@@ -36,4 +36,11 @@ function fillWeekData(calendar_data) {
 	document.getElementById('last_presented').innerText = totalPresent;
 	document.getElementById('last_events_number').innerText = totalEvents;
 }
-document.getElementById("dateField").valueAsDate = new Date();
+document.getElementById("date").valueAsDate = new Date();
+if (window.location.href.includes("error_notfound")) {
+	Swal.fire({
+		title: "ОШИБКА!",
+		text: "Обьект не найден в базе данных.",
+		icon: "error"
+	});
+}

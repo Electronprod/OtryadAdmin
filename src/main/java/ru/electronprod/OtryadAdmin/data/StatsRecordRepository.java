@@ -29,6 +29,8 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 
 	List<StatsRecord> findByType(String type);
 
+	List<StatsRecord> findByTypeAndGroup(String type, String group, Sort sort);
+
 	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.group IS NULL OR s.group = '' ORDER BY s.type")
 	List<String> findDistinctTypesWithoutGroups();
 
@@ -37,6 +39,9 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 
 	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.author = :author ORDER BY s.type")
 	List<String> findDistinctTypesAuthor(@Param("author") String author);
+
+	@Query("SELECT DISTINCT s.type FROM StatsRecord s WHERE s.author = :author AND (s.group IS NULL OR s.group = '') ORDER BY s.type")
+	List<String> findDistinctTypesAuthorWithoutGroups(@Param("author") String author);
 
 	@Query("SELECT DISTINCT s.human FROM StatsRecord s WHERE s.author = :author ORDER BY s.human.lastname")
 	List<Human> findDistinctHumansAuthor(@Param("author") String author);

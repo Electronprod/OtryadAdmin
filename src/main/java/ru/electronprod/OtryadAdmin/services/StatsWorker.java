@@ -129,25 +129,6 @@ public class StatsWorker {
 	}
 
 	@Transactional(readOnly = true)
-	public List<StatsRecord> generatePresentStats(Collection<Human> humans, String event_type, String formatted_date,
-			User user, int event_id, String group) {
-		List<StatsRecord> resultArray = new ArrayList<StatsRecord>();
-		for (Human human : humans) {
-			StatsRecord stats = new StatsRecord(human);
-			stats.setAuthor(user.getLogin());
-			stats.setDate(formatted_date);
-			stats.setPresent(true);
-			stats.setReason("error:present");
-			stats.setType(event_type);
-			stats.setUser_role(user.getRole());
-			stats.setEvent_id(event_id);
-			stats.setGroup(group);
-			resultArray.add(stats);
-		}
-		return resultArray;
-	}
-
-	@Transactional(readOnly = true)
 	private StatsRecord createUnpresentStatsRecord(JSONObject data, String event, String formatted_date, User user,
 			int event_id, List<Human> humans, String group) {
 		// Finding human to add stats record
@@ -167,6 +148,7 @@ public class StatsWorker {
 		return stats;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Transactional()
 	public int mark_group(MarkDTO dto, User user, List<Human> humans, String group) throws Exception {
 		// Validating input
@@ -186,34 +168,9 @@ public class StatsWorker {
 			resultRecords.add(createUnpresentStatsRecord(data, event, date, user, event_id, humans, group));
 		}
 		// Marking Present humans
-		resultRecords.addAll(generatePresentStats(humans, event, date, user, event_id, group));
-
-		// Saving records to database
-		if (dbservice.getStatsRepository().saveAll(resultRecords) == null)
-			throw new Exception("Error saving stats records to database!");
-		log.info("User " + user.getLogin() + " (" + user.getRole() + ") marked " + resultRecords.size()
-				+ " people. EventID: " + event_id);
-		botServ.sendNotification_marked(user, event);
-		return event_id;
-	}
-
-	@Transactional()
-	public int mark_only_present(MarkDTO dto, User user) throws Exception {
-		// Validating input
-		String date = DBService.getStringDate(dto.getDate() != null ? dto.getDate() : DBService.getStringDate());
-		String event;
-		if (dto.getEvent() != null) {
-			event = dto.getEvent();
-		} else {
-			throw new IllegalArgumentException("Event is null");
-		}
-		// Defining variables
-		List<StatsRecord> resultRecords = new ArrayList<StatsRecord>();
-		int event_id = dbservice.getStatsRepository().findMaxEventIDValue() + 1;
-		List<Human> humans = dbservice.getHumanRepository().findAll();
-		for (Object o : dto.getPresentPeople()) {
-			int human_id = Integer.parseInt(String.valueOf(o));
-			Human human = humans.stream().filter(human1 -> human1.getId() == human_id).findFirst().orElseThrow();
+		dto.getPresentPeople().forEach(h1 -> {
+			Human human = humans.stream().filter(h -> h.getId() == Integer.parseInt(String.valueOf(h1))).findFirst()
+					.orElseThrow(() -> new IllegalStateException("Human not found: " + h1));
 			StatsRecord stats = new StatsRecord(human);
 			stats.setAuthor(user.getLogin());
 			stats.setDate(date);
@@ -222,14 +179,14 @@ public class StatsWorker {
 			stats.setType(event);
 			stats.setUser_role(user.getRole());
 			stats.setEvent_id(event_id);
+			stats.setGroup(group);
 			resultRecords.add(stats);
-			humans.remove(human);
-		}
+		});
 		// Saving records to database
 		if (dbservice.getStatsRepository().saveAll(resultRecords) == null)
 			throw new Exception("Error saving stats records to database!");
 		log.info("User " + user.getLogin() + " (" + user.getRole() + ") marked " + resultRecords.size()
-				+ " people. EventID: " + event_id);
+				+ " people. EventID: " + event_id + " Group: " + group);
 		botServ.sendNotification_marked(user, event);
 		return event_id;
 	}

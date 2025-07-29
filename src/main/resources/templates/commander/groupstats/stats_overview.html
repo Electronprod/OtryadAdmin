@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Статистика группы</title>
+<link rel="stylesheet" href="/assets/default_style.css">
+<link rel="icon" href="/icon.png">
+<script defer src="/assets/navbar.js"></script>
+</head>
+
+<body>
+	<!--CSRF Attack Protection-->
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<div id="dashboard">
+		<div id="content">
+			<h2 name="title">
+				Статистика группы <u th:text="${group.name}"></u>:
+			</h2>
+			<div class="card">
+				<h3>Список ребят из этой группы</h3>
+				<p>Показывает, кто состоит в этой группе.</p>
+				<details class="cardc">
+					<summary>Нажмите, чтобы просмотреть</summary>
+					<br>
+					<input type="text" id="searchInput" placeholder="Введите имя или фамилию для поиска..."
+						onkeyup="search_human(0,1,'people')" />
+					<table id="people">
+						<thead>
+							<tr>
+								<th onclick="sortTable(0,'people')">Фамилия</th>
+								<th onclick="sortTable(1,'people')">Имя</th>
+								<th onclick="sortTable(2,'people')">Класс</th>
+								<th onclick="sortTable(3,'people')">Действие</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="human : ${humans}">
+								<td th:text="${human.lastname}"></td>
+								<td th:text="${human.name}"></td>
+								<td th:text="${human.classnum}"></td>
+								<td>
+									<form th:action="@{/commander/stats/personal_id}" method="get" style="display: inline;">
+										<input type="hidden" name="id" th:value="${human.id}" />
+										<button class="admin-button" type="submit">Личная статистика</button>
+									</form>
+							</td>
+							</tr>
+						</tbody>
+					</table>
+				</details>
+			</div>
+			<div class="card">
+				<h3>Все события в группе</h3>
+				<table>
+					<thead>
+						<tr>
+							<th>Событие</th>
+							<th>Просмотр</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="event : ${group_events}">
+							<td th:text="${event}"></td>
+							<td>
+								<form th:action="@{/commander/stats/group/report}" method="get" style="display: inline;">
+									<input type="hidden" name="eventname" th:value="${event}" /> <input type="hidden" name="groupname"
+										th:value="${group.name}" />
+									<button type="submit">Отчет</button>
+								</form>
+								<form th:action="@{/commander/stats/group/report/table}" method="get" style="display: inline;">
+									<input type="hidden" name="eventname" th:value="${event}" /> <input type="hidden" name="groupname"
+										th:value="${group.name}" />
+									<button class="admin-button" type="submit">Таблица отметок</button>
+								</form>
+						</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<div class="card">
+				<h3>Просмотр отметок по дате</h3>
+				<p>Посмотрите посещения и пропуски в выбранную дату в этой группе</p>
+				<form method="get" th:action="@{/commander/stats/date}">
+					<label for="date">Дата:</label> <input type="date" id="dateF" name="date" required /><input type="hidden"
+						name="group" th:value="${group.name}" /><br>
+					<button type="submit">Посмотреть</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Просмотр отметок за все события</h3>
+				<p>Показывает, используя всю доступную информацию для этой группы.</p>
+				<form th:action="@{/commander/stats/group/all_report}" method="get" style="display: inline;">
+					<input type="hidden" name="groupname" th:value="${group.name}" />
+					<button type="submit">Отчет посещаемости</button>
+				</form>
+				<form th:action="@{/commander/stats/group/all_table}" method="get" style="display: inline;">
+					<input type="hidden" name="groupname" th:value="${group.name}" />
+					<button class="admin-button" type="submit">Таблица отметок</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Причины пропусков в группе</h3>
+				<details class="cardc">
+					<summary>Нажмите, чтобы посмотреть</summary>
+					<br>
+					<table>
+						<thead>
+							<tr><th>Причина</th>
+								<th>Пропуски</th></tr>
+						</thead>
+						<tbody>
+							<tr th:each="reason : ${reasons}">
+								<td th:text="${reason.key}"></td>
+								<td th:text="${reason.value}"></td>
+							</tr>
+							<tr th:if="${reasons.size() == 0}">
+								<td colspan="2">Пока тут пусто :(</td>
+							</tr>
+						</tbody>
+					</table>
+				</details>
+			</div>
+		</div>
+	</div>
+</body>
+<script src="/assets/sort_table.js"></script>
+<script defer src="/assets/search_table.js"></script>
+<script>
+	document.getElementById("dateF").valueAsDate = new Date();
+</script>
+</html>
