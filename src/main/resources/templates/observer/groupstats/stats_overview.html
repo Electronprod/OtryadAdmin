@@ -20,9 +20,7 @@
 			</h2>
 			<div class="card">
 				<h3>Список ребят из этой группы</h3>
-				<p>В списке ниже представлена базовая информация о ребятах. Если вам нужно узнать всю контактную информацию о
-					человеке, нажмите сверху кнопку "Список отряда" и найдите человека там. Чтобы получить статистический отчет о
-					человеке, нажмите на кнопку "Перейти" в таблице ниже.</p>
+				<p>Показывает, кто состоит в этой группе.</p>
 				<details class="cardc">
 					<summary>Нажмите, чтобы просмотреть</summary>
 					<br>
@@ -34,7 +32,7 @@
 								<th onclick="sortTable(0,'people')">Фамилия</th>
 								<th onclick="sortTable(1,'people')">Имя</th>
 								<th onclick="sortTable(2,'people')">Класс</th>
-								<th onclick="sortTable(3,'people')">Информация</th>
+								<th onclick="sortTable(3,'people')">Действие</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -45,7 +43,7 @@
 								<td>
 									<form th:action="@{/observer/stats/personal_id}" method="get" style="display: inline;">
 										<input type="hidden" name="id" th:value="${human.id}" />
-										<button class="admin-button" type="submit">Перейти</button>
+										<button class="admin-button" type="submit">Личная статистика</button>
 									</form>
 							</td>
 							</tr>
@@ -66,12 +64,14 @@
 						<tr th:each="event : ${group_events}">
 							<td th:text="${event}"></td>
 							<td>
-								<form th:action="@{/observer/stats/report}" method="get" style="display: inline;">
-									<input type="hidden" name="event_name" th:value="${event}" />
-									<button type="submit">Отметки</button>
+								<form th:action="@{/observer/stats/group/report}" method="get" style="display: inline;">
+									<input type="hidden" name="eventname" th:value="${event}" /> <input type="hidden" name="groupname"
+										th:value="${group.name}" />
+									<button type="submit">Отчет</button>
 								</form>
-								<form th:action="@{/observer/stats/event_table}" method="get" style="display: inline;">
-									<input type="hidden" name="event_name" th:value="${event}" />
+								<form th:action="@{/observer/stats/group/report/table}" method="get" style="display: inline;">
+									<input type="hidden" name="eventname" th:value="${event}" /> <input type="hidden" name="groupname"
+										th:value="${group.name}" />
 									<button class="admin-button" type="submit">Таблица отметок</button>
 								</form>
 						</td>
@@ -83,22 +83,44 @@
 				<h3>Просмотр отметок по дате</h3>
 				<p>Посмотрите посещения и пропуски в выбранную дату в этой группе</p>
 				<form method="get" th:action="@{/observer/stats/group/date}">
-					<label for="date">Дата:</label> <input type="date" id="date" name="date" required /> <input type="hidden"
-						name="groupname" th:value="${group.name}" /> <br>
+					<label for="date">Дата:</label> <input type="date" id="dateF" name="date" required /><input type="hidden"
+						name="groupname" th:value="${group.name}" /><br>
 					<button type="submit">Посмотреть</button>
 				</form>
 			</div>
 			<div class="card">
 				<h3>Просмотр отметок за все события</h3>
-				<p>Вся статистика, касающаяся этой группы находится здесь.</p>
-				<form th:action="@{/observer/stats/group/report}" method="get" style="display: inline;">
-					<input type="hidden" id="date" name="groupname" th:value="${group.name}" />
-					<button type="submit">Отметки</button>
+				<p>Показывает, используя всю доступную информацию для этой группы.</p>
+				<form th:action="@{/observer/stats/group/all_report}" method="get" style="display: inline;">
+					<input type="hidden" name="groupname" th:value="${group.name}" />
+					<button type="submit">Отчет посещаемости</button>
 				</form>
-				<form th:action="@{/observer/stats/group/table}" method="get" style="display: inline;">
-					<input type="hidden" id="date" name="groupname" th:value="${group.name}" />
+				<form th:action="@{/observer/stats/group/all_table}" method="get" style="display: inline;">
+					<input type="hidden" name="groupname" th:value="${group.name}" />
 					<button class="admin-button" type="submit">Таблица отметок</button>
 				</form>
+			</div>
+			<div class="card">
+				<h3>Причины пропусков в группе</h3>
+				<details class="cardc">
+					<summary>Нажмите, чтобы посмотреть</summary>
+					<br>
+					<table>
+						<thead>
+							<tr><th>Причина</th>
+								<th>Пропуски</th></tr>
+						</thead>
+						<tbody>
+							<tr th:each="reason : ${reasons}">
+								<td th:text="${reason.key}"></td>
+								<td th:text="${reason.value}"></td>
+							</tr>
+							<tr th:if="${reasons.size() == 0}">
+								<td colspan="2">Пока тут пусто :(</td>
+							</tr>
+						</tbody>
+					</table>
+				</details>
 			</div>
 		</div>
 	</div>
@@ -106,6 +128,6 @@
 <script src="/assets/sort_table.js"></script>
 <script defer src="/assets/search_table.js"></script>
 <script>
-	document.getElementById("date").valueAsDate = new Date();
+	document.getElementById("dateF").valueAsDate = new Date();
 </script>
 </html>
