@@ -10,9 +10,10 @@
 <script defer src="/assets/navbar.js"></script>
 </head>
 
-<body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+<body onresize="onResize()" onload="onResize()">
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<input type="hidden" id="squadcommander_login" th:value="${login}" />
 	<div id="dashboard">
 		<div id="content">
 			<h2>
@@ -51,46 +52,83 @@
 					</table>
 				</details>
 			</div>
+			<div class="cardc-container">
+				<div class="cardc">
+					<h3>За все время</h3>
+					<p>
+						<b>Количество пропусков:</b> <span id="people_missed"></span><br> <b>Количество посещений:</b> <span
+							id="people_presented"></span><br> <b>Количество событий:</b> <span id="events_number"></span>
+					</p>
+				</div>
+				<div class="cardc">
+					<h3>За неделю</h3>
+					<p>
+						<b>Количество пропусков:</b> <span id="last_missed"></span><br> <b>Количество посещений:</b> <span
+							id="last_presented"></span><br> <b>Количество событий:</b> <span id="last_events_number"></span>
+					</p>
+				</div>
+			</div>
 			<div class="card">
-				<h3>Статистика посещений события</h3>
-				<p>Посмотрите, кто и сколько раз посетил выбранное событие в этом звене</p>
+				<h3>Просмотр отметок</h3>
+				<p>Быстрый доступ к информации о последних выставленных отметках</p>
+				<div class="calendar-line"></div>
+				<ul>
+					<li><b>Наведитесь</b>, чтобы увидеть название события (только для ПК)</li>
+					<li><b>Нажмите</b>, чтобы перейти к отметкам</li>
+				</ul>
+				<details class="cardc">
+					<summary>Смотреть по дате</summary>
+					<p>Посмотрите посещения и пропуски в выбранную дату в рамках звена.</p>
+					<form id="date-form" method="get" onsubmit="return submitForm()">
+						<label for="date">Дата:</label> <input type="date" id="date" name="date" required> <br>
+						<button type="submit">Посмотреть</button>
+					</form>
+				</details>
+				<details class="cardc" onclick="showAllEvents()">
+					<summary>Показать все события</summary>
+					<p>Нажмите на строку события, чтобы перейти к отметкам.</p>
+					<div id="showAllEvents"></div>
+				</details>
+				<details class="cardc">
+					<summary>Просмотр всех отметок</summary>
+					<p>Просмотрите все отметки, выставленные командиром этого звена.</p>
+					<a class="greenbtn" onclick="window.location.href=window.location+'/table'">Перейти</a>
+				</details>
+			</div>
+			<div class="card">
+				<h3>Посещаемость события</h3>
+				<p>Показывает информацию для выбранного события в этом звене</p>
+				<ul>
+					<li><b>Посещаемость</b> - кто и сколько раз посетил выбранное событие</li>
+					<li><b>Таблица</b> - перейти к отметкам этого события</li>
+				</ul>
 				<form method="get">
 					<label for="event_name">Выберите событие:</label> <select id="event_name" name="event_name">
 						<option th:each="event : ${events}" th:value="${event}" th:text="${event}"></option>
 					</select>
-					<button id="reportbtn" type="submit">Показать</button>
+					<button class="form-btn" id="reportbtn" type="submit">Посещаемость</button>
+					<button class="form-btn" id="eventbtn" type="submit">Таблица</button>
 				</form>
 			</div>
 			<div class="card">
-				<h3>Просмотр отметок по дате</h3>
-				<p>Посмотрите посещения и пропуски в выбранную дату для этого звена</p>
-				<form id="date-form" method="get" onsubmit="return submitForm()">
-					<label for="date">Дата:</label> <input type="date" id="date" name="date" required> <br>
-					<button type="submit">Посмотреть</button>
-				</form>
-			</div>
-			<div class="card">
-				<h3>Просмотр отметок в виде таблицы</h3>
-				<p>Просмотрите всю статистику для этого звена в виде таблицы.</p>
-				<button onclick="window.location.href=window.location+'/table'">Перейти</button>
+				<h3>Причины пропусков</h3>
+				<table>
+					<thead>
+						<tr><th>Причина</th>
+							<th>Пропуски</th></tr>
+					</thead>
+					<tbody>
+						<tr th:each="reason : ${reasons}">
+							<td th:text="${reason.key}"></td>
+							<td th:text="${reason.value}"></td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 		</div>
 	</div>
 </body>
 <script src="/assets/sort_table.js"></script>
-<script>
-	document.getElementById("date").valueAsDate = new Date();
-	function submitForm() {
-		const form = document.getElementById('date-form');
-		const dateInput = document.getElementById('date').value;
-		const currentUrl = window.location.href;
-		const newUrl = `${currentUrl}/date?${encodeURIComponent(dateInput)}`;
-		form.action = newUrl;
-		return true;
-	}
-	document.addEventListener("DOMContentLoaded", function() {
-		var submitButton = document.getElementById("reportbtn");
-		submitButton.setAttribute("formaction", window.location + "/report");
-	});
-</script>
+<script src="/assets/calendar-line.js"></script>
+<script src="/onepage_scripts/observer_squad_stats.js"></script>
 </html>

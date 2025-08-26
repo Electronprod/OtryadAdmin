@@ -111,18 +111,13 @@
 				</table>
 			</div>
 			<div class="card">
-				<h3>Просмотр отметок по дате</h3>
-				<p>Посмотрите посещения и пропуски в выбранную дату.</p>
-				<form id="date-form" action="/observer/stats/date">
-					<label for="date">Дата:</label> <input type="date" id="date" name="date" required> <br>
-					<button type="submit">Посмотреть</button>
-				</form>
-			</div>
-			<div class="card">
-				<h3>Персональная статистика</h3>
-				<p>Посмотрите подробную статистику для любого человека. Введите его ФИ в строку ниже и нажмите нужную кнопку.</p>
+				<h3>Просмотр персональной статистики</h3>
+				<p>Показывает всю информацию о выбранном человеке.</p>
 				<form method="get">
-					<input placeholder="Введите ФИ" name="name" type="text" required />
+					<select name="id">
+						<option th:each="human: ${humans}" th:value="${human.id}" th:text="${human.lastname} + ' ' + ${human.name}">
+						</option>
+					</select>
 					<button class="form-btn" type="submit" formaction="/observer/stats/personal">Посмотреть</button>
 					<button class="form-btn" type="submit" formaction="/observer/stats/personal/table">Посмотреть в виде
 						таблицы</button>
@@ -140,12 +135,20 @@
 				</form>
 			</div>
 			<div class="card">
+				<h3>Просмотр отметок по дате</h3>
+				<p>Посмотрите все посещения и пропуски в выбранную дату.</p>
+				<form id="date-form" action="/observer/stats/date">
+					<label for="date">Дата:</label> <input type="date" id="date" name="date" required> <br>
+					<button type="submit">Посмотреть</button>
+				</form>
+			</div>
+			<div class="card">
 				<h3>Просмотр всех отметок</h3>
 				<p>
-					Просмотрите все отметки, которые были проставлены за все время. <br> <b>Не использовать без нужды! Сильно
-						нагружает сервер.</b>
+					Показывает таблицу со всеми отметками, которые были проставлены за время существования БД. <br> <b>Не
+						использовать без нужды! Сильно нагружает сервер и ваш компьютер.</b>
 				</p>
-				<a class="greenbtn" href="/observer/stats/table">Перейти</a>
+				<a class="greenbtn" style="background-color: red" href="/observer/stats/table">Получить таблицу</a>
 			</div>
 		</div>
 	</div>

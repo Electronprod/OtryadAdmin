@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -94,10 +95,12 @@ public class APIController {
 	@SuppressWarnings("unchecked")
 	@GetMapping("/api/line_calendar")
 	@PreAuthorize("isAuthenticated()")
-	public String get_line_calendar_data() {
+	public String get_line_calendar_data(Optional<String> login) {
 		JSONArray arr = new JSONArray();
-		var data = dbservice.getStatsRepository().findByAuthor(auth.getCurrentUser().getLogin(),
-				Sort.by(Sort.Direction.ASC, "id"));
+		String loginValue = login.isEmpty() ? auth.getCurrentUser().getLogin()
+				: dbservice.getUserRepository().findByLogin(login.orElseThrow()).orElse(auth.getCurrentUser())
+						.getLogin();
+		var data = dbservice.getStatsRepository().findByAuthor(loginValue);
 		Collection<StatsRecord> stats = data.stream().collect(
 				Collectors.toMap(StatsRecord::getEvent_id, record -> record, (existing, replacement) -> existing))
 				.values();
