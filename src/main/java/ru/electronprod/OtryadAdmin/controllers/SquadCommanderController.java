@@ -17,7 +17,7 @@ import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.models.*;
 import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
-import ru.electronprod.OtryadAdmin.services.StatsWorker;
+import ru.electronprod.OtryadAdmin.services.StatsHandler;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 
 @Slf4j
@@ -30,7 +30,7 @@ public class SquadCommanderController {
 	@Autowired
 	private AuthHelper authHelper;
 	@Autowired
-	private StatsWorker statsHelper;
+	private StatsHandler statsHelper;
 
 	@GetMapping("")
 	public String overview() {

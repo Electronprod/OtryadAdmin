@@ -11,7 +11,7 @@
 	</parent>
 	<groupId>ru.electronprod</groupId>
 	<artifactId>OtryadAdmin</artifactId>
-	<version>2.0 - beta</version>
+	<version>2.0</version>
 	<name>OtryadAdmin</name>
 	<description>Statistics application</description>
 	<url />
@@ -80,6 +80,11 @@
  			 <groupId>com.github.kshashov</groupId>
 			 <artifactId>spring-boot-starter-telegram</artifactId>
  			 <version>0.29</version>
+		</dependency>
+		<dependency>
+  			<groupId>org.apache.tomcat.embed</groupId>
+  			<artifactId>tomcat-embed-core</artifactId>
+ 			 <version>10.1.44</version>
 		</dependency>
 	</dependencies>
 	<build>

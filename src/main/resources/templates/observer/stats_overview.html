@@ -26,18 +26,9 @@
 				<div th:if="${user_role == 'ROLE_ADMIN'}">
 					<a href="/admin" class="admin-button">Вернуться в панель администратора</a>
 				</div>
-			</div>
-			<div th:if="${!groups.isEmpty()}" class="card animated-border">
-				<h3>Отметить ребят в группе</h3>
-				<P>Отмечаются как посещения, так и пропуски, с указанием причин. Вы работаете только с участниками выбранной
-					группы.</P>
-				<label for="group">Выберите группу ребят, в которой хотите выставить отметки:</label>
-				<form action="/observer/markgroup" method="get">
-					<select id="id" name="id" required>
-						<option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}"></option>
-					</select>
-					<button class="button" style="background-color: blue;" type="submit">Отметить ребят в этой группе</button>
-				</form>
+				<div th:if="${user_role == 'ROLE_COMMANDER'}">
+					<a href="/commander/stats" class="admin-button">Вернуться в панель командира</a>
+				</div>
 			</div>
 			<div class="cardc-container">
 				<div class="cardc">
