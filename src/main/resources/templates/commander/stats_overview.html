@@ -35,6 +35,18 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 	border: 1px solid #ddd;
 	background-color: rgb(249, 250, 251);
 }
+
+.top {
+	padding: 1px;
+	margin-top: -15px
+}
+
+@media ( max-width : 768px) {
+	.top {
+		padding: 1px;
+		margin-top: 0px
+	}
+}
 </style>
 </head>
 
@@ -44,8 +56,16 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 	<div id="navbar"></div>
 	<div id="dashboard">
 		<div id="content">
-			<div class="header" style="padding: 1px; margin: 0px 0;">
+			<div class="header top">
 				<h3>Общая статистика</h3>
+			</div>
+			<div class="card">
+				<h3>Просмотр статистики по всему отряду</h3>
+				<p>Перенаправляет вас в панель наблюдателя, где можно просматривать любую статистику для всего отряда.</p>
+				<a class="admin-button" href="/observer">Перейти в панель наблюдателя</a>
+			</div>
+			<div class="header">
+				<h3>Ваша статистика</h3>
 			</div>
 			<div class="cardc-container">
 				<div class="cardc">

@@ -373,9 +373,8 @@ public class AdminController {
 	 */
 	@GetMapping("/groupmgr")
 	public String groupManager(Model model) {
-		List<User> markers = dbservice.getUserRepository().findAll().stream().filter(
-				user -> !user.getRole().equals("ROLE_SQUADCOMMANDER") && !user.getRole().equals("ROLE_OBSERVER"))
-				.toList();
+		List<User> markers = dbservice.getUserRepository().findAll().stream()
+				.filter(user -> user.getRole().equals("ROLE_COMMANDER")).toList();
 		model.addAttribute("markers", markers);
 		model.addAttribute("groups", dbservice.getGroupRepository().findAll());
 		return "admin/groupmgr";

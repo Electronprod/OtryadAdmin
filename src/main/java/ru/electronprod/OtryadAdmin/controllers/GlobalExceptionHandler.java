@@ -15,7 +15,8 @@ public class GlobalExceptionHandler {
 	@ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
 	public String handleException(Exception e, Model model) {
 		model.addAttribute("errorMessage", e.getMessage());
-		log.error("Error caught: ", e);
+		if (!e.getMessage().contains("No static resource"))
+			log.error("Error caught: ", e);
 		return "public/error";
 	}
 }

@@ -26,7 +26,7 @@ import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
-import ru.electronprod.OtryadAdmin.services.StatsWorker;
+import ru.electronprod.OtryadAdmin.services.StatsHandler;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 
 @Slf4j
@@ -35,7 +35,7 @@ import ru.electronprod.OtryadAdmin.utils.Answer;
 @PreAuthorize("hasAuthority('ROLE_COMMANDER')")
 public class CommanderController {
 	@Autowired
-	private StatsWorker statsWorker;
+	private StatsHandler statsWorker;
 	@Autowired
 	private DBService dbservice;
 	@Autowired

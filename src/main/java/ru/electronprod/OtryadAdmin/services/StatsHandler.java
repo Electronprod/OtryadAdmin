@@ -1,7 +1,6 @@
 package ru.electronprod.OtryadAdmin.services;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -29,7 +28,7 @@ import ru.electronprod.OtryadAdmin.utils.FileOptions;
 
 @Slf4j
 @Service
-public class StatsWorker {
+public class StatsHandler {
 	@Autowired
 	private DBService dbservice;
 	@Autowired
@@ -106,7 +105,8 @@ public class StatsWorker {
 			}
 			model.addAttribute("commanderData", commanderData);
 			// Groups
-			Set<String> humanGroups = personalStats.stream().map(StatsRecord::getGroup).collect(Collectors.toSet());
+			Set<String> humanGroups = personalStats.stream().map(StatsRecord::getGroup).filter(group -> group != null)
+					.collect(Collectors.toSet());
 			Map<String, Pair<Long, Long>> groupsData = new LinkedHashMap<String, Pair<Long, Long>>();
 			humanGroups.forEach(gr -> {
 				groupsData.put(gr,

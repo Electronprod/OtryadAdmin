@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,7 +46,7 @@ public class APIController {
 	 */
 	@SuppressWarnings("unchecked")
 	@GetMapping("/api/observer/marks")
-	@PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_OBSERVER')")
+	@PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_OBSERVER') or hasAuthority('ROLE_COMMANDER')")
 	public String whomarked(@RequestParam(required = false) String date) {
 		if (date == null || date.isEmpty())
 			date = DBService.getStringDate();
