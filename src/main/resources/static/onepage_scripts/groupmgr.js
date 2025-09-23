@@ -76,6 +76,13 @@ async function changeStatus(btn, id) {
 		btn.disabled = true;
 	}
 }
+async function changeReqMarks(btn, id) {
+	const success = await sendPostData("/admin/groupmgr/change_reqmarks?id=" + id);
+	if (success) {
+		showNotification("Значение изменено", "Изменения отобразятся после перезагрузки страницы.", "success");
+		btn.disabled = true;
+	}
+}
 async function recognize(action) {
 	const toRecognize = document.getElementById("recognize-input");
 	const linesArray = toRecognize.value.split("\n");

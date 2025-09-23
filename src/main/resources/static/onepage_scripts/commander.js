@@ -30,15 +30,17 @@ async function groupSelect() {
 	let group = document.getElementById('group').value;
 	if (group === "all_people")
 		group = null;
-	people = await getData("/api/get_group_members?group=" + group);
-	console.log("Members of the group:", people.length, "Group:", group);
+	answer = await getData("/api/get_group_members?group=" + group);
+	people = answer.people;
+	console.log("Members of the group:", people.length, "Group:", group, "Allow 'unmarked': ", !answer.mark);
 	// Applying
 	let table = document.getElementById("markTable");
 	let rows = table.querySelectorAll("tbody tr");
 	Array.from(rows).forEach(row => {
 		if (!people.includes(row.getAttribute('name'))) {
 			row.style.display = "none";
-			setNonMarkingOptions("none");
+			if (answer.mark)
+				setNonMarkingOptions("none");
 		} else {
 			row.style.display = "table-row";
 			setNonMarkingOptions("flex");

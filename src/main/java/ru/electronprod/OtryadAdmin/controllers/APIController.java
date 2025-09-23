@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
-import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 
@@ -42,33 +44,33 @@ public class APIController {
 	}
 
 	/**
-	 * Required for observer overview page
+	 * Required for demand page
 	 */
 	@SuppressWarnings("unchecked")
 	@GetMapping("/api/observer/marks")
-	@PreAuthorize("hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_OBSERVER') or hasAuthority('ROLE_COMMANDER')")
-	public String whomarked(@RequestParam(required = false) String date) {
-		if (date == null || date.isEmpty())
-			date = DBService.getStringDate();
+	@PreAuthorize("!hasAuthority('ROLE_SQUADCOMMANDER')")
+	public String whomarked(@RequestParam(required = false) Optional<String> date) {
+		List<StatsRecord> statsByDate = dbservice.getStatsRepository()
+				.findByDate(date.isPresent() ? DBService.getStringDate(date.get()) : DBService.getStringDate());
 		JSONArray answer = new JSONArray();
-		List<StatsRecord> statsArr = dbservice.getStatsRepository().findByDate(date.replaceAll("-", "."));
-		List<User> usersFromStatsArr = statsArr.stream().map(StatsRecord::getAuthor)
-				.map(author -> dbservice.getUserRepository().findByLogin(author).get()).distinct().toList();
-		usersFromStatsArr.forEach(user -> {
-			JSONObject o = new JSONObject();
-			o.put("login", user.getLogin());
-			o.put("name", user.getName());
-			o.put("role", SettingsRepository.getRoles().get(user.getRole()));
-			o.put("role_raw", user.getRole());
-			o.put("id", user.getId());
-			JSONArray events = new JSONArray();
-			List<String> eventsArr = statsArr.stream().filter(stats -> stats.getAuthor().equals(user.getLogin()))
-					.map(StatsRecord::getType).distinct().toList();
-			o.put("events_count", eventsArr.size());
-			events.addAll(eventsArr);
-			o.put("events", events);
-			answer.add(o);
-		});
+		statsByDate.stream().map(StatsRecord::getAuthor)
+				.map(author -> dbservice.getUserRepository().findByLogin(author).get()).distinct().toList()
+				.forEach(user -> {
+					JSONObject o = new JSONObject();
+					o.put("login", user.getLogin());
+					o.put("name", user.getName());
+					o.put("role", SettingsRepository.getRoles().get(user.getRole()));
+					o.put("role_raw", user.getRole());
+					o.put("id", user.getId());
+					JSONArray events = new JSONArray();
+					Supplier<Stream<StatsRecord>> authoredStats = () -> statsByDate.stream()
+							.filter(stats -> stats.getAuthor().equals(user.getLogin()));
+					List<String> eventsArr = authoredStats.get().map(StatsRecord::getType).distinct().toList();
+					o.put("events_count", authoredStats.get().map(StatsRecord::getEvent_id).distinct().count());
+					events.addAll(eventsArr);
+					o.put("events", events);
+					answer.add(o);
+				});
 		return answer.toJSONString();
 	}
 
@@ -123,11 +125,13 @@ public class APIController {
 	public String get_group_members(@RequestParam String group) {
 		try {
 			if (group.equals("null"))
-				return "[\"" + dbservice.getHumanRepository().findAll().stream()
-						.map(human -> String.valueOf(human.getId())).collect(Collectors.joining("\", \"")) + "\"]";
+				return "{\"mark\": false, \"people\": [\"" + dbservice.getHumanRepository().findAll().stream()
+						.map(human -> String.valueOf(human.getId())).collect(Collectors.joining("\", \"")) + "\"]}";
 			var realGroup = dbservice.getGroupRepository().findById(Integer.parseInt(group));
-			return "[\"" + realGroup.get().getHumans().stream().map(human -> String.valueOf(human.getId()))
-					.collect(Collectors.joining("\", \"")) + "\"]";
+			return "{\"mark\":" + realGroup.get().isRequireAbsentMark() + ", \"people\": [\""
+					+ realGroup.get().getHumans().stream().map(human -> String.valueOf(human.getId()))
+							.collect(Collectors.joining("\", \""))
+					+ "\"]}";
 		} catch (Exception e) {
 			return Answer
 					.fail("Could not retrieve infomation about people in the group. Error message: " + e.getMessage());

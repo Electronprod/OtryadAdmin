@@ -50,7 +50,7 @@ public class ObserverController {
 		// Groups view
 		model.addAttribute("all_groups", dbservice.getGroupRepository().findAll());
 		// Other info
-		model.addAttribute("humans", dbservice.getHumanRepository().findAll());
+		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
 		model.addAttribute("people_size", dbservice.getHumanRepository().getSize());
 		model.addAttribute("people_missed", dbservice.getStatsRepository().countByIsPresent(false));
 		model.addAttribute("people_attended", dbservice.getStatsRepository().countByIsPresent(true));

@@ -4,7 +4,7 @@ import org.json.simple.JSONArray;
 import lombok.Data;
 
 /**
- * DTO used to parse "mark" requests
+ * DTO that is used process "mark" requests
  */
 @Data
 public class MarkDTO {
