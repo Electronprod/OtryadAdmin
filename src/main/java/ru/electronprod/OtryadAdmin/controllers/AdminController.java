@@ -21,6 +21,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -35,7 +36,9 @@ import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
+import ru.electronprod.OtryadAdmin.services.StatsHandler;
 import ru.electronprod.OtryadAdmin.telegram.BotService;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
@@ -55,6 +58,8 @@ public class AdminController {
 	private AuthHelper auth;
 	@Autowired
 	private ChatRepository chatRep;
+	@Autowired
+	private StatsHandler statsHandler;
 	@Autowired
 	private BotService botServ;
 	@Autowired
@@ -79,12 +84,37 @@ public class AdminController {
 		return "forward:/observer/demand";
 	}
 
+	@GetMapping("/mark")
+	public String mark(Model model) {
+		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
+		return "admin/mark";
+	}
+
+	@PostMapping("/mark")
+	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
+		try {
+			List<Human> people = dbservice.getHumanRepository().findAll();
+			User realUser = auth.getCurrentUser();
+			User admin = new User();
+			admin.setRole("ROLE_COMMANDER");
+			admin.setId(realUser.getId());
+			admin.setLogin(realUser.getLogin());
+			admin.setTelegram(realUser.getTelegram());
+			int event_id = statsHandler.mark_group(dto, admin, people, null);
+			return ResponseEntity.accepted().body(Answer.marked(event_id));
+		} catch (Exception e) {
+			log.error("Mark error (admin.mark):", e);
+			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
+		}
+	}
+
 	/*
 	 * User manager
 	 */
 	@GetMapping("/usermgr")
 	public String usermgr(Model model) {
-		model.addAttribute("users", dbservice.getUserRepository().findAll());
+		var users = dbservice.getUserRepository().findAll(Sort.by(Sort.Direction.ASC, "login"));
+		model.addAttribute("users", users);
 		model.addAttribute("roles", SettingsRepository.getRoles());
 		return "admin/usermgr";
 	}
@@ -160,7 +190,7 @@ public class AdminController {
 	 */
 	@GetMapping("/squadmgr")
 	public String squadManager(Model model) {
-		model.addAttribute("squads", dbservice.getSquadRepository().findAll());
+		model.addAttribute("squads", dbservice.getSquadRepository().findAll(Sort.by(Sort.Direction.ASC, "squadName")));
 		model.addAttribute("users", dbservice.getUserRepository().findAllByRole("ROLE_SQUADCOMMANDER").stream()
 				.filter(user -> user.getSquad() == null).toList());
 		return "admin/squadmgr";
@@ -373,7 +403,7 @@ public class AdminController {
 	 */
 	@GetMapping("/groupmgr")
 	public String groupManager(Model model) {
-		List<User> markers = dbservice.getUserRepository().findAll().stream()
+		var markers = dbservice.getUserRepository().findAll(Sort.by(Sort.Direction.ASC, "name")).stream()
 				.filter(user -> user.getRole().equals("ROLE_COMMANDER")).toList();
 		model.addAttribute("markers", markers);
 		model.addAttribute("groups", dbservice.getGroupRepository().findAll());
@@ -394,6 +424,17 @@ public class AdminController {
 			return ResponseEntity.status(404).body(Answer.fail("Group not found"));
 		Group gr = group.get();
 		gr.setEditable(!gr.isEditable());
+		dbservice.getGroupRepository().save(gr);
+		return ResponseEntity.accepted().body(Answer.success());
+	}
+
+	@PostMapping("/groupmgr/change_reqmarks")
+	public ResponseEntity<String> groupManager_change_reqmarks(@RequestParam() int id) {
+		Optional<Group> group = dbservice.getGroupRepository().findById(id);
+		if (group.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Group not found"));
+		Group gr = group.get();
+		gr.setRequireAbsentMark(!gr.isRequireAbsentMark());
 		dbservice.getGroupRepository().save(gr);
 		return ResponseEntity.accepted().body(Answer.success());
 	}

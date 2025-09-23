@@ -51,7 +51,7 @@ function loadMarkedUsersTable(date) {
 			const table = document.createElement('table');
 			const thead = document.createElement('thead');
 			const headerRow = document.createElement('tr');
-			const headers = ['Роль', 'Имя', 'События'];
+			const headers = ['Роль', 'Имя', 'События', 'Кол-во событий'];
 			headers.forEach(headerText => {
 				const th = document.createElement('th');
 				th.textContent = headerText;
@@ -63,11 +63,13 @@ function loadMarkedUsersTable(date) {
 			if (data.length === 0) {
 				const row = document.createElement('tr');
 				const emptyCell = document.createElement('td');
-				emptyCell.colSpan = 3;
+				emptyCell.colSpan = headers.length;
 				emptyCell.textContent = 'Нет выставленных отметок';
 				row.appendChild(emptyCell);
 				tbody.appendChild(row);
+				document.getElementById('showStatsByDate').disabled=true;
 			} else {
+				document.getElementById('showStatsByDate').disabled=false;
 				data.forEach(item => {
 					const row = document.createElement('tr');
 					const roleCell = document.createElement('td');
@@ -82,6 +84,18 @@ function loadMarkedUsersTable(date) {
 					eventsCell.textContent = item.events.join(", ");
 					row.appendChild(eventsCell);
 
+					const eventscountCell = document.createElement('td');
+					eventscountCell.textContent = item.events_count;
+					row.appendChild(eventscountCell);
+
+					if (item.events_count != item.events.length) {
+						row.style = "border: 3px solid darkred; background-color:#fd8c59";
+						Swal.fire({
+							icon: 'warning',
+							title: 'Обнаружено несоответствие!',
+							html: 'Обнаружено <span style="color:#fd8c59">несоответствие</span> в кол-ве событий. Вероятно, кто-то отметил одно событие два раза. Пожалуйста, проверьте правильность выставления отметок'
+						})
+					}
 					tbody.appendChild(row);
 				});
 			}

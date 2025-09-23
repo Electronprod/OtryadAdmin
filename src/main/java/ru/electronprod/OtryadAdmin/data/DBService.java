@@ -1,14 +1,12 @@
 package ru.electronprod.OtryadAdmin.data;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Calendar;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,14 +31,19 @@ public class DBService {
 	@Getter
 	@Autowired
 	private GroupRepository groupRepository;
+	private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+	private static ZoneId zone;
+
+	@Value("${app.timezone}")
+	private void setTimeZone(String timezone) {
+		DBService.zone = ZoneId.of(timezone);
+	}
 
 	/**
 	 * @return Current date in format "yyyy.MM.dd"
 	 */
 	public static String getStringDate() {
-		Calendar calendar = Calendar.getInstance();
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
-		return dateFormat.format(calendar.getTime());
+		return LocalDate.now(zone).format(OUTPUT_FORMATTER);
 	}
 
 	/**
@@ -52,23 +55,20 @@ public class DBService {
 	 * @apiNote Possible input date formats: "yyyy-MM-dd", "dd-MM-yyyy",
 	 *          "yyyy.MM.dd", "MM/dd/yyyy"
 	 */
-	public static String getStringDate(String unknownDate) throws Exception {
-		String[] possiblePatterns = { "yyyy-MM-dd", "dd-MM-yyyy", "yyyy.MM.dd", "MM/dd/yyyy" };
-		LocalDate parsedDate = null;
-		for (String pattern : possiblePatterns) {
+	private static final DateTimeFormatter[] INPUT_FORMATTERS = { DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+			DateTimeFormatter.ofPattern("dd-MM-yyyy"), DateTimeFormatter.ofPattern("yyyy.MM.dd"),
+			DateTimeFormatter.ofPattern("MM/dd/yyyy") };
+
+	public static String getStringDate(String unknownDate) throws IllegalArgumentException {
+		for (DateTimeFormatter fmt : INPUT_FORMATTERS) {
 			try {
-				DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
-				parsedDate = LocalDate.parse(unknownDate, formatter);
-				break;
+				LocalDate parsed = LocalDate.parse(unknownDate, fmt);
+				return parsed.format(OUTPUT_FORMATTER);
 			} catch (DateTimeParseException ignored) {
+				// try next one
 			}
 		}
-		if (parsedDate != null) {
-			DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-			return parsedDate.format(outputFormatter);
-		} else {
-			log.warn("Unknown date recognition error: " + unknownDate);
-			throw new Exception("Unknown date recognition error: " + unknownDate);
-		}
+		log.warn("Date recognition error " + unknownDate);
+		throw new IllegalArgumentException("Date recognition error: " + unknownDate);
 	}
 }

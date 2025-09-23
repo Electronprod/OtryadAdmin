@@ -43,7 +43,7 @@ public class AuthHelper implements InitializingBean {
 			user.setPassword(admin_password);
 			user.setName("Administrator");
 			register(user);
-			log.info("Admin registered. Use authorization data from application.properties file.");
+			log.info("Admin registered. Use authorization credentials from application.properties file.");
 		}
 	}
 

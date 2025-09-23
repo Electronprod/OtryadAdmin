@@ -90,6 +90,10 @@ details[open] {
 						командира:</label> <select id="marker" name="marker">
 						<option th:each="marker : ${markers}" th:value="${marker.id}"
 							th:text="${marker.name}+' ('+${marker.getRoleText()}+')'"></option>
+					</select><label for="requireAbsentMark">Нужно ли обязательно отмечать причины отсутствия:</label> <select
+						name="requireAbsentMark">
+						<option value="true">ДА</option>
+						<option value="false">НЕТ</option>
 					</select>
 					<button class="greenbtn" type="submit">Создать группу</button>
 				</form>
@@ -117,6 +121,7 @@ details[open] {
 							<th>Название</th>
 							<th>Ребят</th>
 							<th>Статус</th>
+							<th>Причины</th>
 							<th>Действия</th>
 						</tr>
 					</thead>
@@ -125,7 +130,11 @@ details[open] {
 							<td th:text="${group.marker.name}"></td>
 							<td th:text="${group.name}"></td>
 							<td th:text="${group.humans.size()}"></td>
-							<td><span th:if="${group.editable==true}">Отмечаемо</span> <span th:if="${group.editable==false}">Заморожено</span></td>
+							<td th:text="${group.editable ? 'Отмечаемо' : 'Заморожено'}"></td>
+							<td>
+								<button th:name="${group.id}" class="button" th:onclick="'changeReqMarks(this,'+${group.id}+')'"
+									th:text="${group.requireAbsentMark ? 'Да' : 'Нет'}"></button>
+						</td>
 							<td>
 								<div class="action-buttons">
 									<button th:name="${group.id}" class="button change-status-1-btn" th:if="${group.editable==true}"

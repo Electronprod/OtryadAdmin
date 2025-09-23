@@ -26,6 +26,9 @@ public class Group {
 	@Column(name = "editable")
 	@org.hibernate.annotations.ColumnDefault("true")
 	private boolean editable;
+	@Column(name = "requireAbsentMark")
+	@org.hibernate.annotations.ColumnDefault("true")
+	private boolean requireAbsentMark;
 
 	public void addHuman(Human human) {
 		humans.add(human);
