@@ -469,6 +469,8 @@ public class AdminController {
 		if (human.isEmpty() || group.isEmpty())
 			return ResponseEntity.status(404).body(Answer.fail("Group or Human not found"));
 		Group gr = group.get();
+		if (gr.getHumans().contains(human.get()))
+			return ResponseEntity.status(404).body(Answer.fail("Human is already in the group!"));
 		gr.addHuman(human.get());
 		dbservice.getGroupRepository().save(gr);
 		return ResponseEntity.accepted().body(Answer.success());
@@ -481,7 +483,36 @@ public class AdminController {
 		if (human1.isEmpty() || group.isEmpty())
 			return ResponseEntity.status(404).body(Answer.fail("Group or Human not found"));
 		Group gr = group.get();
+		if (!gr.getHumans().contains(human1.get()))
+			return ResponseEntity.status(404).body(Answer.fail("Human is not in the group!"));
 		gr.removeHuman(human1.get());
+		dbservice.getGroupRepository().save(gr);
+		return ResponseEntity.accepted().body(Answer.success());
+	}
+
+	/**
+	 * @param id     - groupID
+	 * @param action - true/false - add/delete
+	 */
+	@PostMapping("/groupmgr/manage/all")
+	public ResponseEntity<String> groupManager_all_action(@RequestParam() int id, @RequestParam() boolean action) {
+		Optional<Group> group = dbservice.getGroupRepository().findById(id);
+		if (group.isEmpty())
+			return ResponseEntity.status(404).body(Answer.fail("Group not found"));
+		Group gr = group.get();
+		if (action) {
+			var people = dbservice.getHumanRepository().findAll();
+			people.removeAll(gr.getHumans());
+			people.forEach(human -> {
+				gr.addHuman(human);
+			});
+		} else {
+			var people = new ArrayList<Human>();
+			people.addAll(gr.getHumans());
+			people.forEach(human -> {
+				gr.removeHuman(human);
+			});
+		}
 		dbservice.getGroupRepository().save(gr);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
@@ -591,6 +622,17 @@ public class AdminController {
 			return ResponseEntity.status(404).body(Answer.fail("Event not found"));
 		}
 		stats.stream().forEach(stat -> stat.setDate(value.replaceAll("-", ".")));
+		dbservice.getStatsRepository().saveAll(stats);
+		return ResponseEntity.accepted().body(Answer.success());
+	}
+
+	@PostMapping("/statsmgr/edit_group")
+	public ResponseEntity<String> statsManager_edit_group(@RequestParam int eventid, @RequestParam String value) {
+		List<StatsRecord> stats = dbservice.getStatsRepository().findByEventId(eventid);
+		if (stats.isEmpty()) {
+			return ResponseEntity.status(404).body(Answer.fail("Event not found"));
+		}
+		stats.stream().forEach(stat -> stat.setGroup(value));
 		dbservice.getStatsRepository().saveAll(stats);
 		return ResponseEntity.accepted().body(Answer.success());
 	}

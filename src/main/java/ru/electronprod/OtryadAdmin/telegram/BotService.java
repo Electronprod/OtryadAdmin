@@ -12,18 +12,23 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.SendMessage;
+import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.ChatRepository;
+import ru.electronprod.OtryadAdmin.data.UserRepository;
 import ru.electronprod.OtryadAdmin.data.filesystem.TelegramLanguage;
 
 /**
  * Provides methods to interact with telegram bot easily
  */
+@Slf4j
 @Service
 public class BotService {
 	@Autowired
 	private TelegramLanguage lang;
 	@Autowired
 	private ChatRepository chatRep;
+	@Autowired
+	private UserRepository userRep;
 
 	/**
 	 * Sends text message with HTML markup support
@@ -114,6 +119,23 @@ public class BotService {
 				BotConfig.telegramBot.execute(msg);
 			}
 		}
+		sendNotification_marked_staff(user, eventName);
+	}
+
+	private void sendNotification_marked_staff(ru.electronprod.OtryadAdmin.models.User user, String eventName) {
+		var chats = chatRep.findByOwnerIn(userRep.findAllByRole("ROLE_ADMIN"));
+		chats.forEach(chat -> {
+			try {
+				if (chat.isSendMarkedNotification()) {
+					var msg = new SendMessage(chat.getChatId(),
+							lang.get("marked_staff").replace("%user%", user.getName()).replace("%event%", eventName))
+							.parseMode(ParseMode.HTML).replyMarkup(getNotification_marked_button(chat));
+					BotConfig.telegramBot.execute(msg);
+				}
+			} catch (Exception e) {
+				log.warn("Mark message to staff error:" + e.getMessage());
+			}
+		});
 	}
 
 	public InlineKeyboardMarkup getNotification_marked_button(ru.electronprod.OtryadAdmin.models.Chat chat) {
