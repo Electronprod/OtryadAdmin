@@ -4,6 +4,10 @@ if ((typeof Swal === "function") == false) {
 	loadScript("/public_resources/sweetalert2.js", null);
 }
 async function sendData(address, bodyData) {
+	if (!(await checkIfMarkedAlready(bodyData.event, bodyData.date))) {
+		showError("Отметки не выставлены");
+		return;
+	}
 	try {
 		showLoader();
 		const csrfToken = document.querySelector('input[name="_csrf"]').value;
@@ -129,4 +133,29 @@ function showColumn(elementID, columnIndex) {
 		}
 	}
 	isAnyColumnHidden = false;
+}
+async function checkIfMarkedAlready(event, date) {
+	try {
+		let code = (await fetch("/api/check_already_marked?event=" + event + "&date=" + date)).status;
+		if (code == 200) {
+			return true;
+		} else if (code == 302) {
+			let result = await Swal.fire({
+				title: "Обнаружены похожие отметки!",
+				html: "<p>Отметки с таким же событием в эту дату были найдены на сервере.</p> <br><b>Продолжить выставление?</b> ",
+				icon: "warning",
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Да, продолжить',
+				cancelButtonText: 'Отмена'
+			});
+			console.log("[checkIfMarkedAlready]: User decision is", result.isConfirmed);
+			return result.isConfirmed;
+		}
+		console.warn("Error checking marks existence because the answer code was unrecognizable. Code: ", code);
+	} catch (err) {
+		console.error("Error checking marks existence:", err);
+	}
+	return false;
 }

@@ -64,14 +64,20 @@ textarea {
 	<div class="floating-button-2" onclick="showModal()">
 		<i class="plus-sign"></i>
 	</div>
-	<div class="floating-button" onclick="window.history.back()">
+	<div class="floating-button" onclick="window.location.href='/admin/groupmgr'">
 		<span class="double-arrow"></span>
 	</div>
 	<div class="overlay" id="overlay">
 		<div class="modal">
-			<h2>Распознать и выполнить</h2>
+			<h2>Действия</h2>
+			<div class="modal-buttons">
+				<button class="submit-button" onclick="addGroupAll()">Добавить ВСЕХ в группу</button>
+				<button class="close-button" onclick="removeGroupAll()">Удалить ВСЕХ из группы</button>
+			</div>
+			<h3>Распознать и выполнить действие</h3>
 			<div class="form-group">
-				<textarea id="recognize-input" placeholder="Введите ФИ здесь... Каждое ФИ в новой строке."></textarea>
+				<textarea id="recognize-input"
+					placeholder="Введите ФИ здесь... Каждое ФИ в новой строке. Для этих людей будет выполнено действие, которое вы выберите ниже"></textarea>
 			</div>
 			<div class="modal-buttons">
 				<button id="addbtn" class="submit-button" onclick="recognize(true)">Добавить в группу</button>

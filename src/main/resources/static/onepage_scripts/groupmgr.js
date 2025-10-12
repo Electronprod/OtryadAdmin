@@ -14,6 +14,18 @@ async function removeGroup(humanID) {
 		showShortNotification("Удален.", "Человек удален из группы.", "success");
 	}
 }
+async function addGroupAll() {
+	const success = await sendPostData("/admin/groupmgr/manage/all?id=" + groupID + "&action=true");
+	if (success) {
+		window.location.href = "/admin/groupmgr/manage?added_all&id=" + groupID;
+	}
+}
+async function removeGroupAll() {
+	const success = await sendPostData("/admin/groupmgr/manage/all?id=" + groupID + "&action=false");
+	if (success) {
+		window.location.href = "/admin/groupmgr/manage?removed_all&id=" + groupID;
+	}
+}
 function toggleButtons(humanId) {
 	const addButton = document.getElementById(`add-${humanId}`);
 	const deleteButton = document.getElementById(`delete-${humanId}`);
@@ -123,4 +135,18 @@ async function recognize(action) {
 		});
 	}
 	closeModal();
+}
+if (window.location.href.includes("added_all")) {
+	Swal.fire({
+		title: "УСПЕХ!",
+		text: "Все люди добавлены в группу",
+		icon: "success"
+	});
+}
+if (window.location.href.includes("removed_all")) {
+	Swal.fire({
+		title: "УСПЕХ!",
+		text: "Все люди удалены из группы",
+		icon: "success"
+	});
 }

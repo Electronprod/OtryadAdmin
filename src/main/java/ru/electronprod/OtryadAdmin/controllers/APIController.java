@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -88,6 +89,19 @@ public class APIController {
 			arr.add(jsonObject);
 		}
 		return arr.toJSONString();
+	}
+
+	/**
+	 * Required for mark pages
+	 */
+	@GetMapping("/api/check_already_marked")
+	@PreAuthorize("isAuthenticated()")
+	public ResponseEntity<String> checkEventMarkToday(String event, String date) {
+		int events = dbservice.getStatsRepository().countDistinctEventsByDateAndAuthorAndType(
+				DBService.getStringDate(date), auth.getCurrentUser().getLogin(), event);
+		if (events == 0 || events == 1)
+			return ResponseEntity.ok().build();
+		return ResponseEntity.status(302).body(Answer.fail(events + " events found."));
 	}
 
 	/**
