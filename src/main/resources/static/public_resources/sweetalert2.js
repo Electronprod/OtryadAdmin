@@ -1,4 +1,4 @@
-// Loading style
+// Appending the library style
 var link = document.createElement("link");
 link.rel = "stylesheet";
 link.type = "text/css";
