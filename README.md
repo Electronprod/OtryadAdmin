@@ -1,5 +1,7 @@
 # OtryadAdmin
-OtryadAdmin is a web application developed specifically for the management structure of [RVO Nadezhda](otryad-nadezhda.ru), which makes it easy to track people's attendance at various events. Therefore it was developed for the Russian organization the webapp does not have English translation.
+OtryadAdmin is a web application developed specifically for the management structure of [RVO Nadezhda](https://otryad-nadezhda.ru/), which makes it easy to track people's attendance at various events. Therefore it was developed for the Russian organization the webapp does not have English translation.
+## Installation & Usage guide
+All guides are available on the [wiki](https://github.com/Electronprod/OtryadAdmin/wiki).
 ## Technology Stack
 #### Languages
 - Java
@@ -20,6 +22,8 @@ Also used:
 - JSON.simple
 - Project Lombok
 - PostgreSQL driver
+- sweetalert2 (JS library)
+- SheetJS (JS library)
 
 ## Screenshots
 
