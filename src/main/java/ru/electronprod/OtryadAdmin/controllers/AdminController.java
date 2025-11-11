@@ -75,6 +75,7 @@ public class AdminController {
 		model.addAttribute("eventtypes", SettingsRepository.getEvent_types());
 		model.addAttribute("reasons", SettingsRepository.getReasons_for_absences());
 		model.addAttribute("replacements", SettingsRepository.getReplacements());
+		model.addAttribute("groups", dbservice.getGroupRepository().findAll());
 		model.addAttribute("appInfo", appInfo);
 		return "admin/dashboard";
 	}
@@ -448,6 +449,8 @@ public class AdminController {
 		if (!group1.get().getHumans().isEmpty())
 			return ResponseEntity.unprocessableEntity()
 					.body(Answer.fail("Cannot delete group with people! Delete people from group and try again."));
+		if (SettingsRepository.containsGroup(group1.get().getName()))
+			return ResponseEntity.unprocessableEntity().body(Answer.fail("The group is tied to some events"));
 		dbservice.getGroupRepository().deleteById(id);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
@@ -644,10 +647,14 @@ public class AdminController {
 	}
 
 	@PostMapping("/config/addevent")
-	public String config_addevent(@RequestParam String event, @RequestParam String canSetReason) {
+	public String config_addevent(@RequestParam String event, @RequestParam String canSetReason,
+			@RequestParam(required = false) String groupname) {
+		if (groupname != null && !groupname.equals("null")
+				&& dbservice.getGroupRepository().existsByName(groupname) == false)
+			return "redirect:/admin?error_group";
 		try {
 			SettingsRepository.addData(SettingsRepository.SECTION_EVENT_TYPES,
-					SettingsRepository.generateEvent(event, Boolean.parseBoolean(canSetReason)));
+					SettingsRepository.generateEventWithGroup(event, Boolean.parseBoolean(canSetReason), groupname));
 			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding event. ", e);
