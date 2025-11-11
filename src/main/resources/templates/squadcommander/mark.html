@@ -9,6 +9,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <script src="/assets/navbar.js"></script>
 <link rel="stylesheet" href="/assets/markpage.css">
+<style>
+#indicator {
+	color: red;
+	font-size: 16px;
+	font-family: 'Roboto', sans-serif;
+	margin-bottom: 4px;
+	margin-top: 0px;
+	padding: 1px;
+}
+</style>
 </head>
 
 <body>
@@ -35,12 +45,36 @@
 					</p>
 				</div>
 				<form id="markForm">
-					<div class="event-data-container">
+					<div class="event-data-container" style="display: inline-grid">
 						<label for="event_type">Выберите событие:</label> <select id="event_type" onchange="handleEventChange(this)"
-							required>
-							<option th:each="entry : ${event_types_map}" th:value="${entry.key}" th:text="${entry.key}"></option>
+							style="margin-bottom: 1px;" required>
+							<option th:each="entry : ${event_types_map}" th:value="${entry.key}" th:text="${entry.key}"
+								th:group="${entry.value.getFirst()}"></option>
 							<option value="unknown-event">Другое событие...</option>
-						</select><br> <label for="dateField">Выберите дату:</label> <input id="dateField" type="date" required /><br>
+						</select>
+						<div id="indicator_div" style="display: none;">
+							<p>
+								Данное событие привязано к группе <span id="indicator"></span>
+							</p>
+							<details class="cardc">
+								<summary>Что это значит?</summary>
+								<p>
+									Вы выставляете отметки только участникам данной группы из вашего звена - не удивлятесь отсутствию членов звена
+									- это нормально.<br> <b>Важно:</b> за группу отвечает и отчитывается ее глава - кто-то из заместителей
+									командира отряда или он сам. Они видят полную статистику за весь отряд в удобном виде.
+								</p>
+								<h4>Что такое "группа" и ее "участники"?</h4>
+								<p>
+									В OtryadAdmin предусмотрена система иерархии, которая позволяет объединить многие события в группу с одним
+									названием и ограниченным составом ребят-участников, таким образом объединяя отметки и не допуская проблем "он
+									не участвует, но надо его отметить". В группе всегда есть ответственный - кто-то из заместителей командира
+									отряда или он сам.<br> <b>Пример</b>: в "Зимней сказке" участвуют не все ребята, поэтому в группе "Зимняя
+									сказка", состоящей из многих отметок посещений репетиций, выставленных командирами, будут состоять только
+									участники представления и только им будут выставлены отметки.
+								</p>
+							</details>
+						</div>
+						<label for="dateField">Выберите дату:</label> <input id="dateField" type="date" required /><br>
 					</div>
 					<input type="text" id="searchInput" placeholder="Введите имя или фамилию для поиска..."
 						onkeyup="search_human('1','2','markTable')" />
@@ -54,7 +88,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							<tr th:each="human, iterStat : ${humanList}">
+							<tr th:name="${human.id}" th:each="human, iterStat : ${humanList}">
 								<td><input class="custom-checkbox" type="checkbox" name="select" th:value="${human.id}"
 									th:id="'checkbox-' + ${iterStat.index}" /></td>
 								<td th:text="${human.lastname}">Фамилия</td>

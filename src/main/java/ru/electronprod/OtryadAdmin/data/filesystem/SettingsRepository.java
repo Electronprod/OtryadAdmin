@@ -11,6 +11,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class SettingsRepository implements InitializingBean {
 	@Getter
 	private static File config = new File("settings.txt");
 	@Getter
-	private static Map<String, Boolean> event_types = new LinkedHashMap<String, Boolean>();
+	private static Map<String, Pair<String, Boolean>> event_types = new LinkedHashMap<String, Pair<String, Boolean>>();
 	@Getter
 	private static List<String> reasons_for_absences = new ArrayList<String>();;
 	@Getter
@@ -80,8 +81,8 @@ public class SettingsRepository implements InitializingBean {
 		JSONArray eventtypes = (JSONArray) data.get(SECTION_EVENT_TYPES);
 		for (Object o : eventtypes) {
 			JSONObject obj = (JSONObject) o;
-			event_types.put(String.valueOf(obj.get("event")),
-					Boolean.parseBoolean(String.valueOf(obj.get("canSetReason"))));
+			event_types.put(String.valueOf(obj.get("event")), Pair.of(String.valueOf(obj.get("groupname")),
+					Boolean.parseBoolean(String.valueOf(obj.get("canSetReason")))));
 		}
 		// Adding reasons for absences
 		JSONArray reasons = (JSONArray) data.get(SECTION_REASONS);
@@ -207,11 +208,25 @@ public class SettingsRepository implements InitializingBean {
 	 *              false - no)
 	 * @return JSONObject
 	 */
-	@SuppressWarnings("unchecked")
 	public static JSONObject generateEvent(String event, boolean mark) {
+		return generateEventWithGroup(event, mark, null);
+	}
+
+	/**
+	 * Generates event's JSONObject
+	 * 
+	 * @param event     - event appearance in the database
+	 * @param mark      - Can a commander indicate reasons for absence? (true - yes,
+	 *                  false - no)
+	 * @param groupname - name of the group to which the event must be added
+	 * @return JSONObject
+	 */
+	@SuppressWarnings("unchecked")
+	public static JSONObject generateEventWithGroup(String event, boolean mark, String groupname) {
 		JSONObject o = new JSONObject();
 		o.put("event", event);
 		o.put("canSetReason", mark);
+		o.put("groupname", groupname);
 		return o;
 	}
 
@@ -257,5 +272,12 @@ public class SettingsRepository implements InitializingBean {
 			}
 		}
 		return null;
+	}
+
+	public static boolean containsGroup(String group) {
+		if (event_types.containsValue(Pair.of(group, false)) || event_types.containsValue(Pair.of(group, true))) {
+			return true;
+		}
+		return false;
 	}
 }

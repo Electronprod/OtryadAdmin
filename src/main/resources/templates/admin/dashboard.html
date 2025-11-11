@@ -74,13 +74,15 @@ textarea:focus {
 							<tr>
 								<th>Название события</th>
 								<th>Выбор причины</th>
+								<th>Группа</th>
 								<th>Действие</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr th:each="entry : ${eventtypes}">
 								<td th:text="${entry.key}"></td>
-								<td th:text="${entry.value ? 'Да' : 'Нет'}"></td>
+								<td th:text="${entry.value.getSecond() ? 'Да' : 'Нет'}"></td>
+								<td th:text="${entry.value.getFirst().equals('null') ? 'N/A' : entry.value.getFirst()}"></td>
 								<td>
 									<form th:action="@{/admin/config/delevent}" method="post" style="display: inline;">
 										<input type="hidden" name="event" th:value="${entry.key}" />
@@ -93,10 +95,18 @@ textarea:focus {
 					<form th:action="@{/admin/config/addevent}" method="post" class="card_2" style="background-color: #d1cdcd;">
 						<h4>Добавить новое событие</h4>
 						<input placeholder="Название события" name="event" type="text" required /> <label for="canSetReason">
-							Нужно указывать причины пропуска?</label> <select name="canSetReason">
-							<option value="false">Нет</option>
-							<option value="true">Да</option>
+							Относится к группе?</label> <select id="groupname" name="groupname" required>
+							<option value="null">Нет</option>
+							<option th:each="group : ${groups}" th:value="${group.name}" th:text="${group.name}"
+								th:req="${group.requireAbsentMark}"></option>
 						</select>
+						<div id="canSetReasonDiv">
+							<label for="canSetReason"> Нужно указывать причины пропуска?</label><br> <select id="canSetReason"
+								name="canSetReason">
+								<option value="false">Нет</option>
+								<option value="true">Да</option>
+							</select>
+						</div>
 						<button type="submit">Добавить событие</button>
 					</form>
 				</details>
@@ -195,41 +205,67 @@ textarea:focus {
 			</div>
 		</div>
 	</div>
+	<script>
+		function formatArea() {
+			const area = document.getElementById('rawConfig');
+			area.value = JSON.stringify(JSON.parse(area.value), null, 4);
+		}
+
+		const groupnameSelect = document.getElementById('groupname');
+		groupnameSelect.addEventListener('change', function() {
+			const selectedOption = this.options[this.selectedIndex];
+			const req = selectedOption.getAttribute('req');
+			const changedValue = this.value;
+
+			console.log('Groupname value changed to:', changedValue, req);
+			const canSetReasonSelect = document.getElementById('canSetReason');
+			const canSetReasonDiv = document.getElementById('canSetReasonDiv');
+			if (changedValue == "null") {
+				canSetReasonDiv.style.display = "";
+			} else {
+				canSetReasonDiv.style.display = "none";
+				canSetReasonSelect.value = req;
+			}
+		});
+
+		if (window.location.href.includes("saved")) {
+			Swal.fire({
+				title : "УСПЕХ!",
+				text : "Изменения сохранены.",
+				icon : "success"
+			});
+		}
+		if (window.location.href.includes("error_unknown")) {
+			Swal.fire({
+				title : "НЕИЗВЕСТНАЯ ОШИБКА!",
+				text : "При выполнении действия произошла неизвестная ошибка.",
+				icon : "error"
+			});
+		}
+		if (window.location.href.includes("error_group")) {
+			Swal.fire({
+				title : "ГРУППА НЕ СУЩЕСТВУЕТ!",
+				text : "Введенная группа не найдена.",
+				icon : "error"
+			});
+		}
+		if (window.location.href.includes("deleted")) {
+			Swal.fire({
+				title : "УСПЕХ!",
+				text : "Удалено.",
+				icon : "success"
+			});
+		}
+		if (window.innerWidth <= 768
+				&& !localStorage.getItem('mobileAlertShown')) {
+			Swal
+					.fire({
+						title : "Неподдерживаемое устройство!",
+						html : "<p>Панель администратора и ее функционал были расчитаны для работы на больших экранах. Может наблюдаться некорректное отображение web-страниц.<br><br>Это не касается страниц других пользователей.</p>",
+						icon : "warning"
+					});
+			localStorage.setItem('mobileAlertShown', 'true');
+		}
+	</script>
 </body>
-<script>
-	function formatArea() {
-		const area = document.getElementById('rawConfig');
-		area.value = JSON.stringify(JSON.parse(area.value), null, 4);
-	}
-	if (window.location.href.includes("saved")) {
-		Swal.fire({
-			title : "УСПЕХ!",
-			text : "Изменения сохранены.",
-			icon : "success"
-		});
-	}
-	if (window.location.href.includes("error_unknown")) {
-		Swal.fire({
-			title : "НЕИЗВЕСТНАЯ ОШИБКА!",
-			text : "При выполнении действия произошла неизвестная ошибка.",
-			icon : "error"
-		});
-	}
-	if (window.location.href.includes("deleted")) {
-		Swal.fire({
-			title : "УСПЕХ!",
-			text : "Удалено.",
-			icon : "success"
-		});
-	}
-	if (window.innerWidth <= 768 && !localStorage.getItem('mobileAlertShown')) {
-		Swal
-				.fire({
-					title : "Неподдерживаемое устройство!",
-					html : "<p>Панель администратора и ее функционал были расчитаны для работы на больших экранах. Может наблюдаться некорректное отображение web-страниц.<br><br>Это не касается страниц других пользователей.</p>",
-					icon : "warning"
-				});
-		localStorage.setItem('mobileAlertShown', 'true');
-	}
-</script>
 </html>

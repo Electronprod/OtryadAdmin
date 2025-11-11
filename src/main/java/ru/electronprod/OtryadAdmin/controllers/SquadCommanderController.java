@@ -53,7 +53,18 @@ public class SquadCommanderController {
 	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
 		try {
 			var humans = dbservice.getSquadRepository().findByCommander(authHelper.getCurrentUser()).getHumans();
-			int event_id = statsHelper.mark_group(dto, authHelper.getCurrentUser(), humans, null);
+			String group = null;
+			if (dto.getGroupID() != -1) {
+				Optional<Group> groupObj = dbservice.getGroupRepository().findById(dto.getGroupID());
+				if (groupObj.isPresent()) {
+					humans.retainAll(groupObj.get().getHumans());
+					group = groupObj.get().getName();
+				} else {
+					log.warn("(squadcommander.mark): incorrect group. Please, check front-end side. GroupID received: "
+							+ dto.getGroupID());
+				}
+			}
+			int event_id = statsHelper.mark_group(dto, authHelper.getCurrentUser(), humans, group);
 			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
 			log.error("Mark error (squadcommander.mark):", e);

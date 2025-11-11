@@ -4,14 +4,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,9 +81,9 @@ public class APIController {
 	@PreAuthorize("hasAuthority('ROLE_SQUADCOMMANDER')")
 	public String getEventTypesForReasons() {
 		JSONArray arr = new JSONArray();
-		Map<String, Boolean> data = SettingsRepository.getEvent_types();
-		for (Map.Entry<String, Boolean> e : data.entrySet()) {
-			if (!e.getValue())
+		Map<String, Pair<String, Boolean>> data = SettingsRepository.getEvent_types();
+		for (Entry<String, Pair<String, Boolean>> e : data.entrySet()) {
+			if (!e.getValue().getSecond())
 				continue;
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("event", e.getKey());
@@ -146,6 +147,28 @@ public class APIController {
 					+ realGroup.get().getHumans().stream().map(human -> String.valueOf(human.getId()))
 							.collect(Collectors.joining("\", \""))
 					+ "\"]}";
+		} catch (Exception e) {
+			return Answer
+					.fail("Could not retrieve infomation about people in the group. Error message: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Required for Squadcommander mark page
+	 */
+	@GetMapping("/api/get_group_members_squadcommander")
+	@PreAuthorize("hasAuthority('ROLE_SQUADCOMMANDER')")
+	public String get_group_members_squadcommander(@RequestParam String groupname) {
+		var user = auth.getCurrentUser();
+		try {
+			var squad_people = dbservice.getSquadRepository().findByCommander(user).getHumans();
+			if (groupname.equals("null") || groupname == null)
+				return "{\"groupid\": -1, \"people\": [\"" + squad_people.stream()
+						.map(human -> String.valueOf(human.getId())).collect(Collectors.joining("\", \"")) + "\"]}";
+			var realGroup = dbservice.getGroupRepository().findByName(groupname);
+			squad_people.retainAll(realGroup.get().getHumans());
+			return "{\"groupid\":" + realGroup.get().getId() + ", \"people\": [\"" + squad_people.stream()
+					.map(human -> String.valueOf(human.getId())).collect(Collectors.joining("\", \"")) + "\"]}";
 		} catch (Exception e) {
 			return Answer
 					.fail("Could not retrieve infomation about people in the group. Error message: " + e.getMessage());
