@@ -4,7 +4,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.*;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
@@ -23,7 +21,7 @@ import ru.electronprod.OtryadAdmin.models.Squad;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
-import ru.electronprod.OtryadAdmin.services.StatsHandler;
+import ru.electronprod.OtryadAdmin.services.StatsProcessor;
 import ru.electronprod.OtryadAdmin.telegram.BotService;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 
@@ -37,9 +35,9 @@ public class ObserverController {
 	@Autowired
 	private AuthHelper auth;
 	@Autowired
-	private StatsHandler statsWorker;
-	@Autowired
 	private BotService botServ;
+	@Autowired
+	private StatsProcessor statsProcessor;
 
 	@GetMapping("")
 	public String stats_overview(Model model) {
@@ -86,7 +84,7 @@ public class ObserverController {
 	@GetMapping("/stats/report")
 	public String stats_event(@RequestParam String event_name, Model model) {
 		List<StatsRecord> stats = dbservice.getStatsRepository().findByType(event_name);
-		model.addAttribute("data", statsWorker.getEventReport(stats));
+		model.addAttribute("data", statsProcessor.getAttendanceReportByStatsRecords(stats));
 		model.addAttribute("eventName", event_name);
 		return "public/event_stats";
 	}
@@ -114,10 +112,7 @@ public class ObserverController {
 		if (human.isEmpty()) {
 			return "redirect:/observer/stats?error_notfound";
 		}
-		statsWorker.getMainPersonalReportModel(dbservice.getStatsRepository().findByHuman(human.get()), model, true);
-		model.addAttribute("person", human.get().getLastname() + " " + human.get().getName());
-		model.addAttribute("human_id", human.get().getId());
-		return "observer/personal_stats";
+		return statsProcessor.getPersonReport(human.get(), model);
 	}
 
 	@GetMapping("/stats/personal/table_id")
@@ -160,23 +155,8 @@ public class ObserverController {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		var data = dbservice.getStatsRepository().findByDateAndAuthor(date.replaceAll("-", "."),
-				squad.get().getCommander().getLogin(), Sort.by(Sort.Direction.DESC, "id"));
-		if (eventid.isPresent())
-			data = data.stream().filter(e -> String.valueOf(e.getEvent_id()).equals(eventid.get())).toList();
-		model.addAttribute("statss", data);
-		return "public/statsview_rawtable";
-	}
-
-	@GetMapping("/stats/squad/{id}/event_table")
-	public String stats_squad_event_table(@PathVariable("id") int id, @RequestParam String event_name, Model model) {
-		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
-		if (squad.isEmpty())
-			return "redirect:/observer/stats?error_notfound";
-		List<StatsRecord> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name,
-				squad.get().getCommander().getLogin(), Sort.by(Sort.Direction.DESC, "id"));
-		model.addAttribute("statss", stats);
-		return "public/statsview_rawtable";
+		return statsProcessor.getEventByDateAndFilters_user(squad.get().getCommander(), DBService.getStringDate(date),
+				eventid, Optional.empty(), model);
 	}
 
 	@GetMapping("/stats/squad/{id}/report")
@@ -184,11 +164,15 @@ public class ObserverController {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		List<StatsRecord> stats = dbservice.getStatsRepository().findByTypeAndAuthor(event_name,
-				squad.get().getCommander().getLogin(), Sort.by(Sort.Direction.DESC, "id"));
-		model.addAttribute("data", statsWorker.getEventReport(stats));
-		model.addAttribute("eventName", event_name);
-		return "public/event_stats";
+		return statsProcessor.reportEvent_user(squad.get().getCommander(), event_name, model);
+	}
+
+	@GetMapping("/stats/squad/{id}/event_table")
+	public String stats_squad_event_table(@PathVariable("id") int id, @RequestParam String event_name, Model model) {
+		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
+		if (squad.isEmpty())
+			return "redirect:/observer/stats?error_notfound";
+		return statsProcessor.showEventTable_user(squad.get().getCommander(), event_name, model);
 	}
 
 	@GetMapping("/stats/squad/{id}/table")
@@ -196,9 +180,7 @@ public class ObserverController {
 		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model.addAttribute("statss", dbservice.getStatsRepository().findByAuthor(squad.get().getCommander().getLogin(),
-				Sort.by(Sort.Direction.DESC, "id")));
-		return "public/statsview_rawtable";
+		return statsProcessor.showFullTable_user(squad.get().getCommander(), model);
 	}
 
 	/*
@@ -209,16 +191,7 @@ public class ObserverController {
 		Optional<Group> group = dbservice.getGroupRepository().findById(id);
 		if (group.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
-		model.addAttribute("group", group.get());
-		model.addAttribute("humans",
-				group.get().getHumans().stream().sorted(Comparator.comparing(obj -> obj.getLastname())).toList());
-		model.addAttribute("group_events",
-				dbservice.getStatsRepository().findDistinctTypesGroup(group.get().getName()));
-		model.addAttribute("reasons",
-				dbservice.getStatsRepository().findByGroup(group.get().getName(), Sort.by(Sort.Direction.ASC, "reason"))
-						.stream().map(StatsRecord::getReason)
-						.filter(reason -> !SettingsRepository.getReplacements().containsKey(reason))
-						.collect(Collectors.groupingBy(reason -> reason, Collectors.counting())));
+		statsProcessor.fill_statsPage_group(group.get(), model);
 		return "observer/groupstats/stats_overview";
 	}
 
@@ -234,33 +207,23 @@ public class ObserverController {
 
 	@GetMapping("/stats/group/report")
 	public String stats_group_report(@RequestParam String eventname, @RequestParam String groupname, Model model) {
-		model.addAttribute("data", statsWorker.getEventReport(dbservice.getStatsRepository()
-				.findByTypeAndGroup(eventname, groupname, Sort.by(Sort.Direction.DESC, "date"))));
-		model.addAttribute("eventName", eventname);
-		return "public/event_stats";
+		return statsProcessor.reportGroupEvent(eventname, groupname, model);
 	}
 
 	@GetMapping("/stats/group/report/table")
 	public String stats_group_report_table(@RequestParam String eventname, @RequestParam String groupname,
 			Model model) {
-		model.addAttribute("statss", dbservice.getStatsRepository().findByTypeAndGroup(eventname, groupname,
-				Sort.by(Sort.Direction.DESC, "date")));
-		return "public/statsview_rawtable";
+		return statsProcessor.showGroupEventTable(eventname, groupname, model);
 	}
 
 	@GetMapping("/stats/group/all_report")
 	public String stats_group_report(@RequestParam String groupname, Model model) {
-		model.addAttribute("data", statsWorker.getEventReport(
-				dbservice.getStatsRepository().findByGroup(groupname, Sort.by(Sort.Direction.DESC, "date"))));
-		model.addAttribute("eventName", groupname);
-		return "public/event_stats";
+		return statsProcessor.reportGroup(groupname, model);
 	}
 
 	@GetMapping("/stats/group/all_table")
 	public String stats_group_allTable(@RequestParam String groupname, Model model) {
-		model.addAttribute("statss",
-				dbservice.getStatsRepository().findByGroup(groupname, Sort.by(Sort.Direction.DESC, "date")));
-		return "public/statsview_rawtable";
+		return statsProcessor.showGroupTable(groupname, model);
 	}
 
 	@GetMapping("/data")

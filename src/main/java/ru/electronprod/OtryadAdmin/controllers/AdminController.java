@@ -38,7 +38,7 @@ import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
-import ru.electronprod.OtryadAdmin.services.StatsHandler;
+import ru.electronprod.OtryadAdmin.services.MarkService;
 import ru.electronprod.OtryadAdmin.telegram.BotService;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
@@ -59,7 +59,7 @@ public class AdminController {
 	@Autowired
 	private ChatRepository chatRep;
 	@Autowired
-	private StatsHandler statsHandler;
+	private MarkService statsHandler;
 	@Autowired
 	private BotService botServ;
 	@Autowired

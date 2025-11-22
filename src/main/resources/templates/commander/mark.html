@@ -67,7 +67,7 @@ details[open] {
 				<form id="markForm">
 					<div>
 						<label for="group">Выберите группу, в которой хотите выставить отметки:</label><br> <select id="group"
-							name="group" onclick="groupSelect()" required>
+							name="group" onchange="groupSelect()" required>
 							<option value="all_people">Все ребята (группа не выбрана)</option>
 							<option th:each="group : ${groups}" th:value="${group.id}" th:text="${group.name}"></option>
 						</select>
