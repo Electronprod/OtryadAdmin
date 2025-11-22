@@ -19,7 +19,7 @@
 				Статистика группы <u th:text="${group.name}"></u>:
 			</h2>
 			<div class="card">
-				<h3>Список ребят из этой группы</h3>
+				<h3>Состав группы</h3>
 				<p>Показывает, кто состоит в этой группе.</p>
 				<details class="cardc">
 					<summary>Нажмите, чтобы просмотреть</summary>
@@ -80,15 +80,6 @@
 				</table>
 			</div>
 			<div class="card">
-				<h3>Просмотр отметок по дате</h3>
-				<p>Посмотрите посещения и пропуски в выбранную дату в этой группе</p>
-				<form method="get" th:action="@{/observer/stats/group/date}">
-					<label for="date">Дата:</label> <input type="date" id="dateF" name="date" required /><input type="hidden"
-						name="groupname" th:value="${group.name}" /><br>
-					<button type="submit">Посмотреть</button>
-				</form>
-			</div>
-			<div class="card">
 				<h3>Просмотр отметок за все события</h3>
 				<p>Показывает, используя всю доступную информацию для этой группы.</p>
 				<form th:action="@{/observer/stats/group/all_report}" method="get" style="display: inline;">
@@ -98,6 +89,15 @@
 				<form th:action="@{/observer/stats/group/all_table}" method="get" style="display: inline;">
 					<input type="hidden" name="groupname" th:value="${group.name}" />
 					<button class="admin-button" type="submit">Таблица отметок</button>
+				</form>
+			</div>
+			<div class="card">
+				<h3>Просмотр отметок по дате</h3>
+				<p>Посмотрите посещения и пропуски в выбранную дату в этой группе</p>
+				<form method="get" th:action="@{/observer/stats/group/date}">
+					<label for="date">Дата:</label> <input type="date" id="dateF" name="date" required /><input type="hidden"
+						name="groupname" th:value="${group.name}" /><br>
+					<button type="submit">Посмотреть</button>
 				</form>
 			</div>
 			<div class="card">

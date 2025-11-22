@@ -78,6 +78,12 @@
 				</form>
 			</div>
 			<div class="card">
+				<h3>Отчет по всем вашим отметкам</h3>
+				<p>Показывает посещаемость ребят в рамках всех ваших отметок.</p>
+				<a class="form-btn" href="/squadcommander/stats/report_me?include_groups=false">Посмотреть без групп</a> <a
+					class="form-btn" href="/squadcommander/stats/report_me?include_groups=true">Посмотреть с группами</a>
+			</div>
+			<div class="card">
 				<h3>Причины пропусков</h3>
 				<table>
 					<thead>
@@ -97,26 +103,25 @@
 			</div>
 			<div class="card">
 				<h3>В звене</h3>
-				<p>Показывает статистику основываясь только на ваших отметках</p>
+				<p>Показывает статистику, основываясь только на ваших отметках</p>
 				<form method="get">
 					<select name="id">
 						<option th:each="human: ${humans}" th:value="${human.id}" th:text="${human.lastname} + ' ' + ${human.name}">
 						</option>
 					</select>
-					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal">Посмотреть</button>
 					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal/table">Посмотреть в виде
 						таблицы</button>
 				</form>
 			</div>
 			<div class="card">
 				<h3>В отряде</h3>
-				<p>Показывает статистику используя отметки всех командиров</p>
+				<p>Показывает статистику, используя отметки всех командиров</p>
 				<form method="get">
 					<select name="id">
 						<option th:each="human: ${humans}" th:value="${human.id}" th:text="${human.lastname} + ' ' + ${human.name}">
 						</option>
 					</select>
-					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal_full">Посмотреть</button>
+					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal">Посмотреть</button>
 					<button class="form-btn" type="submit" formaction="/squadcommander/stats/personal_full/table">Посмотреть в
 						виде таблицы</button>
 				</form>

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Персональная статистика</title>
+
+<link rel="stylesheet" href="/assets/personal_page.css" />
+<link rel="icon" href="/icon.png" />
+<link rel="stylesheet" href="/public_resources/fontawesome/css/all.min.css" />
+<script defer src="/assets/navbar.js"></script>
+</head>
+
+<body>
+	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<input type="hidden" id="human-id" th:value="${human.id}" />
+
+	<div class="app-container">
+		<header class="profile-header">
+			<div class="profile-info">
+				<div class="avatar-placeholder">
+					<i class="fa-solid fa-user"></i>
+				</div>
+				<div>
+					<h1 class="profile-name" th:text="${person}">Имя Фамилия</h1>
+					<span class="profile-commander">Звено «<span th:text="${human.getSquad().getSquadName()}"></span>»
+					</span>
+				</div>
+			</div>
+
+			<div class="header-stats">
+				<div class="stat-pill success">
+					<div class="stat-icon">
+						<i class="fa-solid fa-check"></i>
+					</div>
+					<div class="stat-text">
+						<span class="stat-label">Посещено</span> <span class="stat-value" th:text="${attendance.getFirst()}">0</span>
+					</div>
+				</div>
+				<div class="stat-pill danger">
+					<div class="stat-icon">
+						<i class="fa-solid fa-xmark"></i>
+					</div>
+					<div class="stat-text">
+						<span class="stat-label">Пропущено</span> <span class="stat-value" th:text="${attendance.getSecond()}">0</span>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<div class="dashboard-grid">
+			<div class="dashboard-col-main">
+				<div class="modern-card">
+					<div class="card-header">
+						<h3>
+							<i class="fa-solid fa-users-viewfinder"></i> Активность в звене
+						</h3>
+					</div>
+					<div class="card-body" style="padding: 10px;">
+						<div class="stat-list">
+							<div class="stat-item" th:each="data : ${squadData}">
+								<div class="stat-item-header">
+									<div class="stat-title">
+										<span th:text="${data.key}"></span>
+									</div>
+									<div class="stat-badges">
+										<span class="mini-badge green" title="Посещений"> <i class="fa-solid fa-check"></i> <span
+											th:text="${data.value.getFirst()}"></span>
+										</span> <span class="mini-badge red" title="Пропусков" th:if="${data.value.getSecond() > 0}"> <i
+											class="fa-solid fa-xmark"></i> <span th:text="${data.value.getSecond()}"></span>
+										</span>
+									</div>
+								</div>
+								<div class="progress-track">
+									<div class="progress-fill" th:with="total=${data.value.getFirst() + data.value.getSecond()}"
+										th:style="'width: ' + (${total} > 0 ? (${data.value.getFirst()} * 100.0 / ${total}) : 0) + '%'"></div>
+								</div>
+								<button class="btn-details-toggle" onclick="toggleStatDetails(this)">
+									<span class="btn-text">Подробнее</span> <i class="fa-solid fa-chevron-down"></i>
+								</button>
+								<div class="item-details-wrapper">
+									<div class="item-details-content">
+										<h4>Причины пропусков</h4>
+										<p>От последних отметок к старым</p>
+										<ul class="reasons-list">
+											<li class="reasons-list-li-bad" th:each="val : ${event_reasons_data.get(data.key)}"><span
+												th:text="${val}"></span></li>
+											<li class="reasons-list-li-ok" th:if="${event_reasons_data.get(data.key) == null}">Тут ничего нет :)</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div th:if="${squadData.isEmpty()}" class="empty-state">
+								<i class="fa-regular fa-face-angry"></i>
+								<p>Нет событий!</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="modern-card">
+					<div class="card-header">
+						<h3>
+							<i class="fa-solid fa-layer-group"></i> Активность в группах
+						</h3>
+					</div>
+					<div class="card-body" style="padding: 10px;">
+						<div class="stat-list">
+							<div class="stat-item" th:each="data : ${groupsData}">
+								<div class="stat-main">
+									<div class="stat-item-header">
+										<span class="stat-title" th:text="${data.key}">Группа</span>
+										<div class="stat-badges">
+											<span class="mini-badge green" title="Посещений"> <i class="fa-solid fa-check"></i> <span
+												th:text="${data.value.getFirst()}"></span>
+											</span> <span class="mini-badge red" title="Пропусков" th:if="${data.value.getSecond() > 0}"> <i
+												class="fa-solid fa-xmark"></i> <span th:text="${data.value.getSecond()}"></span>
+											</span>
+										</div>
+									</div>
+									<div class="progress-track">
+										<div class="progress-fill" th:with="total=${data.value.getFirst() + data.value.getSecond()}"
+											th:style="'width: ' + (${total} > 0 ? (${data.value.getFirst()} * 100.0 / ${total}) : 0) + '%'"></div>
+									</div>
+								</div>
+								<button class="btn-details-toggle" onclick="toggleStatDetails(this)">
+									<span class="btn-text">Подробнее</span> <i class="fa-solid fa-chevron-down"></i>
+								</button>
+								<div class="item-details-wrapper">
+									<div class="item-details-content">
+										<h4>Причины пропусков</h4>
+										<p>От последних отметок к старым</p>
+										<ul class="reasons-list">
+											<li class="reasons-list-li-bad" th:each="val : ${event_reasons_data.get(data.key)}"><span
+												th:text="${val}"></span></li>
+											<li class="reasons-list-li-ok" th:if="${event_reasons_data.get(data.key) == null}">Тут ничего нет :)</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+							<div th:if="${groupsData.isEmpty()}" class="empty-state">
+								<i class="fa-regular fa-face-angry"></i>
+								<p>Нет событий!</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="modern-card">
+					<div class="card-header">
+						<h3>
+							<i class="fa-solid fa-briefcase"></i> Дополнительная активность
+						</h3>
+					</div>
+					<div class="card-body">
+						<div class="groups-grid">
+							<div class="group-box" th:each="data : ${commanderData}">
+								<div class="group-name" th:text="${data.key}">Событие</div>
+								<div class="group-stats">
+									<div class="g-stat visited">
+										<span class="g-val" th:text="${data.value.getFirst()}">0</span> <span class="g-lbl">Был</span>
+									</div>
+									<div class="g-divider"></div>
+									<div class="g-stat missed">
+										<span class="g-val" th:text="${data.value.getSecond()}">0</span> <span class="g-lbl">Нет</span>
+									</div>
+								</div>
+							</div>
+							<div th:if="${commanderData.isEmpty()}" class="empty-state">
+								<i class="fa-regular fa-face-frown"></i>
+								<p>Нет событий</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="dashboard-col-side">
+				<div class="modern-card">
+					<div class="card-header">
+						<h3>
+							<i class="fa-solid fa-circle-info"></i> О человеке
+						</h3>
+					</div>
+					<div class="card-body">
+						<div class="p-data">
+							<ul class="p-line">
+								<li><i class="fa-solid fa-cake-candles"></i> Дата рождения: <span th:text="${human.birthday}"></span></li>
+								<li><i class="fa-solid fa-graduation-cap"></i> Класс: <span th:text="${human.classnum}"></span></li>
+								<li><i class="fa-solid fa-phone"></i> Телефон: <span th:text="${human.phone}"></span></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+
+				<div class="dashboard-col-side">
+					<div class="modern-card">
+						<div class="card-header">
+							<h3>
+								<i class="fa-regular fa-calendar-xmark"></i> Причины пропусков
+							</h3>
+						</div>
+						<div class="card-body">
+							<div class="tags-cloud">
+								<div class="reason-tag" th:each="data : ${reasons_data}">
+									<span class="reason-name" th:text="${data.key}"></span> <span class="reason-count" th:text="${data.value}">0</span>
+								</div>
+								<div th:if="${reasons_data.isEmpty()}" class="empty-state">
+									<i class="fa-regular fa-face-smile"></i>
+									<p>Пропусков нет!</p>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<footer class="page-footer">
+		<div class="timer">
+			Время подсчёта(мс): <span th:text="${time}">00</span>
+		</div>
+	</footer>
+</body>
+<script>
+	function toggleStatDetails(btn) {
+		const wrapper = btn.nextElementSibling;
+		btn.classList.toggle('open');
+		wrapper.classList.toggle('open');
+		if (wrapper.style.maxHeight) {
+			wrapper.style.maxHeight = null;
+		} else {
+			wrapper.style.maxHeight = wrapper.scrollHeight + "px";
+		}
+	}
+</script>
+</html>
