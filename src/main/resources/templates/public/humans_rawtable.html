@@ -36,10 +36,12 @@
 					<button onclick="sortTable(10)" class="sortbtn">Сортировать</button></th>
 				<th>ID<br>
 					<button onclick="sortTable(11)" class="sortbtn">Сортировать</button></th>
+				<th>Пол<br>
+					<button onclick="sortTable(12)" class="sortbtn">Сортировать</button></th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr th:each="human, iterStat : ${humans}">
+			<tr th:each="human, iterStat : ${humans}" th:name="${human.lastname}">
 				<td th:text="${iterStat.index + 1}"></td>
 				<td th:text="${human.lastname}"></td>
 				<td th:text="${human.name}"></td>
@@ -59,15 +61,17 @@
 		<button class="btn" id="sheetjsexport">Экспорт как XLSX</button>
 		<button class="btn" style="background-color: green" onclick="window.history.back();">Вернуться</button>
 	</div>
-</body>
-<script src="/assets/mgr.js"></script>
-<script>
-	document.getElementById("sheetjsexport").addEventListener(
-			'click',
-			function() {
-				var wb = XLSX.utils.table_to_book(document
-						.getElementById("userTable"));
-				XLSX.writeFile(wb, "humans.xlsx");
-			});
+	<script src="/assets/mgr.js"></script>
+	<script src="/assets/sex.js"></script>
+	<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+	showSexColumn();
+});
+
+document.getElementById("sheetjsexport").addEventListener('click', function() {
+	var wb = XLSX.utils.table_to_book(document.getElementById("userTable"));
+	XLSX.writeFile(wb, "humans.xlsx");
+});
 </script>
+</body>
 </html>

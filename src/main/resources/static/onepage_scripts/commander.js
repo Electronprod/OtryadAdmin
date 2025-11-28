@@ -28,8 +28,12 @@ let people = [];
 async function groupSelect() {
 	// Retrieving data
 	let group = document.getElementById('group').value;
-	if (group === "all_people")
+	if (group === "all_people") {
 		group = null;
+		await showSearchInput(true);
+	} else {
+		await showSearchInput(false);
+	}
 	answer = await getData("/api/get_group_members?group=" + group);
 	people = answer.people;
 	console.log("Members of the group:", people.length, "Group:", group, "Allow 'unmarked': ", !answer.mark);
@@ -108,4 +112,20 @@ async function send() {
 	} catch (error) {
 		showError("Произошла неизвестная ошибка!", String(error));
 	}
+}
+// Button
+const genderbtn = document.getElementById('genderbtn');
+const observer = new IntersectionObserver((entries) => {
+	entries.forEach(entry => {
+		if (entry.isIntersecting) {
+			genderbtn.style.display = 'block';
+		} else {
+			genderbtn.style.display = 'none';
+		}
+	});
+});
+observer.observe(document.getElementById("markTable"));
+function stopObserver() {
+	observer.disconnect();
+	genderbtn.style.display = 'none';
 }

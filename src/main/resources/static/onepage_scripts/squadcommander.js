@@ -33,6 +33,11 @@ document.getElementById('select_all_humans_checkbox').addEventListener('change',
 let people = [];
 let groupid = -1;
 async function groupSelect(group = 'null') {
+	if (group === "null") {
+		await showSearchInput(true);
+	} else {
+		await showSearchInput(false);
+	}
 	answer = await getData("/api/get_group_members_squadcommander?groupname=" + group);
 	people = answer.people;
 	groupid = answer.groupid;

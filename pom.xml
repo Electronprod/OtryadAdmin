@@ -11,9 +11,9 @@
 	</parent>
 	<groupId>ru.electronprod</groupId>
 	<artifactId>OtryadAdmin</artifactId>
-	<version>2.1.2</version>
+	<version>2.2</version>
 	<name>OtryadAdmin</name>
-	<description>Statistics application</description>
+	<description>An attendance tracking program</description>
 	<url />
 	<properties>
 		<java.version>17</java.version>

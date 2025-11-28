@@ -207,6 +207,22 @@ public class StatsProcessor {
 						.filter(reason -> !SettingsRepository.getReplacements().containsKey(reason))
 						.collect(Collectors.groupingBy(reason -> reason, Collectors.counting())));
 	}
+
+	/**
+	 * Forms the attendance report using all available data
+	 * 
+	 * @param include_groups - Shell we take into account the StatsRecords related
+	 *                       to some groups?
+	 * @param model          - model to add the data
+	 * @return the path to html template
+	 */
+	public String reportAllEvents(boolean include_groups, Model model) {
+		var data = include_groups ? dbservice.getStatsRepository().findAll()
+				: dbservice.getStatsRepository().findByGroup(null, Sort.by(Sort.Direction.DESC, "id"));
+		model.addAttribute("data", getAttendanceReportByStatsRecords(data));
+		model.addAttribute("eventName", "All events");
+		return "public/event_stats";
+	}
 	/*
 	 * General methods
 	 */
