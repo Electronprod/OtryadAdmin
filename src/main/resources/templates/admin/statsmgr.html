@@ -58,7 +58,7 @@
 			<div class="form-group">
 				<label for="type">Событие</label> <select id="type" required>
 					<option th:each="event : ${event_types_map}"
-						th:text="${event.key} + ' (' + (${event.value ? 'С причиной' : 'Без причины'})+')'" th:value="${event.key}"></option>
+						th:text="${event.key} + ' (' + (${event.value.getSecond() ? 'С причиной' : 'Без причины'})+')'" th:value="${event.key}"></option>
 				</select>
 			</div>
 			<div class="form-group">

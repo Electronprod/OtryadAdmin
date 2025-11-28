@@ -6,6 +6,7 @@
 <title>Отметить ребят</title>
 <link rel="stylesheet" href="/assets/default_style.css">
 <link rel="stylesheet" href="/assets/markpage.css">
+<link rel="stylesheet" href="/public_resources/fontawesome/css/all.min.css" />
 <link rel="icon" href="/icon.png">
 <script src="/assets/navbar.js"></script>
 <style>
@@ -36,6 +37,28 @@ details[open] {
 .non_marking {
 	color: red;
 	background-color: orange;
+}
+
+.floating-button {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	width: 60px;
+	height: 60px;
+	background-color: #ff9800;
+	color: #fff;
+	border-radius: 50%;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 24px;
+	transition: background-color 0.3s ease;
+	cursor: pointer;
+}
+
+.floating-button:hover {
+	background-color: #e68900;
 }
 </style>
 </head>
@@ -73,7 +96,8 @@ details[open] {
 						</select>
 					</div>
 					<label>Введите название события:</label> <input id="event_type" type="text" required /> <label>Выберите
-						дату:</label> <input id="dateField" type="date" required /><br>
+						дату:</label> <input id="dateField" type="date" required /><br> <input type="text" id="searchInput"
+						placeholder="Введите имя или фамилию для поиска..." onkeyup="search_human('1','2','markTable')" />
 					<table id="markTable">
 						<thead>
 							<tr>
@@ -89,6 +113,7 @@ details[open] {
 									th:id="'checkbox-' + ${iterStat.index}" /></td>
 								<td th:text="${human.lastname}">Фамилия</td>
 								<td th:text="${human.name}">Имя</td>
+								<td th:text="${human.surname}" hidden=>0</td>
 								<td><select class="details-input" th:name="'details[' + ${human.id} + ']'"
 									th:id="'details-' + ${iterStat.index}">
 										<option class="non_marking" value="do_not_mark_user">Не отмечается</option>
@@ -104,7 +129,13 @@ details[open] {
 	</div>
 	<!--Search space-->
 	<div style="height: 50vh"></div>
+	<div id="genderbtn" class="floating-button" onclick="sortByGender();stopObserver()">
+		<i class="fa-solid fa-venus-mars floating-button"></i>
+	</div>
 </body>
 <script src="/onepage_scripts/commander.js"></script>
 <script src="/assets/mark_engine.js"></script>
+<script src="/assets/sex.js"></script>
+<script src="/assets/mgr.js"></script>
+<script src="/assets/search_table.js"></script>
 </html>

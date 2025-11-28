@@ -89,6 +89,11 @@ public class ObserverController {
 		return "public/event_stats";
 	}
 
+	@GetMapping("/stats/report_all")
+	public String stats_reportAll(@RequestParam boolean include_groups, Model model) {
+		return statsProcessor.reportAllEvents(include_groups, model);
+	}
+
 	@GetMapping("/stats/event_table")
 	public String stats_eventTable(@RequestParam String event_name, Model model) {
 		model.addAttribute("statss",
@@ -181,6 +186,14 @@ public class ObserverController {
 		if (squad.isEmpty())
 			return "redirect:/observer/stats?error_notfound";
 		return statsProcessor.showFullTable_user(squad.get().getCommander(), model);
+	}
+
+	@GetMapping("/stats/squad/{id}/report_me")
+	public String stats_report_me(@PathVariable("id") int id, @RequestParam boolean include_groups, Model model) {
+		Optional<Squad> squad = dbservice.getSquadRepository().findById(id);
+		if (squad.isEmpty())
+			return "redirect:/observer/stats?error_notfound";
+		return statsProcessor.report_user(squad.get().getCommander(), include_groups, model);
 	}
 
 	/*

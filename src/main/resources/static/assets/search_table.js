@@ -33,6 +33,15 @@ function search_human(id0, id1, tableID) {
 		}
 	}
 }
+async function showSearchInput(value) {
+	const input = document.getElementById('searchInput');
+	input.value = '';
+	if (value) {
+		input.style.display = ''
+	} else {
+		input.style.display = 'none'
+	}
+}
 document.getElementById("searchInput").addEventListener("keypress",
 	function() {
 		this.scrollIntoView(true);

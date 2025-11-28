@@ -55,3 +55,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	var submitButton = document.getElementById("eventbtn");
 	submitButton.setAttribute("formaction", window.location + "/event_table");
 });
+function reportme(val) {
+	window.location.href = window.location.pathname + '/report_me?include_groups=' + val;
+}
