@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Прием</title>
+<link rel="stylesheet" href="/public_resources/fontawesome/css/all.min.css">
+<link rel="stylesheet" href="/assets/collector.css">
+<script src="/public_resources/exceljs.min.js"></script>
+<link rel="icon" href="/icon.png">
+</head>
+<body>
+	<div class="container">
+		<div class="nav-bar">
+			<div class="nav-brand">
+				<i class="fa-solid fa-id-card"></i> OtryadAdmin | Приемная
+			</div>
+			<div>
+				<a class="btn btn-secondary" href="/head/collector"> <i class="fas fa-plus"></i> Добавить
+				</a> <a class="btn btn-secondary" href="/head/collector/data"> <i class="fas fa-list"></i> Список
+				</a>
+				<button class="btn btn-secondary" onclick="exportTable()">
+					<i class="fa-solid fa-file-export"></i> Экспорт
+				</button>
+				<a class="btn btn-secondary" href="/lk"> <i class="fa-solid fa-house"></i>Выйти
+				</a>
+			</div>
+		</div>
+		<div id="view-form" class="view-section active">
+			<div class="card">
+				<div class="form-layout">
+
+					<div class="photo-column">
+						<h2>Фото</h2>
+						<div class="photo-placeholder">
+							<video id="videoElement" autoplay playsinline class="hidden"></video>
+							<img id="capturedImage" class="hidden" alt="Captured Photo">
+
+							<div id="placeholderContent">
+								<i class="fas fa-user"></i> <span>No Photo</span>
+							</div>
+						</div>
+
+						<div class="cam-controls">
+							<select id="cameraSource" onchange="if(stream){ startCamera(); }">
+								<option value="" disabled selected>Загрузка камер...</option>
+							</select>
+							<button type="button" class="btn btn-secondary" onclick="startCamera()">Предпросмотр</button>
+						</div>
+
+						<button type="button" class="btn btn-primary main-photo-btn" onclick="takePhoto()">
+							<i class="fas fa-camera"></i> Сфотографировать
+						</button>
+						<canvas id="canvas" class="hidden"></canvas>
+						<input type="hidden" id="base64Output">
+					</div>
+
+					<div class="info-column">
+						<h2>Информация</h2>
+						<form id="studentForm">
+							<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+							<div class="input-row">
+								<div class="form-group">
+									<label>Фамилия:</label> <input type="text" id="surname" required placeholder="Белкин">
+								</div>
+								<div class="form-group">
+									<label>Дата рождения:</label> <input type="date" id="dob" required>
+								</div>
+							</div>
+
+							<div class="input-row">
+								<div class="form-group">
+									<label>Имя:</label> <input type="text" id="firstname" required placeholder="Андрей">
+								</div>
+								<div class="form-group">
+									<label>Школа:</label> <input type="text" id="school" placeholder="№ 123">
+								</div>
+							</div>
+
+							<div class="input-row">
+								<div class="form-group">
+									<label>Отчество:</label> <input type="text" id="patronymic" placeholder="Александрович">
+								</div>
+								<div class="form-group">
+									<label>Класс:</label> <input type="text" id="grade" placeholder="10 А">
+								</div>
+							</div>
+
+							<div class="form-group">
+								<label>Адрес:</label> <input type="text" id="address" placeholder="улица Пушкина, дом Колотушкина, кв 29">
+							</div>
+
+							<div class="form-group">
+								<label>Представитель:</label> <input type="text" id="parent" placeholder="ФИО родителя">
+							</div>
+
+							<div class="form-group">
+								<label>Телефон:</label> <input type="tel" id="phone" placeholder="+7 (999) 000-00-00">
+							</div>
+
+							<div class="form-group">
+								<label>Дополнительная информация:</label>
+								<textarea id="notes" placeholder="Любая информация, которую необходимо сохранить"></textarea>
+							</div>
+						</form>
+
+						<div class="actions-row">
+							<button type="button" class="btn btn-primary" style="padding: 10px 40px; font-size: 1.1rem;" onclick="saveData()">Сохранить</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="/onepage_scripts/collector.js"></script>
+</body>
+</html>
