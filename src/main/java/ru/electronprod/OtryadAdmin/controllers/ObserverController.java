@@ -27,7 +27,7 @@ import ru.electronprod.OtryadAdmin.utils.Answer;
 
 @Controller
 @RequestMapping("/observer")
-@PreAuthorize("hasAuthority('ROLE_OBSERVER') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_COMMANDER')")
+@PreAuthorize("hasAuthority('ROLE_OBSERVER') or hasAuthority('ROLE_ADMIN') or hasAuthority('ROLE_COMMANDER') or hasAuthority('ROLE_HEAD')")
 @Slf4j
 public class ObserverController {
 	@Autowired

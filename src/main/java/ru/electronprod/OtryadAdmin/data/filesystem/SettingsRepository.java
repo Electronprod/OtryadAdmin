@@ -34,7 +34,8 @@ public class SettingsRepository implements InitializingBean {
 	private static Map<String, String> replacements = new LinkedHashMap<String, String>();
 	@Getter
 	private static final Map<String, String> roles = Map.of("ROLE_ADMIN", "ADMIN", "ROLE_SQUADCOMMANDER",
-			"КОМАНДИР ЗВЕНА", "ROLE_COMMANDER", "ЗАМ. КОМАНДИРА ОТРЯДА", "ROLE_OBSERVER", "НАБЛЮДАТЕЛЬ");
+			"КОМАНДИР ЗВЕНА", "ROLE_COMMANDER", "ЗАМ. КОМАНДИРА ОТРЯДА", "ROLE_OBSERVER", "НАБЛЮДАТЕЛЬ", "ROLE_HEAD",
+			"РУКОВОДИТЕЛЬ ОТРЯДА");
 	/** Section name constant **/
 	public static final String SECTION_EVENT_TYPES = "event_types";
 	/** Section name constant **/

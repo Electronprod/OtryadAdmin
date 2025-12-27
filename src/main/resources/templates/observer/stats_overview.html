@@ -6,14 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>Статистика</title>
 <link rel="stylesheet" href="/assets/default_style.css">
-<link rel="stylesheet" href="/assets/markpage.css">
 <script defer src="/assets/navbar.js"></script>
 <link rel="icon" href="/icon.png">
 <script src="/public_resources/sweetalert2.js"></script>
 </head>
 
 <body>
-	<!--CSRF Attack Protection (Getting from thymeleaf for JS)-->
+	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
@@ -146,6 +145,12 @@
 						использовать без нужды! Сильно нагружает сервер и ваш компьютер.</b>
 				</p>
 				<a class="greenbtn" style="background-color: red" href="/observer/stats/table">Получить таблицу</a>
+			</div>
+			<div class="card" th:if="${user_role == 'ROLE_HEAD' || user_role == 'ROLE_ADMIN'}">
+				<h3>Прием новых ребят</h3>
+				<p>Здесь вы можете в удобной форме сохранять информацию о кандидатах, пожелавших вступить в отряд, а также
+					просматривать или экспортировать эти данные.</p>
+				<a href="/head/collector/data" class="greenbtn">Перейти в приемную</a>
 			</div>
 		</div>
 	</div>

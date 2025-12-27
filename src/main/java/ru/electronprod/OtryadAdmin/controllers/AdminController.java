@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.ChatRepository;
@@ -778,5 +779,10 @@ public class AdminController {
 	public ResponseEntity<String> chatsManager_remove(@RequestParam Long id) {
 		chatRep.deleteById(id);
 		return ResponseEntity.ok(Answer.success());
+	}
+
+	@GetMapping("/session-check")
+	public ResponseEntity<String> checkTimeout(HttpSession session) {
+		return ResponseEntity.ok("Max session interval is  " + session.getMaxInactiveInterval() + " seconds");
 	}
 }

@@ -2,7 +2,6 @@ package ru.electronprod.OtryadAdmin.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -55,6 +54,9 @@ public class GuestController {
 		} else if (roles.contains("ROLE_COMMANDER")) {
 			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (COMMANDER)");
 			return "redirect:/commander";
+		} else if (roles.contains("ROLE_HEAD")) {
+			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (HEAD)");
+			return "redirect:/observer";
 		} else {
 			// If user is a guest
 			return "index";
