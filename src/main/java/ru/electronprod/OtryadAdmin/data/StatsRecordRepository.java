@@ -85,4 +85,10 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 	default List<StatsRecord> findLastRecords(int page, int size) {
 		return findPagedRecords(PageRequest.of(page, size));
 	}
+
+	@Query("SELECT DISTINCT s.event_id FROM StatsRecord s ORDER BY s.event_id DESC")
+	List<Integer> findDistinctEventIds(Pageable pageable);
+
+	@Query("SELECT s FROM StatsRecord s WHERE s.event_id IN :ids ORDER BY s.event_id DESC, s.id ASC")
+	List<StatsRecord> findByEventIdIn(@Param("ids") List<Integer> ids);
 }

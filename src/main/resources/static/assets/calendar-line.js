@@ -1,5 +1,5 @@
-const style = document.createElement('style');
-style.textContent = `
+const calendarstyle = document.createElement('style');
+calendarstyle.textContent = `
 .calendar-line {
             display: flex;
             justify-content: space-around;
@@ -49,7 +49,7 @@ style.textContent = `
 			color: red
 		}
   `;
-document.head.appendChild(style);
+document.head.appendChild(calendarstyle);
 const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
 
 function createButton(date) {

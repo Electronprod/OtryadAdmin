@@ -44,7 +44,7 @@
 							<tr th:if="${candidates.isEmpty()}"><td colspan="5" style="text-align: center; padding: 20px;">Нет
 									записей</td></tr>
 							<tr th:each="candidate : ${candidates}" th:name="${candidate.id}">
-								<td><img th:src="${candidate.photo}" class="avatar-small" alt="photo"></td>
+								<td><img th:src="${candidate.photo} == null ? '/icon.png' : ${candidate.photo}" class="avatar-small" alt="photo"></td>
 								<td th:text="${candidate.surname + ' ' + candidate.firstname + ' ' + candidate.patronymic}"></td>
 								<td th:text="${candidate.school + ', ' + candidate.grade}"></td>
 								<td th:text="${candidate.phone}"></td>

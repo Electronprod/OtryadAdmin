@@ -3,6 +3,8 @@ package ru.electronprod.OtryadAdmin.data;
 import org.springframework.stereotype.Repository;
 
 import ru.electronprod.OtryadAdmin.models.User;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 	Optional<User> findByLogin(String login);
 
 	List<User> findAllByRole(String role);
+
+	List<User> findAllByLoginIn(Collection<String> logins);
 }

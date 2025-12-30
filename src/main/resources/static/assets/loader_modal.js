@@ -1,5 +1,5 @@
-const style = document.createElement('style');
-style.textContent = `
+const loaderstyle = document.createElement('style');
+loaderstyle.textContent = `
 #loader {
   position: fixed;
   top: 50%;
@@ -33,7 +33,7 @@ style.textContent = `
     transform: rotate(360deg);
   }
 }`;
-document.head.appendChild(style);
+document.head.appendChild(loaderstyle);
 let loader_modal = document.getElementById('loader');
 if (!loader_modal) {
 	loader_modal = document.createElement('div');

@@ -128,4 +128,19 @@ observer.observe(document.getElementById("markTable"));
 function stopObserver() {
 	observer.disconnect();
 	genderbtn.style.display = 'none';
+	Swal.fire({
+		title: "Сортировка по полу применена",
+		icon: "success",
+		toast: true,
+		position: 'top-end',
+		showConfirmButton: false,
+		timer: 3000,
+		timerProgressBar: true,
+		showClass: {
+			popup: 'swal2-show'
+		},
+		hideClass: {
+			popup: 'swal2-hide'
+		}
+	});
 }

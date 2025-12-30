@@ -81,11 +81,6 @@ public class AdminController {
 		return "admin/dashboard";
 	}
 
-	@GetMapping("/demand")
-	public String demand() {
-		return "forward:/observer/demand";
-	}
-
 	@GetMapping("/mark")
 	public String mark(Model model) {
 		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));

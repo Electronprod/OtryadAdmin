@@ -249,7 +249,7 @@ public class ObserverController {
 	public String telegram(Model model) {
 		model.addAttribute("users",
 				dbservice.getUserRepository().findAll().stream().filter(user -> user.getTelegram() != null).toList());
-		return "observer/demand_marks";
+		return "observer/telegram";
 	}
 
 	@PostMapping("/telegram/sendremind")
