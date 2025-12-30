@@ -9,9 +9,18 @@
 <script defer src="/assets/navbar.js"></script>
 <link rel="icon" href="/icon.png">
 <script src="/public_resources/sweetalert2.js"></script>
+<style>
+.blue-btn {
+	background-color: #6363ff;
+}
+
+.blue-btn:hover {
+	background-color: #3a3ae0;
+}
+</style>
 </head>
 
-<body>
+<body onresize="onResize()" onload="onResize()">
 	<!--CSRF Attack Protection-->
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="dashboard">
@@ -42,9 +51,31 @@
 					<p>
 						<b>Количество пропусков:</b> <span th:text="${people_missed_today}"></span><br> <b>Количество посещений:</b>
 						<span th:text="${people_attended_today}"></span><br> <b>Сегодня ребят отметили:</b> <span
-							th:text="${commanders_marked_today}"></span> командиров. <a href="/observer/demand">Подробнее...</a>
+							th:text="${commanders_marked_today}"></span> командиров.
 					</p>
 				</div>
+			</div>
+			<div class="card">
+				<h3>Просмотр отметок</h3>
+				<p>Узнайте, кто и что отметил в выбранную дату - для этого введите ее в поле или выберите событие из списка
+					недавних</p>
+				<label>Недавние отметки</label>
+				<div class="calendar-line"></div>
+				<ul>
+					<li><b>Наведитесь</b>, чтобы увидеть название события (только для ПК)</li>
+					<li><b>Нажмите</b>, чтобы показать отметки в эту дату</li>
+				</ul>
+				<form id="date-form" action="/observer/stats/date">
+					<label>Информация для: </label> <input name="date" id="mark_table_datepickr" type="date"
+						onchange="loadMarkedUsersTable(formatDate(this.valueAsDate))"></input>
+					<div id="marked"></div>
+					<button id="showStatsByDate" type="submit">Показать таблицу отметок</button>
+					<button class="form-btn blue-btn" type="button" onclick="window.location.href='/observer/demand'">Отправить
+						напоминание</button>
+				</form>
+			</div>
+			<div class="header">
+				<h3>Статистика по структурам</h3>
 			</div>
 			<div class="card">
 				<h3>Звеньевая статистика</h3>
@@ -100,6 +131,9 @@
 					</tbody>
 				</table>
 			</div>
+			<div class="header">
+				<h3>Персональная статистика</h3>
+			</div>
 			<div class="card">
 				<h3>Просмотр персональной статистики</h3>
 				<p>Показывает всю информацию о выбранном человеке.</p>
@@ -113,8 +147,11 @@
 						таблицы</button>
 				</form>
 			</div>
+			<div class="header">
+				<h3>Отчет</h3>
+			</div>
 			<div class="card">
-				<h3>Просмотр по событию</h3>
+				<h3>По событию</h3>
 				<p>Посмотрите, кто и сколько раз посетил выбранное событие или таблицу отметок для этого события</p>
 				<form method="get">
 					<label for="event_name">Выберите событие:</label> <select id="event_name" name="event_name">
@@ -125,18 +162,19 @@
 				</form>
 			</div>
 			<div class="card">
-				<h3>Отчет по всем отметкам</h3>
+				<h3>По всем отметкам</h3>
 				<p>Показывает посещаемость ребят в рамках всех отметок.</p>
 				<a class="form-btn" href="/observer/stats/report_all?include_groups=false">Посмотреть без групп</a> <a
 					class="form-btn" href="/observer/stats/report_all?include_groups=true">Посмотреть с группами</a>
 			</div>
-			<div class="card">
-				<h3>Просмотр отметок по дате</h3>
-				<p>Посмотрите все посещения и пропуски в выбранную дату.</p>
-				<form id="date-form" action="/observer/stats/date">
-					<label for="date">Дата:</label> <input type="date" id="date" name="date" required> <br>
-					<button type="submit">Посмотреть</button>
-				</form>
+			<div class="header">
+				<h3>Дополнительно</h3>
+			</div>
+			<div class="card" th:if="${user_role == 'ROLE_HEAD' || user_role == 'ROLE_ADMIN'}">
+				<h3>Прием новых ребят</h3>
+				<p>Здесь вы можете в удобной форме сохранять информацию о кандидатах, пожелавших вступить в отряд, а также
+					просматривать или экспортировать эти данные.</p>
+				<a href="/head/collector/data" class="greenbtn">Перейти в приемную</a>
 			</div>
 			<div class="card">
 				<h3>Просмотр всех отметок</h3>
@@ -146,13 +184,9 @@
 				</p>
 				<a class="greenbtn" style="background-color: red" href="/observer/stats/table">Получить таблицу</a>
 			</div>
-			<div class="card" th:if="${user_role == 'ROLE_HEAD' || user_role == 'ROLE_ADMIN'}">
-				<h3>Прием новых ребят</h3>
-				<p>Здесь вы можете в удобной форме сохранять информацию о кандидатах, пожелавших вступить в отряд, а также
-					просматривать или экспортировать эти данные.</p>
-				<a href="/head/collector/data" class="greenbtn">Перейти в приемную</a>
-			</div>
 		</div>
 	</div>
+	<script src="/assets/calendar-line.js"></script>
+	<script src="/onepage_scripts/observer.js"></script>
 </body>
 </html>

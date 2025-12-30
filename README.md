@@ -24,6 +24,7 @@ Also used:
 - PostgreSQL driver
 - sweetalert2 (JS library)
 - SheetJS (JS library)
+- ExcelJS (JS library)
 
 ## Screenshots
 
@@ -33,6 +34,5 @@ Also used:
 <img width="2837" height="1463" alt="image" src="https://github.com/user-attachments/assets/5ab01441-fd1b-431e-a4db-f5fa743035ac" />
 <img width="2833" height="1479" alt="image" src="https://github.com/user-attachments/assets/ccfba81c-beeb-4124-ada0-bb8e540004b7" />
 
-If you want to know more, visit the [wiki](https://github.com/Electronprod/OtryadAdmin/wiki).
 ## Licenses
 The program is distributed under the MIT license. Library licenses can be found [here](https://github.com/Electronprod/OtryadAdmin/blob/master/src/main/resources/templates/public/licenses.html)

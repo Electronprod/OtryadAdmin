@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -42,16 +45,13 @@ public class StatsProcessor {
 	 */
 	public String getEventByDateAndFilters_user(User user, String date, Optional<String> eventid,
 			Optional<String> group, Model model) {
-		try {
-			var data = dbservice.getStatsRepository().findByDateAndAuthor(DBService.getStringDate(date),
-					user.getLogin(), Sort.by(Sort.Direction.DESC, "id"));
-			if (eventid.isPresent())
-				data = data.stream().filter(e -> String.valueOf(e.getEvent_id()).equals(eventid.get())).toList();
-			if (group.isPresent())
-				data = data.stream().filter(e -> String.valueOf(e.getGroup()).equals(group.get())).toList();
-			model.addAttribute("statss", data);
-		} catch (Exception e) {
-		}
+		var data = dbservice.getStatsRepository().findByDateAndAuthor(DBService.getStringDate(date), user.getLogin(),
+				Sort.by(Sort.Direction.DESC, "id"));
+		if (eventid.isPresent())
+			data = data.stream().filter(e -> String.valueOf(e.getEvent_id()).equals(eventid.get())).toList();
+		if (group.isPresent())
+			data = data.stream().filter(e -> String.valueOf(e.getGroup()).equals(group.get())).toList();
+		model.addAttribute("statss", data);
 		return "public/statsview_rawtable";
 	}
 
@@ -117,10 +117,6 @@ public class StatsProcessor {
 		return "public/event_stats";
 	}
 
-	/*
-	 * Person methods
-	 */
-
 	/**
 	 * Generates a StatsRecords table for a person based on the user's marks.
 	 * 
@@ -134,10 +130,6 @@ public class StatsProcessor {
 				Sort.by(Sort.Direction.DESC, "id")));
 		return "public/statsview_rawtable";
 	}
-
-	/*
-	 * Group methods
-	 */
 
 	/**
 	 * Forms the attendance report for the event related to the group
@@ -223,9 +215,6 @@ public class StatsProcessor {
 		model.addAttribute("eventName", "All events");
 		return "public/event_stats";
 	}
-	/*
-	 * General methods
-	 */
 
 	/**
 	 * Generates attendance report based on the input statsRecords.
@@ -328,5 +317,31 @@ public class StatsProcessor {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Forms the JSON response for calendar-line.js
+	 * 
+	 * @param input - the StatsRecords to work with
+	 * @return JSON string in format: [{event1 info},{event2 info}...]
+	 */
+	@SuppressWarnings("unchecked")
+	public String API_calendarLineProcess(List<StatsRecord> input) {
+		JSONArray result = new JSONArray();
+		Map<Integer, List<StatsRecord>> events = input.stream()
+				.collect(Collectors.groupingBy(StatsRecord::getEvent_id));
+		events.forEach((eventID, records) -> {
+			StatsRecord first = records.get(0);
+			int present = (int) records.stream().filter(rec -> rec.isPresent()).count();
+			int absent = records.size() - present;
+			JSONObject o = new JSONObject();
+			o.put("date", first.getDate());
+			o.put("event", first.getType());
+			o.put("eventid", eventID);
+			o.put("absent", absent);
+			o.put("present", present);
+			result.add(o);
+		});
+		return result.toJSONString();
 	}
 }

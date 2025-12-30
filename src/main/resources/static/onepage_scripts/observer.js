@@ -1,44 +1,7 @@
 document.getElementById("mark_table_datepickr").valueAsDate = new Date()
-document.getElementById('sendremind').addEventListener('submit',
-	function(event) {
-		event.preventDefault();
-		sendData(this);
-	});
-document.getElementById('sendmessage').addEventListener('submit',
-	function(event) {
-		event.preventDefault();
-		sendData(this);
-	});
 document.addEventListener("DOMContentLoaded", () => {
-	sortTable(1, 'rating');
-	sortTable(1, 'rating1');
-	console.log("Sorted rating.");
 	loadMarkedUsersTable(formatDate(new Date()));
 });
-function receiver_select(val) {
-	if (val == -1) {
-		document.getElementById('send_remaind_table_sq').style = 'display:true';
-		document.getElementById('sendremaind_btn').style = 'display:none';
-	} else {
-		document.getElementById('send_remaind_table_sq').style = 'display:none';
-		document.getElementById('sendremaind_btn').style = 'display:true';
-	}
-}
-function sendRemind(val, id) {
-	if (document.getElementById('sendremind_eventname').value == "") {
-		showError('Введите название события!');
-		return;
-	}
-	setSmall(true);
-	var s = document.getElementById('remind_userid_selector');
-	let oldVal = s.options[s.selectedIndex].value;
-	s.options[s.selectedIndex].value = id;
-	console.log("Change: " + oldVal + ">>" + s.options[s.selectedIndex].value);
-	sendData(document.getElementById('sendremind'));
-	s.options[s.selectedIndex].value = oldVal;
-	console.log("Back to: " + s.options[s.selectedIndex].value);
-	val.style = "background-color: darkred";
-}
 function loadMarkedUsersTable(date) {
 	const url = `/api/observer/marks?date=${date}`;
 	fetch(url)
@@ -67,9 +30,9 @@ function loadMarkedUsersTable(date) {
 				emptyCell.textContent = 'Нет выставленных отметок';
 				row.appendChild(emptyCell);
 				tbody.appendChild(row);
-				document.getElementById('showStatsByDate').disabled=true;
+				document.getElementById('showStatsByDate').disabled = true;
 			} else {
-				document.getElementById('showStatsByDate').disabled=false;
+				document.getElementById('showStatsByDate').disabled = false;
 				data.forEach(item => {
 					const row = document.createElement('tr');
 					const roleCell = document.createElement('td');
@@ -92,9 +55,9 @@ function loadMarkedUsersTable(date) {
 						row.style = "border: 3px solid darkred; background-color:#fd8c59";
 						Swal.fire({
 							icon: 'warning',
-							title: 'Обнаружено несоответствие!',
+							title: 'Просмотр отметок',
 							html: 'Обнаружено <span style="color:#fd8c59">несоответствие</span> в кол-ве событий. Вероятно, кто-то отметил одно событие два раза. Пожалуйста, проверьте правильность выставления отметок'
-						})
+						});
 					}
 					tbody.appendChild(row);
 				});
@@ -116,4 +79,22 @@ function formatDate(date) {
 	const month = String(date.getMonth() + 1).padStart(2, '0');
 	const year = date.getFullYear();
 	return `${year}.${month}.${day}`;
+}
+const calendar = document.querySelector('.calendar-line');
+let calendar_data = null;
+async function onResize() {
+	try {
+		if (calendar_data === null) {
+			calendar_data = await fetchData("/api/line_calendar_demandpage");
+			calendar_data.sort((a, b) => a.eventid - b.eventid);
+		}
+		updateCalendar(calendar, calendar_data);
+	} catch {
+		alert("Произошла неизвестная ошибка");
+	}
+}
+function calendar_button(date, event) {
+	document.getElementById("mark_table_datepickr").value = date.replace(/\./g, '-');
+	//	document.getElementById("marked").scrollIntoView({ behavior: 'smooth' });
+	loadMarkedUsersTable(date);
 }

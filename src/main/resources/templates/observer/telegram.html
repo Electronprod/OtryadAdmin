@@ -3,8 +3,9 @@
 
 <head>
 <meta charset="UTF-8">
-<title>Контроль отметок</title>
+<title>Отправить сообщение</title>
 <link rel="stylesheet" href="/assets/default_style.css">
+<link rel="stylesheet" href="/assets/buttons.css">
 <script src="/assets/navbar.js"></script>
 <script src="/public_resources/sweetalert2.js"></script>
 <link rel="icon" href="/icon.png">
@@ -14,16 +15,6 @@
 	<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 	<div id="dashboard">
 		<div id="content">
-			<div class="card">
-				<h2>Просмотр выставленных отметок</h2>
-				<p>Узнайте, кто и что отметил в выбранную дату. Дата по умолчанию - сегодняшний день</p>
-				<label>Информация для: </label>
-				<form id="date-form" action="/observer/stats/date">
-					<input name="date" id="mark_table_datepickr" type="date" onchange="loadMarkedUsersTable(formatDate(this.valueAsDate))"></input>
-					<div id="marked"></div>
-					<button id="showStatsByDate" type="submit">Показать эти отметки</button>
-				</form>
-			</div>
 			<div class="card">
 				<h2>Отправка напоминаний</h2>
 				<p>Отправляйте напоминания через Telegram-бота командирам, которые забыли выставить отметки.</p>
@@ -130,9 +121,12 @@
 				</details>
 			</div>
 		</div>
+		<div class="floating-button" onclick="window.history.back()">
+			<span class="double-arrow"></span>
+		</div>
 	</div>
 </body>
 <script src="/assets/form_status.js"></script>
 <script src="/assets/sort_table.js"></script>
-<script src="/onepage_scripts/demand_marks.js"></script>
+<script src="/onepage_scripts/telegram.js"></script>
 </html>

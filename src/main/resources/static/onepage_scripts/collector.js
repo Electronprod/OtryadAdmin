@@ -106,10 +106,13 @@ async function saveData() {
 		notes: document.getElementById('notes').value,
 		photo: base64Input.value || null
 	};
-	if (!surname || !firstname || !patronymic || !dob || !school || !grade || !address || !parent || !phone) {
-		alert("Пожалуйста, заполните все поля");
-		return;
+	if (!data.surname || !data.firstname || !data.patronymic || !data.dob || !data.school || !data.grade || !data.address || !data.parent || !data.phone) {
+	    alert("Пожалуйста, заполните все поля");
+	    return;
 	}
+	if (!data.photo)
+		if(!confirm("Продолжить без фотографирования?"))
+			return;
 	if ((await sendToServer("/head/collector/add", data)) != null) {
 		alert('Данные успешно сохранены!');
 		document.getElementById('studentForm').reset();
