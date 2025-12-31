@@ -10,6 +10,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
+import ru.electronprod.OtryadAdmin.services.AuthHelper;
+import ru.electronprod.OtryadAdmin.services.RecordService;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 
 @Controller
@@ -17,6 +20,10 @@ import ru.electronprod.OtryadAdmin.utils.Answer;
 class CollectorController {
 	@Autowired
 	private CandidateRepository rep;
+	@Autowired
+	private RecordService rec;
+	@Autowired
+	private AuthHelper auth;
 
 	@GetMapping("/head/collector")
 	public String collector() {
@@ -40,12 +47,16 @@ class CollectorController {
 	@PostMapping("/head/collector/add")
 	public ResponseEntity<String> collector_add(@RequestBody Candidate candidate) {
 		rep.save(candidate);
+		rec.recordAction(auth.getCurrentUser(),
+				"Added a new candidate (%s %s)".formatted(candidate.getFirstname(), candidate.getSurname()),
+				ActionRecordType.COLLECTOR);
 		return ResponseEntity.accepted().body(Answer.success(candidate.toString()));
 	}
 
 	@PostMapping("/head/collector/remove")
 	public ResponseEntity<String> collector_remove(@RequestBody int id) {
 		rep.deleteById(id);
+		rec.recordAction(auth.getCurrentUser(), "Removed candidate ID: %d".formatted(id), ActionRecordType.COLLECTOR);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -56,6 +67,7 @@ class CollectorController {
 		rep.findAll().forEach(candidate -> {
 			result.add(candidate.getJSON());
 		});
+		rec.recordAction(auth.getCurrentUser(), "Exported the candidates table.", ActionRecordType.COLLECTOR);
 		return ResponseEntity.ok().body(result.toJSONString());
 	}
 }

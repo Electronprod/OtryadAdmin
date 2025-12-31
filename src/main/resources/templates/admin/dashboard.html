@@ -52,6 +52,13 @@ textarea:focus {
 				<a class="greenbtn" href="/admin/mark">Загрузить список</a>
 			</div>
 			<div class="card">
+				<h3>Журнал действий</h3>
+				<p>
+					Позволяет просматривать информацию о важных действиях в системе OtryadAdmin</b>
+				</p>
+				<a class="greenbtn" href="/admin/journal">Открыть журнал</a>
+			</div>
+			<div class="card">
 				<h3>Настройки приложения</h3>
 				<p>Тут вы можете управлять главными настройками приложения, например:</p>
 				<ul>
@@ -192,11 +199,6 @@ textarea:focus {
 						<li><b>Group:</b> <span th:text="${appInfo.getGroup()}"></span></li>
 					</ul>
 				</details>
-			</div>
-			<div class="card" th:if="${show_log == true}">
-				<h3>Просмотр лога</h3>
-				<p>У вас включено логирование вывода приложения. Чтобы посмотреть содержимое лога, нажмите на кнопку ниже.</p>
-				<a class="greenbtn" href="/admin/log">Открыть лог</a>
 			</div>
 		</div>
 	</div>

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.models.User;
@@ -22,6 +23,8 @@ public class MarkService {
 	private DBService dbservice;
 	@Autowired
 	private BotService botServ;
+	@Autowired
+	private RecordService rec;
 
 	@Transactional(readOnly = true)
 	private StatsRecord createUnpresentStatsRecord(JSONObject data, String event, String formatted_date, User user,
@@ -83,6 +86,9 @@ public class MarkService {
 		log.info("User " + user.getLogin() + " (" + user.getRole() + ") marked " + resultRecords.size()
 				+ " people. EventID: " + event_id + " Group: " + group);
 		botServ.sendNotification_marked(user, event);
+		rec.recordAction(user,
+				"EventID %d: marked %d people. Group: %s".formatted(event_id, resultRecords.size(), group),
+				ActionRecordType.MARK);
 		return event_id;
 	}
 }

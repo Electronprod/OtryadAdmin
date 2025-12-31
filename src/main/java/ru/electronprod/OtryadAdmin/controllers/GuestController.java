@@ -9,6 +9,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import lombok.extern.slf4j.Slf4j;
+import ru.electronprod.OtryadAdmin.data.DBService;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 
 @Controller
@@ -16,6 +18,8 @@ import ru.electronprod.OtryadAdmin.services.AuthHelper;
 public class GuestController {
 	@Autowired
 	private AuthHelper auth;
+	@Autowired
+	private DBService db;
 
 	@GetMapping("/auth/login")
 	public String loginPage() {
@@ -41,21 +45,28 @@ public class GuestController {
 		for (GrantedAuthority authority : authorities) {
 			roles.add(authority.getAuthority());
 		}
+		var user = auth.getCurrentUser();
+		String login = user.getLogin();
 		// Redirecting to home page
 		if (roles.contains("ROLE_ADMIN")) {
-			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (ADMIN)");
+			log.info("User logged in: " + login + " (ADMIN)");
+			db.recordAction(user, "User logged in.", ActionRecordType.AUTH);
 			return "redirect:/admin";
 		} else if (roles.contains("ROLE_SQUADCOMMANDER")) {
-			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (SQUADCOMMANDER)");
+			log.info("User logged in: " + login + " (SQUADCOMMANDER)");
+			db.recordAction(user, "User logged in.", ActionRecordType.AUTH);
 			return "redirect:/squadcommander";
 		} else if (roles.contains("ROLE_OBSERVER")) {
-			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (OBSERVER)");
+			log.info("User logged in: " + login + " (OBSERVER)");
+			db.recordAction(user, "User logged in.", ActionRecordType.AUTH);
 			return "redirect:/observer";
 		} else if (roles.contains("ROLE_COMMANDER")) {
-			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (COMMANDER)");
+			log.info("User logged in: " + login + " (COMMANDER)");
+			db.recordAction(user, "User logged in.", ActionRecordType.AUTH);
 			return "redirect:/commander";
 		} else if (roles.contains("ROLE_HEAD")) {
-			log.info("User logged in: " + auth.getCurrentUser().getLogin() + " (HEAD)");
+			log.info("User logged in: " + login + " (HEAD)");
+			db.recordAction(user, "User logged in.", ActionRecordType.AUTH);
 			return "redirect:/observer";
 		} else {
 			// If user is a guest

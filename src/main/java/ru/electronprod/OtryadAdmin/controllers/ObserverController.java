@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
 import ru.electronprod.OtryadAdmin.models.Chat;
 import ru.electronprod.OtryadAdmin.models.Group;
 import ru.electronprod.OtryadAdmin.models.Human;
@@ -260,7 +261,10 @@ public class ObserverController {
 			return ResponseEntity.status(404).body(Answer.fail("User not found"));
 		Chat chat = optUser.get().getTelegram();
 		if (chat != null) {
-			botServ.sendSignedReminder(eventname, description, auth.getCurrentUser().getName(), chat);
+			var user = auth.getCurrentUser();
+			botServ.sendSignedReminder(eventname, description, user.getName(), chat);
+			dbservice.recordAction(user, "Sent reminder message to '%d' about '%s'".formatted(userid, eventname),
+					ActionRecordType.TELEGRAM);
 			return ResponseEntity.ok(Answer.success());
 		}
 		return ResponseEntity.status(404).body(Answer.fail("Error finding user's telegram."));
@@ -273,7 +277,10 @@ public class ObserverController {
 			return ResponseEntity.status(404).body(Answer.fail("User not found"));
 		Chat chat = optUser.get().getTelegram();
 		if (chat != null) {
-			botServ.sendSignedMessage(message, auth.getCurrentUser().getName(), chat);
+			var user = auth.getCurrentUser();
+			botServ.sendSignedMessage(message, user.getName(), chat);
+			dbservice.recordAction(user, "Sent message to '%d': '%s'".formatted(userid, message),
+					ActionRecordType.TELEGRAM);
 			return ResponseEntity.ok(Answer.success());
 		}
 		return ResponseEntity.status(404).body(Answer.fail("Error finding user's telegram."));

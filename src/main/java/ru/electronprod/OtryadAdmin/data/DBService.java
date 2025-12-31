@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
+import ru.electronprod.OtryadAdmin.models.User;
+import ru.electronprod.OtryadAdmin.services.RecordService;
 
 /**
  * Class provides access to master JPA repositories
@@ -31,6 +34,8 @@ public class DBService {
 	@Getter
 	@Autowired
 	private GroupRepository groupRepository;
+	@Autowired
+	private RecordService rec;
 	private static final DateTimeFormatter OUTPUT_FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 	private static ZoneId zone;
 
@@ -70,5 +75,13 @@ public class DBService {
 		}
 		log.warn("Date recognition error " + unknownDate);
 		throw new IllegalArgumentException("Date recognition error: " + unknownDate);
+	}
+
+	public void recordAction(User user, String message, ActionRecordType type) {
+		rec.recordAction(user.getLogin(), user.getRole(), message, type);
+	}
+
+	public void recordAction(String login, String role, String message, ActionRecordType type) {
+		rec.recordAction(login, role, message, type);
 	}
 }

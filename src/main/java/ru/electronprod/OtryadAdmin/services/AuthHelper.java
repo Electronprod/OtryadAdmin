@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.UserRepository;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
 import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.security.UsrDetails;
 
@@ -23,6 +24,8 @@ public class AuthHelper implements InitializingBean {
 	private UserRepository userRepository;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+	@Autowired
+	private RecordService rec;
 
 	// Data from application.properties
 	@Value("${security.admin.login}")
@@ -44,6 +47,7 @@ public class AuthHelper implements InitializingBean {
 			user.setName("Administrator");
 			register(user);
 			log.info("Admin registered. Use authorization credentials from application.properties file.");
+			rec.recordAction(user, "Default admin account was created.", ActionRecordType.SYSTEM);
 		}
 	}
 
