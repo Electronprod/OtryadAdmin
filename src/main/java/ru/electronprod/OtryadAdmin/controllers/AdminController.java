@@ -1,7 +1,6 @@
 package ru.electronprod.OtryadAdmin.controllers;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -26,11 +25,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpSession;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.ChatRepository;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
 import ru.electronprod.OtryadAdmin.models.Chat;
 import ru.electronprod.OtryadAdmin.models.Group;
 import ru.electronprod.OtryadAdmin.models.Human;
@@ -40,6 +39,7 @@ import ru.electronprod.OtryadAdmin.models.User;
 import ru.electronprod.OtryadAdmin.models.dto.MarkDTO;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
 import ru.electronprod.OtryadAdmin.services.MarkService;
+import ru.electronprod.OtryadAdmin.services.RecordService;
 import ru.electronprod.OtryadAdmin.telegram.BotService;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 import ru.electronprod.OtryadAdmin.utils.FileOptions;
@@ -56,6 +56,8 @@ public class AdminController {
 	@Autowired
 	private DBService dbservice;
 	@Autowired
+	private RecordService rec;
+	@Autowired
 	private AuthHelper auth;
 	@Autowired
 	private ChatRepository chatRep;
@@ -71,7 +73,6 @@ public class AdminController {
 	 */
 	@GetMapping("")
 	public String dash(Model model) {
-		model.addAttribute("show_log", (new File("log.txt")).exists());
 		model.addAttribute("raw_config", FileOptions.getFileLine(SettingsRepository.getConfig()));
 		model.addAttribute("eventtypes", SettingsRepository.getEvent_types());
 		model.addAttribute("reasons", SettingsRepository.getReasons_for_absences());
@@ -89,9 +90,9 @@ public class AdminController {
 
 	@PostMapping("/mark")
 	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
+		User realUser = auth.getCurrentUser();
 		try {
 			List<Human> people = dbservice.getHumanRepository().findAll();
-			User realUser = auth.getCurrentUser();
 			User admin = new User();
 			admin.setRole("ROLE_COMMANDER");
 			admin.setId(realUser.getId());
@@ -101,6 +102,7 @@ public class AdminController {
 			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
 			log.error("Mark error (admin.mark):", e);
+			rec.recordAction(realUser, e.getMessage(), ActionRecordType.MARK_EXCEPTION);
 			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
 		}
 	}
@@ -126,9 +128,9 @@ public class AdminController {
 		user.setPassword(password);
 		user.setRole(role);
 		user.setName(name);
-		if (auth.register(user))
-			return ResponseEntity.accepted().body(Answer.success());
-		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save user to DB."));
+		auth.register(user);
+		rec.recordAction(auth.getCurrentUser(), "User '%s' was created.".formatted(login), ActionRecordType.CREATE);
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -155,18 +157,16 @@ public class AdminController {
 		user.setName(name);
 		if ((user.getSquad() != null || !user.getGroups().isEmpty()) && !user.getRole().equals(role))
 			return ResponseEntity.badRequest()
-					.body(Answer.fail("You can't change roles if you have a squad or a group."));
+					.body(Answer.fail("You can't change roles if the user have a squad or a group."));
 		user.setRole(role);
-		boolean result = false;
 		if (password.equals("not_changed")) {
-			result = dbservice.getUserRepository().save(user) != null;
+			dbservice.getUserRepository().save(user);
 		} else {
 			user.setPassword(password);
-			result = auth.register(user);
+			auth.register(user);
 		}
-		if (result)
-			return ResponseEntity.accepted().body(Answer.success());
-		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save user to DB."));
+		rec.recordAction(auth.getCurrentUser(), "User '%s' was edited.".formatted(login), ActionRecordType.EDIT);
+		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	@PostMapping("/usermgr/delete")
@@ -179,6 +179,8 @@ public class AdminController {
 		if (user.get().getSquad() != null)
 			return ResponseEntity.unprocessableEntity().body(Answer.fail("User has dependant squad"));
 		dbservice.getUserRepository().deleteById(id);
+		rec.recordAction(auth.getCurrentUser(), "User '%s' was removed.".formatted(user.get().getLogin()),
+				ActionRecordType.REMOVE);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -201,10 +203,9 @@ public class AdminController {
 		Squad squad = new Squad();
 		squad.setSquadName(name);
 		squad.setCommander(commander.get());
-		boolean result = dbservice.getSquadRepository().save(squad) != null;
-		if (result)
-			return ResponseEntity.ok(Answer.success());
-		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save squad to DB"));
+		dbservice.getSquadRepository().save(squad);
+		rec.recordAction(auth.getCurrentUser(), "Squad '%s' was created.".formatted(name), ActionRecordType.CREATE);
+		return ResponseEntity.ok(Answer.success());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -225,9 +226,10 @@ public class AdminController {
 			ResponseEntity.status(404).body(Answer.fail("Squad not found"));
 		Squad squad = squad1.get();
 		squad1.get().setSquadName(name);
-		if (dbservice.getSquadRepository().save(squad) != null)
-			return ResponseEntity.ok(Answer.success());
-		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save squad to DB"));
+		dbservice.getSquadRepository().save(squad);
+		rec.recordAction(auth.getCurrentUser(), "Squad(ID: %d) name was changed to %s.".formatted(squad.getId(), name),
+				ActionRecordType.EDIT);
+		return ResponseEntity.ok(Answer.success());
 	}
 
 	@PostMapping("/squadmgr/delete")
@@ -239,6 +241,8 @@ public class AdminController {
 		User user = sq.get().getCommander();
 		user.setSquad(null);
 		dbservice.getSquadRepository().deleteById(id);
+		rec.recordAction(auth.getCurrentUser(), "Squad '%s' was removed.".formatted(sq.get().getSquadName()),
+				ActionRecordType.REMOVE);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -269,18 +273,18 @@ public class AdminController {
 		human.setClassnum(classnum);
 		human.setPhone(phone);
 		human.setSquad(squadO.get());
-		if (dbservice.getHumanRepository().save(human) != null)
-			return ResponseEntity.ok(Answer.success());
-		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save human to DB"));
+		dbservice.getHumanRepository().save(human);
+		rec.recordAction(auth.getCurrentUser(), "Person '%s %s' was created.".formatted(name, lastname),
+				ActionRecordType.CREATE);
+		return ResponseEntity.ok(Answer.success());
 	}
 
 	@GetMapping("/humanmgr/fullinfo")
 	public String humanmgr_fullInfo(@RequestParam(required = false) String id, Model model) {
 		try {
 			if (id != null) {
-				List<Human> humans = new ArrayList<Human>();
-				humans.add(dbservice.getHumanRepository().findById(Integer.parseInt(id)).orElseThrow());
-				model.addAttribute("humans", humans);
+				model.addAttribute("humans",
+						dbservice.getHumanRepository().findById(Integer.parseInt(id)).orElseThrow());
 				return "public/humans_rawtable";
 			} else {
 				return "forward:/observer/data";
@@ -296,6 +300,9 @@ public class AdminController {
 		if (human.isEmpty())
 			return ResponseEntity.status(404).body(Answer.fail("Human not found"));
 		dbservice.getHumanRepository().deleteById(id);
+		rec.recordAction(auth.getCurrentUser(),
+				"Person '%s %s' was removed.".formatted(human.get().getName(), human.get().getLastname()),
+				ActionRecordType.REMOVE);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -304,6 +311,7 @@ public class AdminController {
 		if (dbservice.getHumanRepository().count() != c)
 			return "redirect:/admin/humanmgr?deleteall_incorrect_number";
 		dbservice.getHumanRepository().deleteAll();
+		rec.recordAction(auth.getCurrentUser(), "All people were removed", ActionRecordType.REMOVE);
 		return "redirect:/admin/humanmgr?deleted_all";
 	}
 
@@ -347,9 +355,10 @@ public class AdminController {
 		human.setClassnum(classnum);
 		human.setPhone(phone);
 		human.setSquad(squadO.get());
-		if (dbservice.getHumanRepository().save(human) != null)
-			return ResponseEntity.ok(Answer.success());
-		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save human to DB"));
+		dbservice.getHumanRepository().save(human);
+		rec.recordAction(auth.getCurrentUser(),
+				"Person '%s %s' was edited.".formatted(human.getName(), human.getLastname()), ActionRecordType.EDIT);
+		return ResponseEntity.ok(Answer.success());
 	}
 
 	@GetMapping("/humanmgr/upload")
@@ -383,6 +392,8 @@ public class AdminController {
 				}
 			}
 			dbservice.getHumanRepository().saveAll(records);
+			rec.recordAction(auth.getCurrentUser(), "Added %d persons from .CSV".formatted(records.size()),
+					ActionRecordType.ADMIN);
 		} catch (Exception e) {
 			e.printStackTrace();
 			try {
@@ -409,19 +420,23 @@ public class AdminController {
 
 	@PostMapping("/groupmgr/add")
 	public String groupManager_addAction(@ModelAttribute Group group) {
-		if (dbservice.getGroupRepository().save(group) != null)
-			return "redirect:/admin/groupmgr?saved";
-		return "redirect:/admin/groupmgr?error_unknown";
+		dbservice.getGroupRepository().save(group);
+		rec.recordAction(auth.getCurrentUser(),
+				"Created group '%s' with commander '%s'".formatted(group.getName(), group.getMarker().getName()),
+				ActionRecordType.CREATE);
+		return "redirect:/admin/groupmgr?saved";
 	}
 
 	@PostMapping("/groupmgr/change_editable")
-	public ResponseEntity<String> groupManager_change_editable(@RequestParam() int id) {
+	public ResponseEntity<String> groupManager_change_editable(@RequestParam int id) {
 		Optional<Group> group = dbservice.getGroupRepository().findById(id);
 		if (group.isEmpty())
 			return ResponseEntity.status(404).body(Answer.fail("Group not found"));
 		Group gr = group.get();
 		gr.setEditable(!gr.isEditable());
 		dbservice.getGroupRepository().save(gr);
+		rec.recordAction(auth.getCurrentUser(),
+				"Set group '%s' editable to %b".formatted(gr.getName(), gr.isEditable()), ActionRecordType.EDIT);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -433,11 +448,13 @@ public class AdminController {
 		Group gr = group.get();
 		gr.setRequireAbsentMark(!gr.isRequireAbsentMark());
 		dbservice.getGroupRepository().save(gr);
+		rec.recordAction(auth.getCurrentUser(),
+				"Set required marks in group '%s' to %b".formatted(gr.getName(), gr.isRequireAbsentMark()),
+				ActionRecordType.EDIT);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
 	@PostMapping("/groupmgr/delete")
-	@Transactional
 	public ResponseEntity<String> groupManager_delete(@RequestParam() int id) throws InterruptedException {
 		Optional<Group> group1 = dbservice.getGroupRepository().findById(id);
 		if (group1.isEmpty())
@@ -448,6 +465,8 @@ public class AdminController {
 		if (SettingsRepository.containsGroup(group1.get().getName()))
 			return ResponseEntity.unprocessableEntity().body(Answer.fail("The group is tied to some events"));
 		dbservice.getGroupRepository().deleteById(id);
+		rec.recordAction(auth.getCurrentUser(), "Removed group '%s'".formatted(group1.get().getName()),
+				ActionRecordType.REMOVE);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -578,9 +597,10 @@ public class AdminController {
 		stats.setReason(reason);
 		stats.setAuthor(author);
 		stats.setPresent(visit);
-		if (dbservice.getStatsRepository().save(stats) != null)
-			return ResponseEntity.ok(Answer.success());
-		return ResponseEntity.internalServerError().body(Answer.fail("Server error: can't save stats record to DB"));
+		dbservice.getStatsRepository().save(stats);
+		rec.recordAction(auth.getCurrentUser(), "Edited StatsRecord (ID: %d)".formatted(stats.getId()),
+				ActionRecordType.EDIT);
+		return ResponseEntity.ok(Answer.success());
 	}
 
 	@PostMapping("/statsmgr/delete_event")
@@ -590,6 +610,8 @@ public class AdminController {
 			return ResponseEntity.status(404).body(Answer.fail("Event not found"));
 		}
 		dbservice.getStatsRepository().deleteAll(stats);
+		rec.recordAction(auth.getCurrentUser(), "Removed StatsRecords (EventID: %d)".formatted(id),
+				ActionRecordType.REMOVE);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -600,6 +622,7 @@ public class AdminController {
 			return ResponseEntity.status(404).body(Answer.fail("Record not found"));
 		}
 		dbservice.getStatsRepository().delete(stats.get());
+		rec.recordAction(auth.getCurrentUser(), "Removed StatsRecord (ID: %d)".formatted(id), ActionRecordType.REMOVE);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -611,6 +634,8 @@ public class AdminController {
 		}
 		stats.stream().forEach(stat -> stat.setType(value));
 		dbservice.getStatsRepository().saveAll(stats);
+		rec.recordAction(auth.getCurrentUser(), "Edited StatsRecords(EventID: %d) type to %s".formatted(eventid, value),
+				ActionRecordType.EDIT);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -622,6 +647,8 @@ public class AdminController {
 		}
 		stats.stream().forEach(stat -> stat.setDate(value.replaceAll("-", ".")));
 		dbservice.getStatsRepository().saveAll(stats);
+		rec.recordAction(auth.getCurrentUser(), "Edited StatsRecords(EventID: %d) date to %s".formatted(eventid, value),
+				ActionRecordType.EDIT);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -633,6 +660,8 @@ public class AdminController {
 		}
 		stats.stream().forEach(stat -> stat.setGroup(value));
 		dbservice.getStatsRepository().saveAll(stats);
+		rec.recordAction(auth.getCurrentUser(),
+				"Edited StatsRecords(EventID: %d) group to %s".formatted(eventid, value), ActionRecordType.EDIT);
 		return ResponseEntity.accepted().body(Answer.success());
 	}
 
@@ -651,6 +680,8 @@ public class AdminController {
 		try {
 			SettingsRepository.addData(SettingsRepository.SECTION_EVENT_TYPES,
 					SettingsRepository.generateEventWithGroup(event, Boolean.parseBoolean(canSetReason), groupname));
+			rec.recordAction(auth.getCurrentUser(), "Added event to config: %s".formatted(event),
+					ActionRecordType.ADMIN);
 			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding event. ", e);
@@ -662,6 +693,8 @@ public class AdminController {
 	public String config_delevent(@RequestParam String event) {
 		try {
 			SettingsRepository.removeEvent(event);
+			rec.recordAction(auth.getCurrentUser(), "Removed event from config: %s".formatted(event),
+					ActionRecordType.ADMIN);
 			return "redirect:/admin?deleted";
 		} catch (Exception e) {
 			log.error("Error removing event. ", e);
@@ -673,6 +706,8 @@ public class AdminController {
 	public String config_addreason(@RequestParam String reason) {
 		try {
 			SettingsRepository.addData(SettingsRepository.SECTION_REASONS, SettingsRepository.generateReason(reason));
+			rec.recordAction(auth.getCurrentUser(), "Added reason to config: %s".formatted(reason),
+					ActionRecordType.ADMIN);
 			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding reason. ", e);
@@ -684,6 +719,8 @@ public class AdminController {
 	public String config_delreason(@RequestParam String reason) {
 		try {
 			SettingsRepository.removeReason(reason);
+			rec.recordAction(auth.getCurrentUser(), "Removed reason from config: %s".formatted(reason),
+					ActionRecordType.ADMIN);
 			return "redirect:/admin?deleted";
 		} catch (Exception e) {
 			log.error("Error removing reason. ", e);
@@ -696,6 +733,8 @@ public class AdminController {
 		try {
 			SettingsRepository.addData(SettingsRepository.SECTION_REPLACEMENTS,
 					SettingsRepository.generateReplacement(from, to));
+			rec.recordAction(auth.getCurrentUser(), "Added replacement to config: from %s to %s".formatted(from, to),
+					ActionRecordType.ADMIN);
 			return "redirect:/admin?saved";
 		} catch (ParseException e) {
 			log.error("Error adding replacement. ", e);
@@ -707,23 +746,13 @@ public class AdminController {
 	public String config_delreplacement(@RequestParam String from) {
 		try {
 			SettingsRepository.removeReplacement(from);
+			rec.recordAction(auth.getCurrentUser(), "Removed replacement from config: from %s".formatted(from),
+					ActionRecordType.ADMIN);
 			return "redirect:/admin?deleted";
 		} catch (Exception e) {
 			log.error("Error removing replacement. ", e);
 			return "redirect:/admin?error_unknown";
 		}
-	}
-
-	@GetMapping("/log")
-	public String log(Model model) {
-		model.addAttribute("log", FileOptions.getFileLineWithSeparator(FileOptions.getFileLines("log.txt"), "\n"));
-		return "admin/log";
-	}
-
-	@PostMapping("/log/clear")
-	public ResponseEntity<String> log_clear() {
-		FileOptions.writeFile("", new File("log.txt"));
-		return ResponseEntity.ok(Answer.success());
 	}
 
 	/*
@@ -750,6 +779,8 @@ public class AdminController {
 		chat.setOwner(user);
 		chatRep.save(chat);
 		botServ.sendPreparedMessage("registered", chat);
+		rec.recordAction(auth.getCurrentUser(), "Connected Telegram Chat (id: %d) to %d".formatted(id, userid),
+				ActionRecordType.TELEGRAM);
 		return ResponseEntity.ok(Answer.success());
 	}
 
@@ -767,13 +798,22 @@ public class AdminController {
 		chat.setOwner(null);
 		chatRep.save(chat);
 		dbservice.getUserRepository().save(user);
+		rec.recordAction(auth.getCurrentUser(), "Disconnected Telegram Chat Id: %d".formatted(id),
+				ActionRecordType.TELEGRAM);
 		return ResponseEntity.ok(Answer.success());
 	}
 
 	@PostMapping("/chatsmgr/delete")
 	public ResponseEntity<String> chatsManager_remove(@RequestParam Long id) {
 		chatRep.deleteById(id);
+		rec.recordAction(auth.getCurrentUser(), "Removed Telegram Chat Id: %d".formatted(id), ActionRecordType.REMOVE);
 		return ResponseEntity.ok(Answer.success());
+	}
+
+	@GetMapping("/journal")
+	public String journal(Model model) {
+		model.addAttribute("records", rec.getActionLog().findAll(Sort.by(Sort.Direction.DESC, "id")));
+		return "admin/journal";
 	}
 
 	@GetMapping("/session-check")

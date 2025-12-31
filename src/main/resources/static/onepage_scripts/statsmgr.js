@@ -1,5 +1,5 @@
 let counter = 0;
-let = showedAll = false;
+let showedAll = false;
 async function fetchAndAppendStats(number) {
 	if (showedAll) {
 		return;
@@ -44,34 +44,21 @@ async function fetchAndAppendStats(number) {
 	main();
 	hideLoader();
 }
-async function loadContent() {
-	const script = document.createElement('script');
-	script.src = "/assets/loader_modal.js";
-	script.type = 'text/javascript';
-	script.onload = function() {
-		fetchAndAppendStats(counter);
-	};
-	script.onerror = function() {
-		console.error(`Error connecting script: loader_modal.`);
-		alert("Возникла критическая ошибка при загрузке страницы. Повторите попытку позже.");
-	};
-	document.body.appendChild(script);
-}
-loadContent();
 init_custom_option("type", "Свое событие...");
 init_custom_option("reason", "Своя причина...");
-let isScrolling = false;
-window.addEventListener('scroll', () => {
-	if (!isScrolling) {
-		isScrolling = true;
-		setTimeout(() => {
-			if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight) {
-				console.log('Requesting for new table rows. Counter = ' + counter);
-				fetchAndAppendStats(counter);
-			}
-			isScrolling = false;
-		}, 200);
-	}
+document.addEventListener("DOMContentLoaded", () => {
+	let isScrolling = false;
+	const observer = new IntersectionObserver((entries) => {
+		if (entries[0].isIntersecting && !isScrolling) {
+			isScrolling = true;
+			fetchAndAppendStats(counter).then(() => {
+				isScrolling = false;
+			});
+		}
+	}, {
+		rootMargin: '200px'
+	});
+	observer.observe(document.getElementById('scroll-anchor'));
 });
 async function removeRecord(id) {
 	const result = await swal.fire({

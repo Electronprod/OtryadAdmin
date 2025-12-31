@@ -28,9 +28,9 @@
 				<th>Действия</th>
 			</tr>
 		</thead>
-		<tbody id="stats-tbody">
-		</tbody>
+		<tbody id="stats-tbody"></tbody>
 	</table>
+	<div id="scroll-anchor"></div>
 	<div class="bottomPanel" id="bp1">
 		<button class="btn" onclick="document.getElementById('bp2').style.display='inline'">Подсветить</button>
 		<button class="btn" onclick="window.location.href='/admin/statsmgr/table'">Таблица</button>
@@ -58,7 +58,8 @@
 			<div class="form-group">
 				<label for="type">Событие</label> <select id="type" required>
 					<option th:each="event : ${event_types_map}"
-						th:text="${event.key} + ' (' + (${event.value.getSecond() ? 'С причиной' : 'Без причины'})+')'" th:value="${event.key}"></option>
+						th:text="${event.key} + ' (' + (${event.value.getSecond() ? 'С причиной' : 'Без причины'})+')'"
+						th:value="${event.key}"></option>
 				</select>
 			</div>
 			<div class="form-group">
@@ -108,6 +109,7 @@
 </body>
 <script src="/assets/stats_renamer.js"></script>
 <script src="/assets/manager.js"></script>
+<script src="/assets/loader_modal.js"></script>
 <script src="/assets/custom_option.js"></script>
 <script src="/onepage_scripts/statsmgr.js"></script>
 <script src="/assets/highlight_similar_rows.js"></script>

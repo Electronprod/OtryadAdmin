@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
 import ru.electronprod.OtryadAdmin.models.Group;
 import ru.electronprod.OtryadAdmin.models.Human;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
@@ -42,6 +43,7 @@ public class CommanderController {
 	private AuthHelper authHelper;
 	@Autowired
 	private StatsProcessor statsProcessor;
+	
 
 	@GetMapping("")
 	public String overview(Model model) {
@@ -56,6 +58,7 @@ public class CommanderController {
 
 	@PostMapping("/mark")
 	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
+		var user = authHelper.getCurrentUser();
 		try {
 			Optional<Group> group = dbservice.getGroupRepository().findById(dto.getGroupID());
 			List<Human> people = null;
@@ -64,11 +67,11 @@ public class CommanderController {
 			} else {
 				people = dbservice.getHumanRepository().findAll();
 			}
-			int event_id = markService.mark_group(dto, authHelper.getCurrentUser(), people,
-					group.isPresent() ? group.get().getName() : null);
+			int event_id = markService.mark_group(dto, user, people, group.isPresent() ? group.get().getName() : null);
 			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
 			log.error("Mark error (commander.mark):", e);
+			dbservice.recordAction(user, e.getMessage(), ActionRecordType.MARK_EXCEPTION);
 			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
 		}
 	}
@@ -176,8 +179,7 @@ public class CommanderController {
 	}
 
 	@GetMapping("/humans")
-	public String getHumansData(Model model) {
-		model.addAttribute("humans", dbservice.getHumanRepository().findAll(Sort.by(Sort.Direction.ASC, "lastname")));
-		return "public/humans_rawtable";
+	public String getHumansData() {
+		return "forward:/observer/data";
 	}
 }

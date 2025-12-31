@@ -55,8 +55,9 @@ public class SquadCommanderController {
 
 	@PostMapping("/mark")
 	public ResponseEntity<String> mark(@RequestBody MarkDTO dto) {
+		var user = authHelper.getCurrentUser();
 		try {
-			var humans = dbservice.getSquadRepository().findByCommander(authHelper.getCurrentUser()).getHumans();
+			var humans = dbservice.getSquadRepository().findByCommander(user).getHumans();
 			String group = null;
 			if (dto.getGroupID() != -1) {
 				Optional<Group> groupObj = dbservice.getGroupRepository().findById(dto.getGroupID());
@@ -68,10 +69,11 @@ public class SquadCommanderController {
 							+ dto.getGroupID());
 				}
 			}
-			int event_id = markService.mark_group(dto, authHelper.getCurrentUser(), humans, group);
+			int event_id = markService.mark_group(dto, user, humans, group);
 			return ResponseEntity.accepted().body(Answer.marked(event_id));
 		} catch (Exception e) {
 			log.error("Mark error (squadcommander.mark):", e);
+			dbservice.recordAction(user, e.getMessage(), ActionRecordType.MARK_EXCEPTION);
 			return ResponseEntity.internalServerError().body(Answer.fail(e.getMessage()));
 		}
 	}
