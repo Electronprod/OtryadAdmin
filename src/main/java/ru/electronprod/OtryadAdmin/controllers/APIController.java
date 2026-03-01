@@ -16,15 +16,23 @@ import org.springframework.data.util.Pair;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import ru.electronprod.OtryadAdmin.data.DBService;
 import ru.electronprod.OtryadAdmin.data.filesystem.SettingsRepository;
+import ru.electronprod.OtryadAdmin.models.ActionRecordType;
 import ru.electronprod.OtryadAdmin.models.StatsRecord;
 import ru.electronprod.OtryadAdmin.services.AuthHelper;
+import ru.electronprod.OtryadAdmin.services.RecordService;
 import ru.electronprod.OtryadAdmin.services.StatsProcessor;
 import ru.electronprod.OtryadAdmin.utils.Answer;
 
+@Slf4j
 @RestController
 public class APIController {
 	@Autowired
@@ -33,6 +41,8 @@ public class APIController {
 	private AuthHelper auth;
 	@Autowired
 	private StatsProcessor statsProcessor;
+	@Autowired
+	private RecordService rec;
 
 	/**
 	 * @see stats_renamer.js
@@ -200,5 +210,19 @@ public class APIController {
 			return Answer
 					.fail("Could not retrieve infomation about people in the group. Error message: " + e.getMessage());
 		}
+	}
+
+	@GetMapping("/api/verify_marks")
+	public ResponseEntity<Map<String, String>> verify_marks(@RequestParam int event_id) {
+		int count = dbservice.getStatsRepository().countByEventId(event_id);
+		return ResponseEntity.ok(Map.of("status", count > 0 ? "ok" : "empty", "event_id", String.valueOf(event_id),
+				"saved_count", String.valueOf(count)));
+	}
+
+	@PostMapping("/api/report_mark_error")
+	public ResponseEntity<Void> reportMarkError(@RequestBody String rawJson, HttpServletRequest request) {
+		log.error("[MARK_VERIFY_ERROR] IP={} | Report: {}", request.getRemoteAddr(), rawJson);
+		rec.recordAction(request.getRemoteAddr(), "-", rawJson, ActionRecordType.MARK_EXCEPTION);
+		return ResponseEntity.ok().build();
 	}
 }

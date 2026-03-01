@@ -173,7 +173,13 @@ async function send() {
 			groupID: groupid,
 			date: document.getElementById("dateField").value
 		};
-		sendData("/squadcommander/mark", data_to_send);
+		const result = await sendData("/squadcommander/mark", data_to_send);
+		if (result && result.eventId) {
+			const expectedTotal =
+				data_to_send.presentPeople.length +
+				data_to_send.unpresentPeople.length;
+			verifyMarks(result.eventId, data_to_send, expectedTotal);
+		}
 	} catch (error) {
 		showError("Произошла неизвестная ошибка!", String(error));
 	}

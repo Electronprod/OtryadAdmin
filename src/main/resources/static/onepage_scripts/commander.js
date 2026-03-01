@@ -108,7 +108,13 @@ async function send() {
 			date: document.getElementById("dateField").value,
 			groupID: group
 		};
-		sendData("/commander/mark", data_to_send);
+		const result = await sendData("/commander/mark", data_to_send);
+		if (result && result.eventId) {
+			const expectedTotal =
+				data_to_send.presentPeople.length +
+				data_to_send.unpresentPeople.length;
+			verifyMarks(result.eventId, data_to_send, expectedTotal);
+		}
 	} catch (error) {
 		showError("Произошла неизвестная ошибка!", String(error));
 	}

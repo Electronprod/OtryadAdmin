@@ -68,6 +68,9 @@ public interface StatsRecordRepository extends JpaRepository<StatsRecord, Intege
 	@Query("SELECT COUNT(DISTINCT s.author) FROM StatsRecord s WHERE s.date = ?1")
 	long countDistinctAuthorsByDate(String date);
 
+	@Query("SELECT COUNT(s) FROM StatsRecord s WHERE s.event_id = :eventId")
+	int countByEventId(int eventId);
+
 	@Query("SELECT COUNT(DISTINCT s.event_id) FROM StatsRecord s WHERE s.date = :date AND s.author = :author AND s.type = :type")
 	int countDistinctEventsByDateAndAuthorAndType(String date, String author, String type);
 
