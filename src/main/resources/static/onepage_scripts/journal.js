@@ -57,3 +57,31 @@ function applyLogStyles() {
         }
     });
 }
+document.addEventListener('DOMContentLoaded', function() {
+    const messageCells = document.querySelectorAll('.message-cell');
+
+    messageCells.forEach(cell => {
+        cell.addEventListener('click', function() {
+            const rawData = this.getAttribute('data-full-text');
+            let displayHtml = '';
+            try {
+                const jsonObject = JSON.parse(rawData);
+                const formattedJson = JSON.stringify(jsonObject, null, 4);
+                displayHtml = `<pre style="text-align: left; background: #2d2d2d; color: #ccc; padding: 15px; border-radius: 8px; overflow-x: auto; font-size: 13px;"><code>${formattedJson}</code></pre>`;
+            } catch (e) {
+                displayHtml = `<div style="text-align: left; white-space: pre-wrap; word-break: break-all; padding: 10px; background: #f9fafb; border-radius: 8px; border: 1px solid #eee;">${rawData}</div>`;
+            }
+            Swal.fire({
+                title: 'Детали записи',
+                html: displayHtml,
+                width: '80%',
+                maxWidth: '800px',
+                confirmButtonText: 'Закрыть',
+                showCloseButton: true,
+                customClass: {
+                    container: 'my-swal-container'
+                }
+            });
+        });
+    });
+});

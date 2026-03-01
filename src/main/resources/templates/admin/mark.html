@@ -36,13 +36,14 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 					<p>
 						В форме ниже отметьте ребят, которые <strong>ПРИСУТСТВОВАЛИ</strong> на событии. Введите название события над
 						таблицей и убедитесь, что указана правильная дата. После этого нажмите "Отправить".<br> <strong>Отправленные
-							данные изменить нельзя!</strong><br> <br> <b>Примечание:</b> в этой форме <u>НЕ ВЫСТАВЛЯЮТСЯ ОТМЕТКИ ЗА ПРОПУСКИ</u>
+							данные изменить нельзя!</strong><br> <br> <b>Примечание:</b> в этой форме <u>НЕ ВЫСТАВЛЯЮТСЯ ОТМЕТКИ ЗА
+							ПРОПУСКИ</u>
 					</p>
 				</div>
 				<form id="markForm">
 					<label>Введите название события:</label> <input id="event_type" type="text" required /> <label>Выберите
 						дату:</label> <input id="dateField" type="date" required /> <input type="text" id="searchInput"
-						placeholder="Введите имя или фамилию для поиска..." onkeyup="filterTable()" />
+						placeholder="Введите имя или фамилию для поиска..." onkeyup="search_human('1','2','markTable')" />
 					<table id="markTable">
 						<thead>
 							<tr>
@@ -68,5 +69,7 @@ input[type="text"], input[type="password"], input[type="date"], input[type="numb
 	<!--Search space-->
 	<div style="height: 50vh"></div>
 </body>
+<script src="/assets/verify_marks.js"></script>
+<script src="/assets/search_table.js"></script>
 <script defer src="/onepage_scripts/observer_mark_group.js"></script>
 </html>

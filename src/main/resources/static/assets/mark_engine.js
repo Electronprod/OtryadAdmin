@@ -34,9 +34,10 @@ async function sendData(address, bodyData) {
 			return false;
 		}
 		const data = await response.json();
-		showSuccess("Отметки выставлены!");
+		showSuccessMark();
 		console.log('mark success:', data);
-		return true;
+		const eventId = data.event_id ?? data.eventId ?? null;
+		return { success: true, eventId }
 	} catch (error) {
 		handleError(error);
 		return false;
@@ -48,7 +49,19 @@ function showSuccess(message) {
 	Swal.fire({
 		title: "Успех!",
 		text: message,
+		timerProgressBar: true,
 		icon: "success",
+		timer: 5000
+	});
+}
+function showSuccessMark() {
+	Swal.fire({
+		title: "Отметки отправлены",
+		text: "Дождитесь подтверждения от сервера, прежде чем покинуть эту страницу.",
+		timerProgressBar: false,
+		showConfirmButton: false,
+		icon: "info",
+		closeOnClickOutside: false
 	});
 }
 function showError(message) {
