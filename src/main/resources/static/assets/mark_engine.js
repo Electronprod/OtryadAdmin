@@ -4,15 +4,18 @@ if ((typeof Swal === "function") == false) {
 	loadScript("/public_resources/sweetalert2.js", null);
 }
 async function sendData(address, bodyData) {
-	if (!(await checkIfMarkedAlready(bodyData.event, bodyData.date))) {
-		showError("Отметки не выставлены");
+	const checkServerResult = await checkIfMarkedAlready(bodyData.event, bodyData.date);
+	if (!checkServerResult.proceed) {
+		if (checkServerResult.error) {
+			showError("Отметки не выставлены", "Возникла ошибка при проверке данных на сервере");
+		}
 		return;
 	}
 	try {
 		showLoader();
 		const csrfToken = document.querySelector('input[name="_csrf"]').value;
 		if (!csrfToken) {
-			showError('Не найден токен CSRF!');
+			showError('Не найден токен CSRF!', "Перезагрузите страницу. Если не поможет, свяжитесь с разработчиком.");
 			return false;
 		}
 		const response = await fetch(address, {
@@ -149,10 +152,12 @@ function showColumn(elementID, columnIndex) {
 }
 async function checkIfMarkedAlready(event, date) {
 	try {
-		let code = (await fetch("/api/check_already_marked?event=" + event + "&date=" + date)).status;
+		const url = `/api/check_already_marked?event=${encodeURIComponent(event)}&date=${encodeURIComponent(date)}`;
+		let response = await fetch(url);
+		let code = response.status;
 		if (code == 200) {
-			return true;
-		} else if (code == 302) {
+			return { proceed: true, error: false };
+		} else if (code == 409) {
 			let result = await Swal.fire({
 				title: "Обнаружены похожие отметки!",
 				html: "<p>Отметки с таким же событием в эту дату были найдены на сервере.</p> <br><b>Продолжить выставление?</b> ",
@@ -164,11 +169,12 @@ async function checkIfMarkedAlready(event, date) {
 				cancelButtonText: 'Отмена'
 			});
 			console.log("[checkIfMarkedAlready]: User decision is", result.isConfirmed);
-			return result.isConfirmed;
+			return { proceed: result.isConfirmed, error: false };
 		}
 		console.warn("Error checking marks existence because the answer code was unrecognizable. Code: ", code);
+		return { proceed: false, error: true };
 	} catch (err) {
-		console.error("Error checking marks existence:", err);
+		console.error("Network error checking marks existence:", err);
+		return { proceed: false, error: true };
 	}
-	return false;
 }

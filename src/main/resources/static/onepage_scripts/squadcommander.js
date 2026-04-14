@@ -163,7 +163,7 @@ async function send() {
 		});
 		var event_type = document.getElementById('event_type');
 		if (!event_type) {
-			showError("Не найден тип события!");
+			showError("Не найден тип(название) события!");
 			return;
 		}
 		const data_to_send = {
