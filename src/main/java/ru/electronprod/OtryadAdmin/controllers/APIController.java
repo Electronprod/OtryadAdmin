@@ -126,9 +126,10 @@ public class APIController {
 	public ResponseEntity<String> checkEventWasAlreadyMarked(String event, String date) {
 		int events = dbservice.getStatsRepository().countDistinctEventsByDateAndAuthorAndType(
 				DBService.getStringDate(date), auth.getCurrentUser().getLogin(), event);
-		if (events == 0 || events == 1)
+		if (events <= 1) {
 			return ResponseEntity.ok().build();
-		return ResponseEntity.status(302).body(Answer.fail(events + " events found."));
+		}
+		return ResponseEntity.status(409).body(Answer.fail(events + " events found."));
 	}
 
 	/**
